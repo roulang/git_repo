@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="segment.min.js"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="output">
+        <div id="container"><canvas id="c"></canvas></div>
+    </div>
+</div>
+<script>
+
+	// Set the canvas size to fill its container
+	var canvas = document.getElementById('c');
+	var container = document.getElementById('container');
+	canvas.width = container.clientWidth;
+	canvas.height = container.clientHeight;
+
+	// Create a new sixteen segment display
+	var segment = new SixteenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.1;
+	segment.DispayText("1234");
+
+	
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+body
+{
+    background-color: white;
+    color: #bbb;
+    font-size: medium;
+    font-family: Calibri, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#wrapper
+{
+    width: 60em;
+    margin: 2em auto;
+    vertical-align: top;
+}
+
+#output
+{
+    width: 60%;
+    float:left;
+}
+
+#container
+{
+    font-size: 95px;
+    width: 6em;
+    height: 1.6em;
+}
+
+#c
+{
+	border-radius: 10px;
+}
+
+canvas
+{
+    width: 400px;
+	height:150px;
+	background-color: #000;
+}
+

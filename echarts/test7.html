@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+    <script src="echarts.min.js"></script>
+	<script src="echarts-liquidfill.min.js"></script>
+	<!-- 
+	<script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script>
+	<script src="https://raw.githubusercontent.com/ecomfe/echarts-liquidfill/gh-pages/dist/echarts-liquidfill.min.js"></script>
+	 -->
+    <style type="text/css">
+        body{
+            margin:0;
+            padding:0;
+        }
+        #container{
+            width:100%;
+            height:700px;
+			text-align:center;
+        }
+        #heading{
+            width:100%;
+            height:10%;
+            background-color: azure;
+			font-size: 30px;
+        }
+        #content-lefttop{
+            width:50%;
+            height:45%;
+            background-color: lightsteelblue;
+            float:left;
+			font-size: 20px;
+        }
+        #content-righttop{
+            width:50%;
+            height:45%;
+            background-color: pink;
+            float:left;
+			font-size: 20px;
+        }
+        #content-leftbottom{
+            width:50%;
+            height:45%;
+            background-color: salmon;
+            float:left;
+			font-size: 20px;
+        }
+        #content-rightbottom{
+            width:50%;
+            height:45%;
+            background-color: cyan;
+            float:left;
+			font-size: 20px;
+        }
+        #footer{
+            width:100%;
+            height:10%;
+            background-color: darkgrey;
+            clear: both;
+			font-size: 20px;
+        }
+        #subheading{
+            width:100%;
+            height:10%;
+			font-size: 25px;
+        }
+        #subcontent-lefttop{
+            width:50%;
+            height:45%;
+            float:left;
+			font-size: 20px;
+        }
+        #subcontent-righttop{
+            width:50%;
+            height:45%;
+            float:left;
+			font-size: 20px;
+        }
+        #subcontent-leftbottom{
+            width:50%;
+            height:45%;
+            float:left;
+			font-size: 20px;
+        }
+        #subcontent-rightbottom{
+            width:50%;
+            height:45%;
+            float:left;
+			font-size: 20px;
+        }
+        #subheading2{
+            width:100%;
+            height:10%;
+			font-size: 25px;
+        }
+        #subcontent2-lefttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent2-righttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent2-leftbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent2-rightbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subheading3{
+            width:100%;
+            height:10%;
+			font-size: 25px;
+        }
+        #subcontent3-lefttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent3-righttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent3-leftbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent3-rightbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subheading4{
+            width:100%;
+            height:10%;
+			font-size: 25px;
+        }
+        #subcontent4-lefttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent4-righttop{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent4-leftbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #subcontent4-rightbottom{
+            width:50%;
+            height:45%;
+            float:left;
+        }
+        #content-top{
+            width:100%;
+            height:45%;
+            background-color: lightsteelblue;
+            float:left;
+			font-size: 20px;
+        }
+        #content-bottom{
+            width:100%;
+            height:45%;
+            background-color: azure;
+            float:left;
+			font-size: 20px;
+        }
+        #subheading5{
+            width:100%;
+            height:10%;
+			font-size: 15px;
+        }
+        #subcontent5{
+            width:100%;
+            height:90%;
+            float:left;
+        }
+        #subheading6{
+            width:100%;
+            height:10%;
+			font-size: 15px;
+        }
+        #subcontent6{
+            width:100%;
+            height:90%;
+            float:left;
+        }
+        #content-top2{
+            width:100%;
+            height:45%;
+            background-color: lightsteelblue;
+            float:left;
+			font-size: 20px;
+        }
+        #content-bottom2{
+            width:100%;
+            height:45%;
+            background-color: azure;
+            float:left;
+			font-size: 20px;
+        }
+        #subheading7{
+            width:100%;
+            height:10%;
+			font-size: 15px;
+        }
+        #subcontent7{
+            width:100%;
+            height:90%;
+            float:left;
+        }
+        #subheading8{
+            width:100%;
+            height:10%;
+			font-size: 15px;
+        }
+        #subcontent8{
+            width:100%;
+            height:90%;
+            float:left;
+        }
+    </style>
+	</head>
+<body onload="setOption(option);setInterval('setOption(option)',5000)">
+    <div id="container">
+        <div id="heading" >应用系统</div>
+        <div id="content-lefttop" hidden="hidden">
+			<div id="subheading">在线用户数>容量80%</div>
+			<div id="subcontent-lefttop"></div>
+			<div id="subcontent-righttop"></div>
+			<div id="subcontent-leftbottom"></div>
+			<div id="subcontent-rightbottom"></div>
+		</div>
+        <div id="content-righttop" hidden="hidden">
+			<div id="subheading2">在线会话数>容量80%</div>
+			<div id="subcontent2-lefttop"></div>
+			<div id="subcontent2-righttop"></div>
+			<div id="subcontent2-leftbottom"></div>
+			<div id="subcontent2-rightbottom"></div>
+		</div>
+        <div id="content-leftbottom" hidden="hidden">
+			<div id="subheading3">DB剩余空间<容量10%</div>
+			<div id="subcontent3-lefttop"></div>
+			<div id="subcontent3-righttop"></div>
+			<div id="subcontent3-leftbottom"></div>
+			<div id="subcontent3-rightbottom"></div>
+		</div>
+        <div id="content-rightbottom" hidden="hidden">
+			<div id="subheading4">执行JOB失败数>0</div>
+			<div id="subcontent4-lefttop"></div>
+			<div id="subcontent4-righttop"></div>
+			<div id="subcontent4-leftbottom"></div>
+			<div id="subcontent4-rightbottom"></div>
+		</div>
+        <div id="content-top" hidden="hidden">
+			<div id="subheading5">每日在线用户数(最大)</div>
+			<div id="subcontent5"></div>
+		</div>
+        <div id="content-bottom" hidden="hidden">
+			<div id="subheading6">每日会话数(最大)</div>
+			<div id="subcontent6"></div>
+		</div>
+        <div id="content-top2" hidden="hidden">
+			<div id="subheading7">每日DB剩余空间(最小)</div>
+			<div id="subcontent7"></div>
+		</div>
+        <div id="content-bottom2" hidden="hidden">
+			<div id="subheading8">每日DB缓存命中率(最小)</div>
+			<div id="subcontent8"></div>
+		</div>
+    </div>
+	<script type="text/javascript">
+		
+		function getRandom(base, scope, dir) {
+			var n;
+			switch (dir) {
+				case -1:
+					n = Math.round(Math.random() * scope + 0.5);
+					n = base - n;
+					break;
+				case 1:
+					n = Math.round(Math.random() * scope + 0.5);
+					n = base + n;
+					break;
+				default:
+					n = Math.round((Math.random() - 0.5) * scope * 2);
+					n = base + n;
+			}
+			return n;
+		};
+		
+		// 指定图表的配置项和数据
+		var option = {
+			title: {
+				top: '40%',
+				textStyle: {
+					fontSize: 25
+				}
+			},
+			series: [{
+				type: 'liquidFill',
+				amplitude: 5,
+				radius: '70%',
+				backgroundStyle: {
+					borderWidth: 5,
+					borderColor: 'red',
+					color: 'yellow'
+				},
+				outline: {
+					borderDistance: 7,
+					itemStyle: {
+						borderWidth: 5,
+					}
+				},
+				label: {
+					normal: {
+						textStyle: {
+							fontSize: 25
+						}
+					}
+				},
+			}]
+		};
+		
+		var tm = 0;  //tm=0..17
+		var h1 = document.getElementById('content-lefttop');
+		var h2 = document.getElementById('content-righttop');
+		var h3 = document.getElementById('content-leftbottom');
+		var h4 = document.getElementById('content-rightbottom');
+		var h5 = document.getElementById('content-top');
+		var h6 = document.getElementById('content-bottom');
+		var h7 = document.getElementById('content-top2');
+		var h8 = document.getElementById('content-bottom2');
+
+		var c1 = document.getElementById('subcontent-lefttop');
+		var c2 = document.getElementById('subcontent-righttop');
+		var c3 = document.getElementById('subcontent-leftbottom');
+		var c4 = document.getElementById('subcontent2-lefttop');
+		var c5 = document.getElementById('subcontent2-righttop');
+		var c6 = document.getElementById('subcontent2-leftbottom');
+		var c7 = document.getElementById('subcontent3-lefttop');
+		var c8 = document.getElementById('subcontent3-righttop');
+		var c9 = document.getElementById('subcontent3-leftbottom');
+		var c10 = document.getElementById('subcontent4-lefttop');
+		var c11 = document.getElementById('subcontent4-righttop');
+		var c12 = document.getElementById('subcontent4-leftbottom');
+		var c13 = document.getElementById('subcontent5');
+		var c14 = document.getElementById('subcontent6');
+		var c15 = document.getElementById('subcontent7');
+		var c16 = document.getElementById('subcontent8');
+		
+		// 基于准备好的dom，初始化echarts实例
+		var myChart1;
+		var myChart2;
+		var myChart3;
+		var myChart4;
+		var myChart5;
+		var myChart6;
+		var myChart7;
+		var myChart8;
+		var myChart9;
+		var myChart10;
+		var myChart11;
+		var myChart12;
+		var myChart13;
+		var myChart14;
+		var myChart15;
+		var myChart16;
+
+		function setOption(opt) {
+
+			if (tm == 0) {
+				h1.hidden = null;
+				h2.hidden = null;
+				h3.hidden = null;
+				h4.hidden = null;
+				h5.hidden = "hidden";
+				h6.hidden = "hidden";
+				h7.hidden = "hidden";
+				h8.hidden = "hidden";
+				myChart1 = echarts.init(c1);
+				myChart2 = echarts.init(c2);
+				myChart3 = echarts.init(c3);
+				myChart4 = echarts.init(c4);
+				myChart5 = echarts.init(c5);
+				myChart6 = echarts.init(c6);
+				myChart7 = echarts.init(c7);
+				myChart8 = echarts.init(c8);
+				myChart9 = echarts.init(c9);
+				myChart10 = echarts.init(c10);
+				myChart11 = echarts.init(c11);
+				myChart12 = echarts.init(c12);
+				myChart13 = echarts.init(c13);
+				myChart14 = echarts.init(c14);
+				myChart15 = echarts.init(c15);
+				myChart16 = echarts.init(c16);
+			} else if (tm == 6) {
+				h1.hidden = "hidden";
+				h2.hidden = "hidden";
+				h3.hidden = "hidden";
+				h4.hidden = "hidden";
+				h5.hidden = null;
+				h6.hidden = null;
+				h7.hidden = "hidden";
+				h8.hidden = "hidden";
+				myChart1 = echarts.init(c1);
+				myChart2 = echarts.init(c2);
+				myChart3 = echarts.init(c3);
+				myChart4 = echarts.init(c4);
+				myChart5 = echarts.init(c5);
+				myChart6 = echarts.init(c6);
+				myChart7 = echarts.init(c7);
+				myChart8 = echarts.init(c8);
+				myChart9 = echarts.init(c9);
+				myChart10 = echarts.init(c10);
+				myChart11 = echarts.init(c11);
+				myChart12 = echarts.init(c12);
+				myChart13 = echarts.init(c13);
+				myChart14 = echarts.init(c14);
+				myChart15 = echarts.init(c15);
+				myChart16 = echarts.init(c16);
+			} else if (tm == 12) {
+				h1.hidden = "hidden";
+				h2.hidden = "hidden";
+				h3.hidden = "hidden";
+				h4.hidden = "hidden";
+				h5.hidden = "hidden";
+				h6.hidden = "hidden";
+				h7.hidden = null;
+				h8.hidden = null;
+				myChart1 = echarts.init(c1);
+				myChart2 = echarts.init(c2);
+				myChart3 = echarts.init(c3);
+				myChart4 = echarts.init(c4);
+				myChart5 = echarts.init(c5);
+				myChart6 = echarts.init(c6);
+				myChart7 = echarts.init(c7);
+				myChart8 = echarts.init(c8);
+				myChart9 = echarts.init(c9);
+				myChart10 = echarts.init(c10);
+				myChart11 = echarts.init(c11);
+				myChart12 = echarts.init(c12);
+				myChart13 = echarts.init(c13);
+				myChart14 = echarts.init(c14);
+				myChart15 = echarts.init(c15);
+				myChart16 = echarts.init(c16);
+			};
+			
+			if (tm < 6) {
+
+				// 使用刚指定的配置项和数据显示图表。
+				var n;
+				//--------------------------------------------------------
+				opt.series[0].label.normal.formatter = null;
+				opt.title.text="ESHOP";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart1.setOption(opt);
+				opt.title.text="CS";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart2.setOption(opt);
+				opt.title.text="ERP";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart3.setOption(opt);
+				//--------------------------------------------------------
+				opt.title.text="ESHOP";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart4.setOption(opt);
+				opt.title.text="CS";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart5.setOption(opt);
+				opt.title.text="ERP";
+				n = getRandom(80, 20, 1);
+				if (n > 89) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart6.setOption(opt);
+				//--------------------------------------------------------
+				opt.title.text="ESHOP";
+				n = getRandom(0, 10, 1);
+				if (n < 6) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart7.setOption(opt);
+				opt.title.text="CS";
+				n = getRandom(0, 10, 1);
+				if (n < 6) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart8.setOption(opt);
+				opt.title.text="ERP";
+				n = getRandom(0, 10, 1);
+				if (n < 6) {
+					opt.series[0].backgroundStyle.borderColor = 'red';
+				} else {
+					opt.series[0].backgroundStyle.borderColor = 'orange';
+				}
+				opt.series[0].data=[n/100];
+				myChart9.setOption(opt);
+				//--------------------------------------------------------
+				opt.series[0].label.normal.formatter = '{c}';
+				opt.title.text="ESHOP";
+				n = getRandom(0, 2, 1);
+				opt.series[0].backgroundStyle.borderColor = 'red';
+				opt.series[0].data=[n];
+				myChart10.setOption(opt);
+				opt.title.text="CS";
+				n = getRandom(0, 2, 1);
+				opt.series[0].backgroundStyle.borderColor = 'red';
+				opt.series[0].data=[n];
+				myChart11.setOption(opt);
+				opt.title.text="ERP";
+				n = getRandom(0, 2, 1);
+				opt.series[0].backgroundStyle.borderColor = 'red';
+				opt.series[0].data=[n];
+				myChart12.setOption(opt);
+			};
+
+			
+			var colors = ['#5793f3', '#d14a61', '#675bba'];
+			var option2 = {
+				color: colors,
+
+				tooltip: {
+					trigger: 'axis'
+				},
+				grid: {
+					right: '20%'
+				},
+				toolbox: {
+					feature: {
+						dataView: {show: true, readOnly: false},
+						restore: {show: true},
+						saveAsImage: {show: true}
+					}
+				},
+				legend: {
+					data:['松下商城','CS网站','ERP']
+				},
+				xAxis: [
+					{
+						type: 'category',
+						axisTick: {
+							alignWithLabel: true
+						},
+						data: ['1/1','1/2','1/3','1/4','1/5','1/6','1/7','1/8','1/9','1/10','1/11','1/12']
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						name: '最大用户数',
+						min: 0,
+						max: 250,
+						position: 'left',
+						axisLine: {
+							lineStyle: {
+								color: colors[2]
+							}
+						},
+						axisLabel: {
+							formatter: '{value}'
+						}
+					}
+				],
+				series: [
+					{
+						name:'松下商城',
+						type:'line',
+						data:[150, 200, 170, 190, 210, 230, 100, 80, 110, 180, 210, 220]
+					},
+					{
+						name:'CS网站',
+						type:'line',
+						//yAxisIndex: 1,
+						data:[50, 80, 70, 90, 10, 30, 10, 80, 10, 55, 70, 90]
+					},
+					{
+						name:'ERP',
+						type:'line',
+						//yAxisIndex: 2,
+						data:[10, 15, 30, 8, 9, 18, 20, 25, 19, 30, 35, 29]
+					}
+				]
+			};
+			myChart13.setOption(option2);
+
+			var option3 = {
+				color: colors,
+
+				tooltip: {
+					trigger: 'axis'
+				},
+				grid: {
+					right: '20%'
+				},
+				toolbox: {
+					feature: {
+						dataView: {show: true, readOnly: false},
+						restore: {show: true},
+						saveAsImage: {show: true}
+					}
+				},
+				legend: {
+					data:['松下商城','CS网站','ERP']
+				},
+				xAxis: [
+					{
+						type: 'category',
+						axisTick: {
+							alignWithLabel: true
+						},
+						data: ['1/1','1/2','1/3','1/4','1/5','1/6','1/7','1/8','1/9','1/10','1/11','1/12']
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						name: '最大会话数',
+						min: 0,
+						max: 100,
+						position: 'left',
+						axisLine: {
+							lineStyle: {
+								color: colors[2]
+							}
+						},
+						axisLabel: {
+							formatter: '{value}'
+						}
+					}
+				],
+				series: [
+					{
+						name:'松下商城',
+						type:'line',
+						data:[30, 50, 70, 61, 51, 78, 91, 21, 11, 40, 56, 88]
+					},
+					{
+						name:'CS网站',
+						type:'line',
+						//yAxisIndex: 1,
+						data:[80, 70, 50, 30, 10, 42, 15, 77, 45, 55, 60, 32]
+					},
+					{
+						name:'ERP',
+						type:'line',
+						//yAxisIndex: 2,
+						data:[29, 33, 20, 60, 19, 28, 10, 45, 79, 52, 25, 29]
+					}
+				]
+			};
+			myChart14.setOption(option3);
+
+			var option4 = {
+				color: colors,
+
+				tooltip: {
+					trigger: 'axis'
+				},
+				grid: {
+					right: '20%'
+				},
+				toolbox: {
+					feature: {
+						dataView: {show: true, readOnly: false},
+						restore: {show: true},
+						saveAsImage: {show: true}
+					}
+				},
+				legend: {
+					data:['松下商城','CS网站','ERP']
+				},
+				xAxis: [
+					{
+						type: 'category',
+						axisTick: {
+							alignWithLabel: true
+						},
+						data: ['1/1','1/2','1/3','1/4','1/5','1/6','1/7','1/8','1/9','1/10','1/11','1/12']
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						name: 'DB剩余空间',
+						min: 0,
+						max: 100,
+						position: 'left',
+						axisLine: {
+							lineStyle: {
+								color: colors[2]
+							}
+						},
+						axisLabel: {
+							formatter: '{value}%'
+						}
+					}
+				],
+				series: [
+					{
+						name:'松下商城',
+						type:'line',
+						data:[20, 21, 25, 19, 15, 22, 25, 20, 15, 19, 10, 12]
+					},
+					{
+						name:'CS网站',
+						type:'line',
+						//yAxisIndex: 1,
+						data:[50, 55, 49, 45, 52, 45, 43, 51, 60, 55, 59, 52]
+					},
+					{
+						name:'ERP',
+						type:'line',
+						//yAxisIndex: 2,
+						data:[32, 33, 30, 35, 28, 28, 27, 31, 35, 32, 29, 28]
+					}
+				]
+			};
+			myChart15.setOption(option4);
+
+			var option5 = {
+				color: colors,
+
+				tooltip: {
+					trigger: 'axis'
+				},
+				grid: {
+					right: '20%'
+				},
+				toolbox: {
+					feature: {
+						dataView: {show: true, readOnly: false},
+						restore: {show: true},
+						saveAsImage: {show: true}
+					}
+				},
+				legend: {
+					data:['松下商城','CS网站','ERP']
+				},
+				xAxis: [
+					{
+						type: 'category',
+						axisTick: {
+							alignWithLabel: true
+						},
+						data: ['1/1','1/2','1/3','1/4','1/5','1/6','1/7','1/8','1/9','1/10','1/11','1/12']
+					}
+				],
+				yAxis: [
+					{
+						type: 'value',
+						name: 'DB缓存命中',
+						min: 0,
+						max: 100,
+						position: 'left',
+						axisLine: {
+							lineStyle: {
+								color: colors[2]
+							}
+						},
+						axisLabel: {
+							formatter: '{value}%'
+						}
+					}
+				],
+				series: [
+					{
+						name:'松下商城',
+						type:'line',
+						data:[85, 90, 95, 97, 80, 88, 75, 92, 91, 82, 76, 93]
+					},
+					{
+						name:'CS网站',
+						type:'line',
+						//yAxisIndex: 1,
+						data:[80, 90, 95, 90, 93, 92, 95, 97, 85, 95, 82, 92]
+					},
+					{
+						name:'ERP',
+						type:'line',
+						//yAxisIndex: 2,
+						data:[90, 93, 92, 87, 89, 78, 80, 85, 89, 92, 75, 79]
+					}
+				]
+			};
+			myChart16.setOption(option5);
+
+			tm = tm + 1;
+			if (tm == 18) tm = 0;
+			
+		};
+	</script>
+</body>
+</html>
