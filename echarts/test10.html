@@ -20,9 +20,13 @@
 	canvas.height = container.clientHeight;
 
 	// Create a new sixteen segment display
-	var segment = new SixteenSegment(6, canvas);
+	var segment = new SevenSegment(6, canvas);
 	segment.SetCount(4);
-	segment.SegmentWidth=0.1;
+	segment.SegmentWidth=0.15;
+	segment.Width=500;
+	//segment.Height=80;
+	segment.FillDark="yellow";
+	segment.FillLight="lime";
 	segment.DispayText("1234");
 
 	
