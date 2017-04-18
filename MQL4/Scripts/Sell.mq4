@@ -17,8 +17,8 @@ void OnStart()
   int s = 10;
   int p = 20;
   double v = 1;
-  double tp = NormalizeDouble(Ask - p*Point, Digits);
-  double sl = NormalizeDouble(Ask + s*Point, Digits);
+  double tp = NormalizeDouble(Bid - p*Point, Digits);
+  double sl = NormalizeDouble(Bid + s*Point, Digits);
 //--- sell order
    if (OrderSend(Symbol(), OP_SELL, v, Bid, 0, sl, tp, "sell", 12345, 0, Red) != 0)
    {
