@@ -54,6 +54,9 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
 	   ps_pt = ProfitStopPt;
+   } else if (ps_value == -1) {
+      ps_price = 0;
+      ps_pt = 0;
    } else {
       ps_price = ps_value;
       ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
@@ -128,6 +131,9 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
 	   ps_pt = ProfitStopPt;
+   } else if (ps_value == -1) {
+      ps_price = 0;
+      ps_pt = 0;
    } else {
       ps_price = ps_value;
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
