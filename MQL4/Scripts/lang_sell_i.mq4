@@ -7,20 +7,19 @@
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #property strict
+
+#include <lang_inc.mqh> 
+
+extern double LossStopPrice = 0;
+extern double ProfitStopPrice = 0;
+
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
-#include <lang_inc.mqh> 
-
-extern int StopLoss = 100;
-extern int StopProfit = 200;
-extern int EquityPercent = 1;
-extern double Vol = 0.1;
 void OnStart()
 {
-//---
    debug = true;
-   if (OrderSell(Vol, StopProfit, StopLoss, EquityPercent, "sell", 12345) != 0)
+   if (OrderSell(LossStopPrice, ProfitStopPrice, "sell", 12345) != 0)
    {
       printf("sell error");
    }

@@ -6,67 +6,72 @@
 #property copyright "Copyright 2017, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property strict
-//+------------------------------------------------------------------+
-//| defines                                                          |
-//+------------------------------------------------------------------+
-// #define MacrosHello   "Hello, world!"
-// #define MacrosYear    2010
-//+------------------------------------------------------------------+
-//| DLL imports                                                      |
-//+------------------------------------------------------------------+
-// #import "user32.dll"
-//   int      SendMessageA(int hWnd,int Msg,int wParam,int lParam);
-// #import "my_expert.dll"
-//   int      ExpertRecalculate(int wParam,int lParam);
-// #import
-//+------------------------------------------------------------------+
-//| EX5 imports                                                      |
-//+------------------------------------------------------------------+
-// #import "stdlib.ex5"
-//   string ErrorDescription(int error_code);
-// #import
-//+------------------------------------------------------------------+
+
 #include <stderror.mqh> 
 #include <stdlib.mqh> 
 
-extern bool debug;
+extern int EquityPercent = 1;
+extern int LossStopPt = 100;
+extern int ProfitStopPt = 200;
+extern double Volume = 0.1;
+extern bool debug = true;
 
 //+------------------------------------------------------------------+
 // OrderBuy
-// volume: Volume
-// ps_point: Profit Stop Point
-// ls_point: Loss Stop Point
+// ls_value: Loss Stop Value
+// ps_value: Profit Stop Value
 // ep: equity percent. ex,1=1%,2=2%
 // comment: Comment
 // magic: Magic
 //+------------------------------------------------------------------+
-int OrderBuy(double volume, int ps_point, int ls_point, int ep, string comment, int magic)
+int OrderBuy(double ls_value, double ps_value, int ep, string comment, int magic)
 {
    int ret = 0;
    double pt = Point;
    double price = Ask;
-   double ps_price = NormalizeDouble(price + ps_point*pt, Digits);
-   double ls_price = NormalizeDouble(price - ls_point*pt, Digits);
-   double rv = getVolume(ep,ls_point);
+   double gap = NormalizeDouble((price - Bid) / pt, 0);
 
-   if (rv < volume) volume = rv;
-   
-   if (!debug) {
-      ret = OrderSend(Symbol(), OP_BUY, volume, price, 0, ls_price, ps_price, comment, magic, 0, Green);
+   double ls_price;
+   double ps_price;
+   double ls_pt;
+   double ps_pt;
+   if (ls_value == 0) {
+      ls_price = NormalizeDouble(price - LossStopPt * pt, Digits);
+	  ls_pt = LossStopPt;
+   } else {
+      ls_price = ls_value;
+      ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
    }
+   if (ps_value == 0) {
+      ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
+	  ps_pt = ProfitStopPt;
+   } else {
+      ps_price = ps_value;
+      ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
+   }
+
+   double risk_vol = getVolume(EquityPercent, ls_pt);
+   if (risk_vol > Volume) risk_vol = Volume;
    
    //<<<<debug
    if (debug) {
       Print("<<<<debug");
-      printf("vol=%.5f", volume);
+      printf("volume=%.5f", risk_vol);
       printf("point=%.5f", pt);
       printf("price=%.5f", price);
-      printf("loss stop=%.5f", ls_price);
-      printf("profit stop=%.5f", ps_price);
+      printf("loss stop price=%.5f", ls_price);
+      printf("loss stop point=%.5f", ls_pt);
+      printf("profit stop price=%.5f", ps_price);
+      printf("profit stop point=%.5f", ps_pt);
+      printf("gap=%.5f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
 
+   if (!debug) {
+      ret = OrderSend(Symbol(), OP_BUY, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Green);
+   }
+   
    if (ret != 0)
    {
       int check=GetLastError(); 
@@ -78,38 +83,59 @@ int OrderBuy(double volume, int ps_point, int ls_point, int ep, string comment, 
 //+------------------------------------------------------------------+
 // OrderSell
 // volume: Volume
-// ps_point: Profit Stop Point
 // ls_point: Loss Stop Point
+// ps_point: Profit Stop Point
 // ep: equity percent. ex,1=1%,2=2%
 // comment: Comment
 // magic: Magic
 //+------------------------------------------------------------------+
-int OrderSell(double volume, int ps_point, int ls_point, int ep, string comment, int magic)
+int OrderSell(double ls_value, double ps_value, int ep, string comment, int magic)
 {
    int ret = 0;
    double pt = Point;
    double price = Bid;
-   double ps_price = NormalizeDouble(price - ps_point*pt, Digits);
-   double ls_price = NormalizeDouble(price + ls_point*pt, Digits);
-   double rv = getVolume(ep, ls_point);
+   double gap = NormalizeDouble((Ask - price) / pt, 0);
 
-   if (rv < volume) volume = rv;
-
-   if (!debug) {
-      ret = OrderSend(Symbol(), OP_SELL, volume, price, 0, ls_price, ps_price, comment, magic, 0, Red);
+   double ls_price;
+   double ps_price;
+   double ls_pt;
+   double ps_pt;
+   if (ls_value == 0) {
+      ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
+	  ls_pt = LossStopPt;
+   } else {
+      ls_price = ls_value;
+      ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
    }
-   
+   if (ps_value == 0) {
+      ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
+	  ps_pt = ProfitStopPt;
+   } else {
+      ps_price = ps_value;
+      ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
+   }
+
+   double risk_vol = getVolume(ep, ls_pt);
+   if (risk_vol > Volume) risk_vol = Volume;
+
    //<<<<debug
    if (debug) {
       Print("<<<<debug");
-      printf("vol=%.5f", volume);
+      printf("volume=%.5f", risk_vol);
       printf("point=%.5f", pt);
       printf("price=%.5f", price);
-      printf("loss stop=%.5f", ls_price);
-      printf("profit stop=%.5f", ps_price);
+      printf("loss stop price=%.5f", ls_price);
+      printf("loss stop point=%.5f", ls_pt);
+      printf("profit stop price=%.5f", ps_price);
+      printf("profit stop point=%.5f", ps_pt);
+      printf("gap=%.5f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
+
+   if (!debug) {
+      ret = OrderSend(Symbol(), OP_SELL, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Red);
+   }
    
    if (ret != 0)
    {
@@ -125,7 +151,7 @@ int OrderSell(double volume, int ps_point, int ls_point, int ep, string comment,
 // ep: equity percent. ex,1=1%,2=2%
 // ls_point: Loss Stop Point
 //+------------------------------------------------------------------+
-double getVolume(int ep, int ls_point)
+double getVolume(int ep, doube ls_point)
 {
    double risk_amount = AccountEquity() * ep / 100;
    double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
