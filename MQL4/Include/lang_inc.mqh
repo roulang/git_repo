@@ -13,8 +13,8 @@
 extern int EquityPercent = 1;
 extern int LossStopPt = 100;
 extern int ProfitStopPt = 200;
-extern double Volume = 0.1;
-extern bool debug = true;
+extern double Vol = 0.1;
+extern bool debug = false;
 
 //+------------------------------------------------------------------+
 // OrderBuy
@@ -32,11 +32,11 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
    double price = Ask;
    int cmd = OP_BUY;
    if (p != 0) {
-	  if (p < price) {
-		cmd = OP_BUYLIMIT;
-	  } else {
-		cmd = OP_BUYSTOP;
-	  }
+	   if (p > price) {
+		   cmd = OP_BUYSTOP;
+	   } else {
+		   cmd = OP_BUYLIMIT;
+	   }
       price = p;
    }
 
@@ -46,21 +46,21 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
    double ps_pt;
    if (ls_value == 0) {
       ls_price = NormalizeDouble(price - LossStopPt * pt, Digits);
-	  ls_pt = LossStopPt;
+	   ls_pt = LossStopPt;
    } else {
       ls_price = ls_value;
       ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
    }
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
-	  ps_pt = ProfitStopPt;
+	   ps_pt = ProfitStopPt;
    } else {
       ps_price = ps_value;
       ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
    }
 
    double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Volume) risk_vol = Volume;
+   if (risk_vol > Vol) risk_vol = Vol;
    
    //<<<<debug
    if (debug) {
@@ -73,7 +73,7 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.5f", gap);
+      printf("gap=%d", gap);
       Print("debug>>>>");
    }
    //debug>>>>
@@ -93,7 +93,6 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
 //+------------------------------------------------------------------+
 // OrderSell
 // p: Price
-// volume: Volume
 // ls_point: Loss Stop Point
 // ps_point: Profit Stop Point
 // comment: Comment
@@ -107,11 +106,11 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
    double price = Bid;
    int cmd = OP_SELL;
    if (p != 0) {
-	  if (p < price) {
-		cmd = OP_SELLSTOP;
-	  } else {
-		cmd = OP_SELLLIMIT;
-	  }
+	   if (p > price) {
+		   cmd = OP_SELLLIMIT;
+	   } else {
+		   cmd = OP_SELLSTOP;
+	   }
       price = p;
    }
 
@@ -121,21 +120,21 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
    double ps_pt;
    if (ls_value == 0) {
       ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
-	  ls_pt = LossStopPt;
+	   ls_pt = LossStopPt;
    } else {
       ls_price = ls_value;
       ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
    }
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
-	  ps_pt = ProfitStopPt;
+	   ps_pt = ProfitStopPt;
    } else {
       ps_price = ps_value;
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
    }
 
    double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Volume) risk_vol = Volume;
+   if (risk_vol > Vol) risk_vol = Vol;
 
    //<<<<debug
    if (debug) {
@@ -148,7 +147,7 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.5f", gap);
+      printf("gap=%d", gap);
       Print("debug>>>>");
    }
    //debug>>>>
@@ -171,7 +170,7 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
 // ep: equity percent. ex,1=1%,2=2%
 // ls_point: Loss Stop Point
 //+------------------------------------------------------------------+
-double getVolume(int ep, doube ls_point)
+double getVolume(int ep, double ls_point)
 {
    double risk_amount = AccountEquity() * ep / 100;
    double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
