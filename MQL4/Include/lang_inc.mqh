@@ -18,18 +18,27 @@ extern bool debug = true;
 
 //+------------------------------------------------------------------+
 // OrderBuy
+// p: Price
 // ls_value: Loss Stop Value
 // ps_value: Profit Stop Value
-// ep: equity percent. ex,1=1%,2=2%
 // comment: Comment
 // magic: Magic
 //+------------------------------------------------------------------+
-int OrderBuy(double ls_value, double ps_value, int ep, string comment, int magic)
+int OrderBuy(double p, double ls_value, double ps_value, string comment, int magic)
 {
    int ret = 0;
    double pt = Point;
+   double gap = NormalizeDouble((Ask - Bid) / pt, 0);
    double price = Ask;
-   double gap = NormalizeDouble((price - Bid) / pt, 0);
+   int cmd = OP_BUY;
+   if (p != 0) {
+	  if (p < price) {
+		cmd = OP_BUYLIMIT;
+	  } else {
+		cmd = OP_BUYSTOP;
+	  }
+      price = p;
+   }
 
    double ls_price;
    double ps_price;
@@ -56,6 +65,7 @@ int OrderBuy(double ls_value, double ps_value, int ep, string comment, int magic
    //<<<<debug
    if (debug) {
       Print("<<<<debug");
+      printf("command=%d", cmd);
       printf("volume=%.5f", risk_vol);
       printf("point=%.5f", pt);
       printf("price=%.5f", price);
@@ -69,7 +79,7 @@ int OrderBuy(double ls_value, double ps_value, int ep, string comment, int magic
    //debug>>>>
 
    if (!debug) {
-      ret = OrderSend(Symbol(), OP_BUY, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Green);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Green);
    }
    
    if (ret != 0)
@@ -82,19 +92,28 @@ int OrderBuy(double ls_value, double ps_value, int ep, string comment, int magic
 
 //+------------------------------------------------------------------+
 // OrderSell
+// p: Price
 // volume: Volume
 // ls_point: Loss Stop Point
 // ps_point: Profit Stop Point
-// ep: equity percent. ex,1=1%,2=2%
 // comment: Comment
 // magic: Magic
 //+------------------------------------------------------------------+
-int OrderSell(double ls_value, double ps_value, int ep, string comment, int magic)
+int OrderSell(double p, double ls_value, double ps_value, string comment, int magic)
 {
    int ret = 0;
    double pt = Point;
+   double gap = NormalizeDouble((Ask - Bid) / pt, 0);
    double price = Bid;
-   double gap = NormalizeDouble((Ask - price) / pt, 0);
+   int cmd = OP_SELL;
+   if (p != 0) {
+	  if (p < price) {
+		cmd = OP_SELLSTOP;
+	  } else {
+		cmd = OP_SELLLIMIT;
+	  }
+      price = p;
+   }
 
    double ls_price;
    double ps_price;
@@ -115,12 +134,13 @@ int OrderSell(double ls_value, double ps_value, int ep, string comment, int magi
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
    }
 
-   double risk_vol = getVolume(ep, ls_pt);
+   double risk_vol = getVolume(EquityPercent, ls_pt);
    if (risk_vol > Volume) risk_vol = Volume;
 
    //<<<<debug
    if (debug) {
       Print("<<<<debug");
+      printf("command=%d", cmd);
       printf("volume=%.5f", risk_vol);
       printf("point=%.5f", pt);
       printf("price=%.5f", price);
@@ -134,7 +154,7 @@ int OrderSell(double ls_value, double ps_value, int ep, string comment, int magi
    //debug>>>>
 
    if (!debug) {
-      ret = OrderSend(Symbol(), OP_SELL, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Red);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Red);
    }
    
    if (ret != 0)

@@ -10,6 +10,7 @@
 
 #include <lang_inc.mqh> 
 
+extern doube Price = 0;
 extern double LossStopPrice = 0;
 extern double ProfitStopPrice = 0;
 
@@ -19,7 +20,7 @@ extern double ProfitStopPrice = 0;
 void OnStart()
 {
    debug = true;
-   if (OrderBuy(LossStopPrice, ProfitStopPrice, "buy", 12345) != 0)
+   if (OrderBuy(Price, LossStopPrice, ProfitStopPrice, "buy", 12345) != 0)
    {
       printf("buy error");
    }
