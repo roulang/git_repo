@@ -1,0 +1,30 @@
+.flex-container {
+	/*flex-direction: column;*/
+	display: flex;
+	justify-content: center;
+	width: 400px;
+	height: 250px;
+	background-color: lightgrey;
+}
+.flex-item {
+	background-color: cornflowerblue;
+	width: 100px;
+	height: 100px;
+	margin: 10px;
+}
+header {
+	background:#666666;
+	border-top:1px solid #cccccc;
+	padding:10px;
+	border-radius:5px;
+	text-align:center;
+	color:#ffffff;
+}
+footer {
+	background:#666666;
+	border-top:1px solid #cccccc;
+	padding:10px;
+	border-radius:5px;
+	text-align:center;
+	color:#ffffff;
+}
