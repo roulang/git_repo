@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="c.css">
+    <script src="segment.min.js"></script>
 	<title>System Monitor</title>
 </head>
 </style>
@@ -13,12 +14,212 @@
 </header>
 
 <div class="flex-container flex-container-1">
-	<div class="flex-container flex-container-2">item 1</div>
-	<div class="flex-container flex-container-3">item 2</div>
-	<div class="flex-container flex-container-3">item 3</div>
+	<div class="flex-container flex-container-2">
+		<div class="date_time1">2017/05/10</div>
+		<div class="flex-container flex-container-4">
+			<div class="title">重要性：高</div>
+			<div class="flex-container flex-container-5">
+				<canvas class="digit" id="d1"></canvas>
+				<div class="unit">件</div>
+			</div>
+		</div>
+		<div class="flex-container flex-container-4">
+			<div class="title">节点停止</div>
+			<div class="flex-container flex-container-5">
+				<canvas class="digit" id="d2"></canvas>
+				<div class="unit">件</div>
+			</div>
+		</div>
+		<div class="flex-container flex-container-4">
+			<div class="title">进程停止</div>
+			<div class="flex-container flex-container-5">
+				<canvas class="digit" id="d3"></canvas>
+				<div class="unit">件</div>
+			</div>
+		</div>
+		<div class="flex-container flex-container-4">
+			<div class="title">任务异常</div>
+			<div class="flex-container flex-container-5">
+				<canvas class="digit" id="d4"></canvas>
+				<div class="unit">件</div>
+			</div>
+		</div>
+	</div>
+	<div class="flex-container flex-container-3">
+		<div class="date_time2">2017/05/8周</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d5"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d6"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d7"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d8"></canvas>
+			<div class="unit">件</div>
+		</div>
+	</div>
+	<div class="flex-container flex-container-3">
+		<div class="date_time2">2017/05月</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d9"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d10"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d11"></canvas>
+			<div class="unit">件</div>
+		</div>
+		<div class="flex-container flex-container-5">
+			<canvas class="digit" id="d12"></canvas>
+			<div class="unit">件</div>
+		</div>
+	</div>
 </div>
 
+<script>
 
+	// Set the canvas size to fill its container
+	var canvas = document.getElementById('d1');
+
+	// Create a new sixteen segment display
+	var segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("1234");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d2');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("2345");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d3');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("3456");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d4');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("4567");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d5');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("5678");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d6');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("6789");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d7');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("7890");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d8');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("8901");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d9');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("9012");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d10');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("0123");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d11');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("1234");
+
+	// Set the canvas size to fill its container
+	canvas = document.getElementById('d12');
+
+	// Create a new sixteen segment display
+	segment = new SevenSegment(6, canvas);
+	segment.SetCount(4);
+	segment.SegmentWidth=0.2;
+	segment.FillDark="aliceblue";
+	segment.FillLight="green";
+	segment.DispayText("2345");
+
+</script>
 </body>
 <footer>footer goes here</footer>
 </html>
