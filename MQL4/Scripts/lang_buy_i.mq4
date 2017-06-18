@@ -12,6 +12,7 @@
 
 extern double Price = 0;
 extern double LossStopPrice = 0;
+//-1 is no set
 extern double ProfitStopPrice = 0;
 
 //+------------------------------------------------------------------+

@@ -12,7 +12,7 @@
 
 extern int EquityPercent = 1;
 extern int LossStopPt = 100;
-extern int ProfitStopPt = 200;
+extern int ProfitStopPt = 100;
 extern double Vol = 0.1;
 extern bool debug = false;
 
@@ -28,7 +28,8 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
 {
    int ret = 0;
    double pt = Point;
-   double gap = NormalizeDouble((Ask - Bid) / pt, 0);
+   double g = Ask - Bid;
+   double gap = NormalizeDouble(g / pt, 0);
    double price = Ask;
    int cmd = OP_BUY;
    if (p != 0) {
@@ -37,7 +38,7 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
 	   } else {
 		   cmd = OP_BUYLIMIT;
 	   }
-      price = p;
+      price = p + g;
    }
 
    double ls_price;
@@ -51,6 +52,7 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
       ls_price = ls_value;
       ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
    }
+   
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
 	   ps_pt = ProfitStopPt;
@@ -76,7 +78,7 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%d", gap);
+      printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
@@ -105,7 +107,8 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
 {
    int ret = 0;
    double pt = Point;
-   double gap = NormalizeDouble((Ask - Bid) / pt, 0);
+   double g = Ask - Bid;
+   double gap = NormalizeDouble(g / pt, 0);
    double price = Bid;
    int cmd = OP_SELL;
    if (p != 0) {
@@ -125,9 +128,10 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
       ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
 	   ls_pt = LossStopPt;
    } else {
-      ls_price = ls_value;
+      ls_price = ls_value + g;
       ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
    }
+   
    if (ps_value == 0) {
       ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
 	   ps_pt = ProfitStopPt;
@@ -135,7 +139,7 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
       ps_price = 0;
       ps_pt = 0;
    } else {
-      ps_price = ps_value;
+      ps_price = ps_value + g;
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
    }
 
@@ -153,7 +157,7 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%d", gap);
+      printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
