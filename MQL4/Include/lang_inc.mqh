@@ -12,7 +12,8 @@
 
 extern int EquityPercent = 1;
 extern int LossStopPt = 100;
-extern int ProfitStopPt = 100;
+extern int ProfitStopPt = 200;
+extern int OOPt = 100;
 extern double Vol = 0.1;
 extern bool debug = false;
 
@@ -171,6 +172,84 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
    }
+   return ret;
+
+}
+
+//+------------------------------------------------------------------+
+// OrderOO
+// comment: Comment
+// magic: Magic
+//+------------------------------------------------------------------+
+int OrderOO(string comment, int magic)
+{
+   int ret = 0;
+   double pt = Point;
+   double g = Ask - Bid;
+   double gap = NormalizeDouble(g / pt, 0);
+   double price1 = Bid;
+   price1 = NormalizeDouble(price1 - OOPt * pt, Digits);
+   double price2 = Ask;
+   price2 = NormalizeDouble(price2 + OOPt * pt, Digits);
+   int cmd1 = OP_SELLSTOP;
+   int cmd2 = OP_BUYSTOP;
+
+   double ls_pt;
+   double ps_pt;
+   ls_pt = LossStopPt;
+   ps_pt = ProfitStopPt;
+   double ls_price1;
+   double ps_price1;
+   ls_price1 = NormalizeDouble(price1 + LossStopPt * pt, Digits);
+   ps_price1 = NormalizeDouble(price1 - ProfitStopPt * pt, Digits);
+
+   double ls_price2;
+   double ps_price2;
+   ls_price2 = NormalizeDouble(price2 - LossStopPt * pt, Digits);
+   ps_price2 = NormalizeDouble(price2 + ProfitStopPt * pt, Digits);
+
+   double risk_vol = getVolume(EquityPercent, ls_pt);
+   if (risk_vol > Vol) risk_vol = Vol;
+
+   //<<<<debug
+   if (debug) {
+      Print("<<<<debug");
+      printf("command1=%d", cmd1);
+      printf("command2=%d", cmd2);
+      printf("volume=%.5f", risk_vol);
+      printf("point=%.5f", pt);
+      printf("price1=%.5f", price1);
+      printf("price2=%.5f", price2);
+      printf("loss stop point=%.5f", ls_pt);
+      printf("profit stop point=%.5f", ps_pt);
+      printf("loss stop price1=%.5f", ls_price1);
+      printf("profit stop price1=%.5f", ps_price1);
+      printf("loss stop price2=%.5f", ls_price2);
+      printf("profit stop price2=%.5f", ps_price2);
+      printf("gap=%.0f", gap);
+      Print("debug>>>>");
+   }
+   //debug>>>>
+
+   if (!debug) {
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, comment, magic, 0, Red);
+   }
+   
+   if (ret != 0)
+   {
+      int check=GetLastError(); 
+      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+   }
+   if (!debug) {
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, comment, magic, 0, Green);
+   }
+   
+   if (ret != 0)
+   {
+      int check=GetLastError(); 
+      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+   }
+
    return ret;
 
 }
