@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                  lang_zigzag.mq4 |
+//|                                                 lang_zigzag.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -13,7 +13,7 @@
 //--- plot up
 #property indicator_label1  "up"
 #property indicator_type1   DRAW_ARROW
-#property indicator_color1  clrLime
+#property indicator_color1  clrSpringGreen
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot down
@@ -24,16 +24,16 @@
 #property indicator_width2  1
 //--- plot star1
 #property indicator_label3  "star1"
-#property indicator_type1   DRAW_ARROW
-#property indicator_color1  clrLime
-#property indicator_style1  STYLE_SOLID
-#property indicator_width1  1
+#property indicator_type3   DRAW_ARROW
+#property indicator_color3  clrYellow
+#property indicator_style3  STYLE_SOLID
+#property indicator_width3  1
 //--- plot star2
 #property indicator_label4  "star2"
-#property indicator_type1   DRAW_ARROW
-#property indicator_color1  clrLime
-#property indicator_style1  STYLE_SOLID
-#property indicator_width1  1
+#property indicator_type4   DRAW_ARROW
+#property indicator_color4  clrYellow
+#property indicator_style4  STYLE_SOLID
+#property indicator_width4  1
 //--- indicator buffers
 double         upBuffer[];
 double         downBuffer[];
@@ -43,7 +43,7 @@ double         star2Buffer[];
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int OnInit()
-{
+  {
 //--- indicator buffers mapping
    SetIndexBuffer(0,upBuffer);
    SetIndexBuffer(1,downBuffer);
@@ -52,16 +52,16 @@ int OnInit()
 //--- setting a code from the Wingdings charset as the property of PLOT_ARROW
    //PlotIndexSetInteger(0,PLOT_ARROW,159);
    //PlotIndexSetInteger(1,PLOT_ARROW,159);
+   //PlotIndexSetInteger(2,PLOT_ARROW,159);
+   //PlotIndexSetInteger(3,PLOT_ARROW,159);
    SetIndexArrow(0,SYMBOL_ARROWUP);
    SetIndexArrow(1,SYMBOL_ARROWDOWN);
-   //SetIndexArrow(2,251);
-   //SetIndexArrow(3,251);
-   SetIndexArrow(2,SYMBOL_ARROWDOWN);
-   SetIndexArrow(3,SYMBOL_ARROWUP);
-   
+   SetIndexArrow(2,SYMBOL_STOPSIGN);
+   SetIndexArrow(3,SYMBOL_STOPSIGN);
+
 //---
    return(INIT_SUCCEEDED);
-}
+  }
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
@@ -77,20 +77,17 @@ int OnCalculate(const int rates_total,
                 const int &spread[])
 {
 //---
-   //upBuffer[1]=low[1]-30*Point;
-   //downBuffer[1]=high[1]+30*Point;
-   
    int limit=rates_total-prev_calculated;
    if(prev_calculated==0) {
       InitializeAll();
-      limit=100;
+      limit=50;
       upBuffer[limit]=low[limit]-30*Point;
       downBuffer[limit]=high[limit]+30*Point;
    }
    
    int st=limit;
-   
-//main loop
+
+   //main loop
    for(int i=st-1;i>0;i--) {
       if (i==(st-1)) printf("loop");
       bool isHigh,isLow;
@@ -105,17 +102,17 @@ int OnCalculate(const int rates_total,
          if(i>1) upBuffer[i]=low[i]-30*Point;
          isLow=true;
       }
-      //if ((isHigh && isLow) || (!isHigh && !isLow)) {
-      if (isHigh && isLow) {
+      if ((isHigh && isLow) || (!isHigh && !isLow)) {
+      //if (isHigh && isLow) {
          star1Buffer[i]=high[i]+60*Point;
          star2Buffer[i]=low[i]-60*Point;
       }
       
    }
-
+   
 //--- return value of prev_calculated for next call
    return(rates_total);
-  }
+}
 //+------------------------------------------------------------------+
 
 int InitializeAll()
