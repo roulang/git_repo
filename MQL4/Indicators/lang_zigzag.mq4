@@ -115,7 +115,7 @@ int OnCalculate(const int rates_total,
    if(prev_calculated==0) {
       limit=InitializeAll();
       //limit=500;
-      totalCount=limit;
+      totalCount=limit+1;
       upBuffer[limit]=low[limit]-30*Point;
       downBuffer[limit]=high[limit]+30*Point;
       last_up_i=last_down_i=limit;
@@ -172,8 +172,23 @@ int OnCalculate(const int rates_total,
    int high_i,low_i;
    high_i=low_i=0;
    
+   
    //loop for search mid up and mid down
    for(int i=st;i>0;i--) {
+      if (i==st) {
+         printf("last_down_i=%d",last_down_i);
+         printf("last_up_i=%d",last_up_i);
+         /* --debug
+         for(int j=last_down_i;j>=0;j--){
+            printf("downBuffer[%d]=%.5f",j,downBuffer[j]);
+         }
+      
+         for(int j=last_up_i;j>=0;j--){
+            printf("upBuffer[%d]=%.5f",j,upBuffer[j]);
+         }
+         */
+      }   
+
       if (downBuffer[i]!=0) {
          if (high_i!=0) {
             if (downBuffer[i]>downBuffer[high_i]) {
@@ -200,31 +215,80 @@ int OnCalculate(const int rates_total,
    }
    
    int lookfor=0;
+   high_i=low_i=0;
    //loop for build zigzag
    for(int i=st;i>0;i--) {
       switch(lookfor) {
          case 0:
             if (middownBuffer[i]!=0) {
                zigBuffer[i]=high[i];
-               lookfor=-1;
+               lookfor=-1; //look for ziglow
+               high_i=i;
                break;
             }
             if (midupBuffer[i]!=0) {
                zigBuffer[i]=low[i];
-               lookfor=1;
+               lookfor=1;  //look for zighigh
+               low_i=i;
                break;
             }
             break;
-         case -1:
+         case -1: //look for ziglow
+            if (middownBuffer[i]!=0) {  //found middown
+               //find lowest of shortlow
+               int k=0;
+               for (int j=high_i-1;j>i;j--) {
+                  if (upBuffer[j]!=0) {
+                     if (k==0) {
+                        k=j;
+                     } else {
+                        if (low[j]<low[k]) {
+                           k=j;
+                        }
+                     }
+                  }
+               }
+               if (k!=0) {
+                  zigBuffer[k]=low[k];
+                  zigBuffer[i]=high[i];
+                  lookfor=-1; //look for ziglow
+                  high_i=i;
+               }
+               break;
+            }
             if (midupBuffer[i]!=0) {
                zigBuffer[i]=low[i];
-               lookfor=1;
+               lookfor=1;  //look for zighigh
+               low_i=i;
             }
             break;
-         case 1:
+         case 1:  //look for zighigh
+            if (midupBuffer[i]!=0) {  //found midup
+               //find highest of shorthigh
+               int k=0;
+               for (int j=low_i-1;j>i;j--) {
+                  if (downBuffer[j]!=0) {
+                     if (k==0) {
+                        k=j;
+                     } else {
+                        if (high[j]>high[k]) {
+                           k=j;
+                        }
+                     }
+                  }
+               }
+               if (k!=0) {
+                  zigBuffer[k]=high[k];
+                  zigBuffer[i]=low[i];
+                  lookfor=1;  //look for zighigh
+                  low_i=i;
+               }
+               break;
+            }
             if (middownBuffer[i]!=0) {
                zigBuffer[i]=high[i];
-               lookfor=-1;
+               lookfor=-1; //look for ziglow
+               high_i=i;
             }
             break;
       }

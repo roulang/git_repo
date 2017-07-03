@@ -12,7 +12,7 @@
 
 extern int EquityPercent = 1;
 extern int LossStopPt = 100;
-extern int ProfitStopPt = 200;
+extern int ProfitStopPt = 300;
 extern int OOPt = 100;
 extern double Vol = 0.1;
 extern bool debug = false;
@@ -263,6 +263,7 @@ double getVolume(int ep, double ls_point)
 {
    double risk_amount = AccountEquity() * ep / 100;
    double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
+   if (tick_value == 0) return 1;
    double volume = risk_amount / (ls_point * tick_value);
    volume = NormalizeDouble(volume, 2);
    
