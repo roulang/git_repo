@@ -11,7 +11,7 @@
 #include <stdlib.mqh> 
 
 extern int EquityPercent = 1;
-extern int LossStopPt = 100;
+extern int LossStopPt = 150;
 extern int ProfitStopPt = 300;
 extern int OOPt = 100;
 extern double Vol = 0.1;

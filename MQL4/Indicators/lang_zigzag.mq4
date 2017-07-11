@@ -11,7 +11,10 @@
 #property indicator_buffers 7
 #property indicator_plots   7
 
-input int InpDeviation=5;  // Deviation
+extern bool debug = false;
+
+input int InpDeviation=100;  // Deviation
+input int Offset=60;
 int innerCount=0;
 int outterCount=0;
 int totalCount=1;
@@ -31,25 +34,25 @@ int totalCount=1;
 //--- plot inner
 #property indicator_label3  "inner"
 #property indicator_type3   DRAW_ARROW
-#property indicator_color3  clrYellow
+#property indicator_color3  clrBlack
 #property indicator_style3  STYLE_SOLID
 #property indicator_width3  1
 //--- plot outter
 #property indicator_label4  "outter"
 #property indicator_type4   DRAW_ARROW
-#property indicator_color4  clrYellow
+#property indicator_color4  clrBlack
 #property indicator_style4  STYLE_SOLID
 #property indicator_width4  1
 //--- plot midup
 #property indicator_label5  "midup"
 #property indicator_type5   DRAW_ARROW
-#property indicator_color5  clrSpringGreen
+#property indicator_color5  clrBlack
 #property indicator_style5  STYLE_SOLID
 #property indicator_width5  1
 //--- plot middown
-#property indicator_label6  "down"
+#property indicator_label6  "middown"
 #property indicator_type6   DRAW_ARROW
-#property indicator_color6  clrRed
+#property indicator_color6  clrBlack
 #property indicator_style6  STYLE_SOLID
 #property indicator_width6  1
 //--- plot zig
@@ -79,11 +82,6 @@ int OnInit()
    SetIndexBuffer(4,midupBuffer);
    SetIndexBuffer(5,middownBuffer);
    SetIndexBuffer(6,zigBuffer);
-//--- setting a code from the Wingdings charset as the property of PLOT_ARROW
-   //PlotIndexSetInteger(0,PLOT_ARROW,159);
-   //PlotIndexSetInteger(1,PLOT_ARROW,159);
-   //PlotIndexSetInteger(2,PLOT_ARROW,159);
-   //PlotIndexSetInteger(3,PLOT_ARROW,159);
    SetIndexArrow(0,SYMBOL_ARROWUP);
    SetIndexArrow(1,SYMBOL_ARROWDOWN);
    SetIndexArrow(2,SYMBOL_STOPSIGN);
@@ -116,8 +114,8 @@ int OnCalculate(const int rates_total,
       limit=InitializeAll();
       //limit=500;
       totalCount=limit+1;
-      upBuffer[limit]=low[limit]-30*Point;
-      downBuffer[limit]=high[limit]+30*Point;
+      upBuffer[limit]=low[limit]-Offset*Point;
+      downBuffer[limit]=high[limit]+Offset*Point;
       last_up_i=last_down_i=limit;
    }
    
@@ -135,7 +133,7 @@ int OnCalculate(const int rates_total,
                //isHigh=true;
                downBuffer[k]=0;
                if (i>1) {
-                  downBuffer[i]=high[i]+30*Point;
+                  downBuffer[i]=high[i]+Offset*Point;
                   last_down_i=i;
                }
             }
@@ -143,7 +141,7 @@ int OnCalculate(const int rates_total,
                //isLow=true;
                upBuffer[k]=0;
                if (i>1) {
-                  upBuffer[i]=low[i]-30*Point;
+                  upBuffer[i]=low[i]-Offset*Point;
                   last_up_i=i;
                }
             }
@@ -154,11 +152,11 @@ int OnCalculate(const int rates_total,
       if (high[i]>high[i+1]) isHigh=true;
       if (low[i]<low[i+1]) isLow=true;
       if (isHigh && isLow) {
-         outterBuffer[i]=high[i]+90*Point;
+         outterBuffer[i]=high[i]+(Offset*3)*Point;
          outterCount++;
       }
       if (!isHigh && !isLow) {
-         innerBuffer[i]=low[i]-90*Point;
+         innerBuffer[i]=low[i]-(Offset*3)*Point;
          innerCount++;
       }
       
@@ -178,37 +176,39 @@ int OnCalculate(const int rates_total,
       if (i==st) {
          printf("last_down_i=%d",last_down_i);
          printf("last_up_i=%d",last_up_i);
-         /* --debug
-         for(int j=last_down_i;j>=0;j--){
-            printf("downBuffer[%d]=%.5f",j,downBuffer[j]);
+         // >>debug
+         if (debug) {
+            for(int j=last_down_i;j>=0;j--){
+               printf("downBuffer[%d]=%.5f",j,downBuffer[j]);
+            }
+         
+            for(int j=last_up_i;j>=0;j--){
+               printf("upBuffer[%d]=%.5f",j,upBuffer[j]);
+            }
          }
-      
-         for(int j=last_up_i;j>=0;j--){
-            printf("upBuffer[%d]=%.5f",j,upBuffer[j]);
-         }
-         */
-      }   
+         // <<debug
+      }
 
       if (downBuffer[i]!=0) {
          if (high_i!=0) {
-            if (downBuffer[i]>downBuffer[high_i]) {
+            if (downBuffer[i]>(downBuffer[high_i]+InpDeviation*Point)) {
                middownBuffer[high_i]=0;
-               if (i!=last_down_i) middownBuffer[i]=high[i]+60*Point;
+               if (i!=last_down_i) middownBuffer[i]=high[i]+(Offset*2)*Point;
             }
          } else {
-            middownBuffer[i]=high[i]+60*Point;
+            middownBuffer[i]=high[i]+(Offset*2)*Point;
          }
          high_i=i;
       }
       
       if (upBuffer[i]!=0) {
          if (low_i!=0) {
-            if (upBuffer[i]<upBuffer[low_i]) {
+            if (upBuffer[i]<(upBuffer[low_i]-InpDeviation*Point)) {
                midupBuffer[low_i]=0;
-               if (i!=last_up_i) midupBuffer[i]=low[i]-60*Point;
+               if (i!=last_up_i) midupBuffer[i]=low[i]-(Offset*2)*Point;
             }
          } else {
-            midupBuffer[i]=low[i]-60*Point;
+            midupBuffer[i]=low[i]-(Offset*2)*Point;
          }
          low_i=i;
       }
@@ -308,7 +308,7 @@ int InitializeAll()
    ArrayInitialize(outterBuffer,0.0);
    ArrayInitialize(midupBuffer,0.0);
    ArrayInitialize(middownBuffer,0.0);
-//   ArrayInitialize(zigBuffer,0.0);
+   //ArrayInitialize(zigBuffer,0.0);
 //--- first counting position
    return(Bars-1);
 }
