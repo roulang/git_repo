@@ -1,11 +1,8 @@
 //+------------------------------------------------------------------+
-//|                                                  lang_timepd.mq4 |
+//|                                          lang_indicator_test.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
-//time period
-//jp=1, gbp=2, usd=4
-//
 #property copyright "Copyright 2017, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
@@ -14,30 +11,30 @@
 #include <lang_stg_inc.mqh>
 
 #property indicator_separate_window
-#property indicator_minimum 0
-#property indicator_maximum 7
+#property indicator_minimum -10
+#property indicator_maximum 10
 #property indicator_buffers 1
 #property indicator_plots   1
-//--- plot tm
-#property indicator_label1  "tm"
+//--- plot signal
+#property indicator_label1  "signal"
 #property indicator_type1   DRAW_HISTOGRAM
 #property indicator_color1  clrRed
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- indicator buffers
-double  tmBuffer[];
-
+double         signalBuffer[];
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int OnInit()
-{
+  {
 //--- indicator buffers mapping
-   SetIndexBuffer(0,tmBuffer);
+   SetIndexBuffer(0,signalBuffer);
+   news_init();
    
 //---
    return(INIT_SUCCEEDED);
-}
+  }
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
@@ -51,7 +48,7 @@ int OnCalculate(const int rates_total,
                 const long &tick_volume[],
                 const long &volume[],
                 const int &spread[])
-{
+  {
 //---
    int limit=rates_total-prev_calculated;
    if(prev_calculated==0) {
@@ -60,19 +57,19 @@ int OnCalculate(const int rates_total,
    
    int st=limit;
    for(int i=st;i>=0;i--) {
-      //if (i==st) printf("loop");
-      //tmBuffer[i]=TimepdValue(i);
-      if (isCurPd(NULL,i)) tmBuffer[i]=1;
-      else tmBuffer[i]=0;
+      if (isNewsPd(NULL,i)) signalBuffer[i]=1;
+      else signalBuffer[i]=0;
    }
+
 //--- return value of prev_calculated for next call
    return(rates_total);
-}
+  }
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
    printf("init");
-   ArrayInitialize(tmBuffer,0.0);
+   ArrayInitialize(signalBuffer,0.0);
 //--- first counting position
    return(Bars-1);
 }

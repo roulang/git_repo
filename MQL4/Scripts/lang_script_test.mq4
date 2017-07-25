@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                    lang_oo_i.mq4 |
+//|                                                    lang_test.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -8,19 +8,19 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_inc.mqh> 
+#include <lang_inc.mqh>
+#include <lang_stg_inc.mqh>
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart()
-  {
+{
 //---
-   debug = false;
-
-   if (OrderOO("oo", 12345,100,100,-1) != 0)
-   {
-      printf("oo error");
-   }
-  }
+   debug=true;
+   printf("test");
+   int ret=0;
+   if (isCurPd(NULL,0)) ret=1;
+   printf("ret is %d",ret);   
+}
 //+------------------------------------------------------------------+

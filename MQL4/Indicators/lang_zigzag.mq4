@@ -15,9 +15,12 @@ extern bool debug = false;
 
 input int InpDeviation=100;  // Deviation
 input int Offset=60;
+
+//local
 int innerCount=0;
 int outterCount=0;
 int totalCount=1;
+int lookfor=0;
 
 //--- plot up
 #property indicator_label1  "up"
@@ -46,13 +49,13 @@ int totalCount=1;
 //--- plot midup
 #property indicator_label5  "midup"
 #property indicator_type5   DRAW_ARROW
-#property indicator_color5  clrBlack
+#property indicator_color5  clrSpringGreen
 #property indicator_style5  STYLE_SOLID
 #property indicator_width5  1
 //--- plot middown
 #property indicator_label6  "middown"
 #property indicator_type6   DRAW_ARROW
-#property indicator_color6  clrBlack
+#property indicator_color6  clrRed
 #property indicator_style6  STYLE_SOLID
 #property indicator_width6  1
 //--- plot zig
@@ -107,6 +110,9 @@ int OnCalculate(const int rates_total,
                 const int &spread[])
 {
 //---
+   //printf("onCalculate(ochl)[%.5f][%.5f][%.5f][%.5f]",open[0],close[0],high[0],low[0]);
+   //printf("onCalculate(total,caled)[%d][%d]",rates_total,prev_calculated);
+
    int limit=rates_total-prev_calculated;
    int last_up_i,last_down_i;
    last_up_i=last_down_i=0;
@@ -170,7 +176,6 @@ int OnCalculate(const int rates_total,
    int high_i,low_i;
    high_i=low_i=0;
    
-   
    //loop for search mid up and mid down
    for(int i=st;i>0;i--) {
       if (i==st) {
@@ -196,7 +201,7 @@ int OnCalculate(const int rates_total,
                if (i!=last_down_i) middownBuffer[i]=high[i]+(Offset*2)*Point;
             }
          } else {
-            middownBuffer[i]=high[i]+(Offset*2)*Point;
+            if (i!=last_down_i) middownBuffer[i]=high[i]+(Offset*2)*Point;
          }
          high_i=i;
       }
@@ -208,13 +213,12 @@ int OnCalculate(const int rates_total,
                if (i!=last_up_i) midupBuffer[i]=low[i]-(Offset*2)*Point;
             }
          } else {
-            midupBuffer[i]=low[i]-(Offset*2)*Point;
+            if (i!=last_up_i) midupBuffer[i]=low[i]-(Offset*2)*Point;
          }
          low_i=i;
       }
    }
    
-   int lookfor=0;
    high_i=low_i=0;
    //loop for build zigzag
    for(int i=st;i>0;i--) {
