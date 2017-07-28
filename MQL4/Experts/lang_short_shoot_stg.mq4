@@ -28,14 +28,17 @@ int OnInit()
 //---
    LossStopPt=sl;
    ProfitStopPt=tp;
-   EquityPercent=2;
+   EquityPercent=1;
    Vol=1;
    debug=false;
    if (debug) {
       Print("OnInit()");
    }
    ea_init();
-   news_init();
+   
+   if (!timer_init()) return(INIT_FAILED);
+   
+   news_read();
 //---
    return(INIT_SUCCEEDED);
 }
@@ -48,6 +51,7 @@ void OnDeinit(const int reason)
    if (debug) {
       Print("OnDeinit()");
    }
+   timer_deinit();
    
 }
 //+------------------------------------------------------------------+
@@ -112,4 +116,12 @@ void OnTick()
          OrderCloseA(Symbol(),-1,com,mag);
       }
    }
+}
+//+------------------------------------------------------------------+
+//| Expert timer function                                             |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+   if(debug) Print("OnTimer()");
+   news_read();
 }

@@ -30,7 +30,10 @@ int OnInit()
   {
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
-   news_init();
+   
+   //if (!timer_init()) return(INIT_FAILED);
+   
+   news_read();
    
 //---
    return(INIT_SUCCEEDED);
@@ -72,4 +75,12 @@ int InitializeAll()
    ArrayInitialize(signalBuffer,0.0);
 //--- first counting position
    return(Bars-1);
+}
+//+------------------------------------------------------------------+
+//| Expert timer function                                             |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+   if(debug) Print("OnTimer()");
+   news_read();
 }

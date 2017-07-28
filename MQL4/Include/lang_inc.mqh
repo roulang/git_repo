@@ -36,6 +36,7 @@ datetime CurrentTimeStamp;
 
 struct NewsImpact
 { 
+   double n;         //index
    string cur;    // currency 
    datetime dt;   // date 
 }; 
@@ -288,21 +289,42 @@ int OrderOO(string comment, int magic, int oPt=0, int ls_pt=0, int ps_pt=0)
 
 }
 
-// type: 1:buy,-1:sell,0:all
+// type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
 int OrderCloseA(string cur, int type, string comment, int magic)
 {
+   //Print("1=",cur,",2=",type,",3=",comment,",4=",magic);
    int t=OrdersTotal();
+   //Print("t=",t);
+   int cnt=0;
    for(int i=t-1;i>=0;i--) {
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      //Print("ret=",ret);
       if (ret==true) {
-         if((type==0 && OrderSymbol()==cur && OrderComment()==comment && OrderMagicNumber()==magic) ||
-            (type==1 && OrderSymbol()==cur && OrderType()==OP_BUY && OrderComment()==comment && OrderMagicNumber()==magic) ||
-            (type==-1 && OrderSymbol()==cur && OrderType()==OP_SELL && OrderComment()==comment && OrderMagicNumber()==magic)) 
+         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
+         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
          {
-            ret=OrderClose(OrderTicket(),OrderLots(),OrderClosePrice(),0,Green);
+            if(OrderType()==OP_BUY) {
+               //Print("send close buy order command");
+               ret=OrderClose(OrderTicket(),OrderLots(),Bid,0,Green);
+            }
+            if(OrderType()==OP_SELL) {
+               //Print("send close sell order command");
+               ret=OrderClose(OrderTicket(),OrderLots(),Ask,0,Green);
+            }
+            if(OrderType()==OP_BUYSTOP || OrderType()==OP_SELLSTOP) {
+               //Print("send delete order command");
+               ret=OrderDelete(OrderTicket(),Green);
+            }
+            
             if (ret!=true) {
                int check=GetLastError(); 
                if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+            } else {
+               cnt++;
             }
          }
       } else {
@@ -310,19 +332,22 @@ int OrderCloseA(string cur, int type, string comment, int magic)
          if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
       }
    }
-   return 0;
+   return cnt;
 }
 
-// type:1 buy,-1 sell,0 all
+// type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
 bool FindOrderA(string cur, int type, string comment, int magic)
 {
    int t=OrdersTotal();
    for(int i=t-1;i>=0;i--) {
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
-         if((type==0 && OrderSymbol()==cur && OrderComment()==comment && OrderMagicNumber()==magic) ||
-            (type==1 && OrderSymbol()==cur && OrderType()==OP_BUY && OrderComment()==comment && OrderMagicNumber()==magic) ||
-            (type==-1 && OrderSymbol()==cur && OrderType()==OP_SELL && OrderComment()==comment && OrderMagicNumber()==magic)) 
+         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
+         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
+            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
          {
             return true;
          }
