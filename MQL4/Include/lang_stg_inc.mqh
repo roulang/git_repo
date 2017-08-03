@@ -282,7 +282,7 @@ int ATRValue(int shift)
 int news_read()
 {
    int cnt=0;
-   int h=FileOpen(filen,FILE_READ|FILE_CSV,',');
+   int h=FileOpen(filen,FILE_READ|FILE_CSV|FILE_SHARE_READ,',');
    if(h!=INVALID_HANDLE) {
       //read record count
       while(!FileIsEnding(h)) {

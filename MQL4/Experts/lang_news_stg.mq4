@@ -11,12 +11,13 @@
 #include <lang_inc.mqh>
 #include <lang_stg_inc.mqh>
 
+//--- input
+input int      i_SL=100;      //take lose point
+input int      i_OPT=150;     //oo offset
 
 //--- local
 string   com="event stg";
 int      mag=12345;
-int      sl=100;      //take lose point
-int      opt=150;     //oo offset
 int      time_ped=300;  //5 minutes
 bool     has_order=false;
 bool     for_test=false;
@@ -71,7 +72,7 @@ void OnTick()
    bool isPd2=isNewsPd2(NULL,bar_shift-1);    //news zone control
    if (isPd2 && !has_order) {
       //Print("Open oo order");
-      OrderOO(com,mag,opt,sl,-1);
+      OrderOO(com,mag,i_OPT,i_SL,-1);
       has_order=true;
       orderdt=now;
       return;
@@ -83,7 +84,7 @@ void OnTick()
          OrderCloseA(NULL,-2,com,mag);   //close sellstop order
 
          //move lose stop, set no risk
-         if (movingStop2(NULL,1,com,mag,bar_shift,sl,0)) {
+         if (movingStop2(NULL,1,com,mag,bar_shift,i_SL,0)) {
             Print("movingstop of buy order");
          }
          
@@ -99,7 +100,7 @@ void OnTick()
          OrderCloseA(NULL,2,com,mag);    //close buystop order
 
          //move lose stop, set no risk
-         if (movingStop2(NULL,-1,com,mag,bar_shift,sl,0)) {
+         if (movingStop2(NULL,-1,com,mag,bar_shift,i_SL,0)) {
             Print("movingstop of sell order");
          }
          
