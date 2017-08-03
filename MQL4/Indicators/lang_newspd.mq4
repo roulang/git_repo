@@ -22,21 +22,27 @@
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- indicator buffers
-double         signalBuffer[];
+double    signalBuffer[];
+
+//local
+bool      for_test=false;
+
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int OnInit()
-  {
+{
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    
-   if (!timer_init()) return(INIT_FAILED);
+   if (!for_test) {
+      if (!timer_init()) return(INIT_FAILED);
+   }
    
    news_read();
 //---
    return(INIT_SUCCEEDED);
-  }
+}
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
@@ -50,7 +56,7 @@ int OnCalculate(const int rates_total,
                 const long &tick_volume[],
                 const long &volume[],
                 const int &spread[])
-  {
+{
 //---
    int limit=rates_total-prev_calculated;
    if(prev_calculated==0) {
@@ -65,7 +71,7 @@ int OnCalculate(const int rates_total,
    
 //--- return value of prev_calculated for next call
    return(rates_total);
-  }
+}
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 int InitializeAll()
@@ -81,5 +87,8 @@ int InitializeAll()
 void OnTimer()
 {
    if(debug) Print("OnTimer()");
-   news_read();
+   
+   if (!for_test) {
+      news_read();
+   }
 }

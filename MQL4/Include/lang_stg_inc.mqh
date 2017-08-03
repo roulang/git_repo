@@ -27,10 +27,13 @@ static int EUR_PD = 2;
 NewsImpact news[];
 string filen="news.csv";
 
-input int news_bef=300;          //5 mins before news
-input int news_aft=SEC_H1*0.25;   //15 mins after news
-input int TimeZoneOffset=SEC_H1*5;
-input int TimerSecond=SEC_H1*0.25;
+int news_bef=SEC_H1*0.25;     //15 mins before news
+int news_aft=SEC_H1*0.25;     //15 mins after news
+int TimeZoneOffset=SEC_H1*5;
+int TimerSecond=SEC_H1*1;
+
+//adx
+double adx_thred=0.5;
 
 //atr
 double atr_lvl=0.0002;
@@ -115,6 +118,64 @@ int TrendStgValue(int shift)
    }
    
    ret=(adx_lv+pdi_break+mdi_break)*adx_dir;
+   
+   return ret;
+}
+
+//+------------------------------------------------------------------+
+//| Trend strategy
+//+------------------------------------------------------------------+
+int TrendStgValue2(int shift)
+{
+   int ret=0;
+   double adx1=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,shift+2);
+   double adx1_pdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_PLUSDI,shift+2);
+   double adx1_mdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MINUSDI,shift+2);
+   double adx2=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,shift+1);
+   double adx2_pdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_PLUSDI,shift+1);
+   double adx2_mdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MINUSDI,shift+1);
+   double adx3=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,shift);
+   double adx3_pdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_PLUSDI,shift);
+   double adx3_mdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MINUSDI,shift);
+   
+   double pdi_offset1=MathAbs(adx1_pdi-adx1_mdi);
+   double pdi_offset2=MathAbs(adx2_pdi-adx2_mdi);
+   double pdi_offset3=MathAbs(adx3_pdi-adx3_mdi);
+
+   int adx_dir=0;
+   if (adx2_pdi>adx2_mdi) {
+      adx_dir=1;
+   }
+   if (adx2_pdi<adx2_mdi) {
+      adx_dir=-1;
+   }
+
+   int pdi_top=0;
+   int mdi_top=0;
+   if (adx_dir==1) {
+      if (adx1_pdi<=(adx2_pdi-adx_thred) && adx2_pdi>=(adx3_pdi+adx_thred)) {
+         pdi_top=1;
+      }
+      if (adx1_mdi>=(adx2_mdi+adx_thred) && adx2_mdi<=(adx3_mdi-adx_thred)) {
+         mdi_top=1;
+      }
+   }
+
+   if (adx_dir==-1) {
+      if (adx1_pdi>=(adx2_pdi+adx_thred) && adx2_pdi<=(adx3_pdi-adx_thred)) {
+         pdi_top=1;
+      }
+      if (adx1_mdi<=(adx2_mdi-adx_thred) && adx2_mdi>=(adx3_mdi+adx_thred)) {
+         mdi_top=1;
+      }
+   }
+   
+   int pdi_mdi_top=0;
+   if (pdi_offset1<=pdi_offset2 && pdi_offset2>=pdi_offset3) {
+      pdi_mdi_top=1;
+   }   
+      
+   ret=(pdi_top+mdi_top+pdi_mdi_top)*adx_dir;
    
    return ret;
 }
@@ -252,7 +313,8 @@ int news_read()
       
       FileClose(h);
    } else {
-      Print("Operation FileOpen failed, error: ",GetLastError());
+      Print("Operation FileOpen failed, error: ",ErrorDescription(GetLastError()));
+      FileClose(h);
    }
 
    return cnt;
@@ -260,11 +322,13 @@ int news_read()
 
 //+------------------------------------------------------------------+
 //| Timer function
+//| argSec: timer seconds
 //+------------------------------------------------------------------+
-bool timer_init()
+bool timer_init(int argSec=0)
 {
    if(debug) Print("timer_init");
-   bool ret=EventSetTimer(TimerSecond);
+   if (argSec==0) argSec=TimerSecond;
+   bool ret=EventSetTimer(argSec);
    return(ret);  
 }
 

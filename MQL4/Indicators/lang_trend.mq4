@@ -59,7 +59,7 @@ int OnCalculate(const int rates_total,
    int st=limit-1;
    if (st<0) st=0;
    for(int i=st;i>=0;i--) {
-      signalBuffer[i]=TrendStgValue(i);
+      signalBuffer[i]=TrendStgValue2(i);
    }
 
 //--- return value of prev_calculated for next call
