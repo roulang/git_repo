@@ -112,8 +112,10 @@ void OnTick()
          order_tp=0;
       }
 
+      bool isPd=isNewsPd(NULL,bar_shift-1);    //news zone control
+
       //open order
-      if (!has_order) {   
+      if (!has_order && !isPd) {
          double closeprice_st=Close[b_st];
          double closeprice_ed=Close[b_ed];
 

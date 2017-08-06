@@ -25,10 +25,10 @@ static int EUR_PD = 2;
 
 //news
 NewsImpact news[];
-string filen="news.csv";
+string filen="lang_news.ex4.csv";
 
-int news_bef=SEC_H1*0.25;     //15 mins before news
-int news_aft=SEC_H1*0.25;     //15 mins after news
+int news_bef=SEC_H1*2;     //2 hr before news
+int news_aft=SEC_H1*2;     //2 hr after news
 int TimeZoneOffset=SEC_H1*5;
 int TimerSecond=SEC_H1*1;
 
@@ -282,7 +282,7 @@ int ATRValue(int shift)
 int news_read()
 {
    int cnt=0;
-   int h=FileOpen(filen,FILE_READ|FILE_CSV|FILE_SHARE_READ,',');
+   int h=FileOpen(filen,FILE_CSV|FILE_SHARE_READ,',');
    if(h!=INVALID_HANDLE) {
       //read record count
       while(!FileIsEnding(h)) {
