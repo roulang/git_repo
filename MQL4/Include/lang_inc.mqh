@@ -1005,6 +1005,7 @@ int writeOrderHistoryToFile()
       return 0;
    }
    
+   Print("write history order file");
    ResetLastError();
    h=FileOpen(g_OrderHisFileName,FILE_READ|FILE_WRITE|FILE_CSV,',');
    if(h==INVALID_HANDLE) {
