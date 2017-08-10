@@ -23,7 +23,7 @@ int         i_cnt=3;
 string   com="tt stg";    //only for GBPUSD 15M
 int      mag=12345;
 int      TimeOffset=SEC_H1*4.25;    //from 6:15 to 10:15,4.25H
-int      n=0;
+int      g_num=0;
 int      l_o=50; //price offset
 bool     has_order=false;
 int      order_tp=0;    //1:buy order, -1:sell order
@@ -100,8 +100,8 @@ void OnTick()
       
       //draw objects
       long current_chart_id=ChartID();
-      string o=StringConcatenate("rect",n);
-      n++;
+      string o=StringConcatenate("rect",g_num);
+      g_num++;
       if (!ObjectCreate(current_chart_id,o,OBJ_RECTANGLE,0,Time[b_ed],low_p,Time[b_st],high_p)) {
          Print("Object Create Error: ", ErrorDescription(GetLastError()));
       }

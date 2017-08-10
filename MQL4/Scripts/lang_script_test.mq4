@@ -11,49 +11,26 @@
 #include <lang_inc.mqh>
 #include <lang_stg_inc.mqh>
 
-//local
-NewsImpact events[];
+
 
 //+------------------------------------------------------------------+
 //| Script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart()
 {
-//---
-   debug=true;
-   printf("test");
+//---  
    
-   int cnt=0;
-   int h=FileOpen(filen,FILE_READ|FILE_CSV,',');
-   if(h!=INVALID_HANDLE) {
-      //read record count
-      while(!FileIsEnding(h)) {
-         string s;
-         s=FileReadString(h);
-         if(debug) Print(s);
-         s=FileReadString(h);
-         if(debug) Print(s);
-         s=FileReadString(h);
-         if(debug) Print(s);
-         cnt++;
-      }
-      
-      ArrayResize(events,cnt);
-      cnt=0;
-      //move to file's head
-      if (FileSeek(h,0,SEEK_SET)) {
-         while(!FileIsEnding(h)) {
-            events[cnt].n=FileReadNumber(h);
-            events[cnt].cur=FileReadString(h);
-            events[cnt].dt=FileReadDatetime(h);
-            cnt++;
-         }
-      }
-      
-      FileClose(h);
-   } else {
-      Print("Operation FileOpen failed, error: ",GetLastError());
+   //test mail
+   //mailNoticeOrderOpen(12345,Symbol(),2,0.1,1.4545,1.4500,1.4678,"some stg",12345);
+   //return;
+   
+   debug=true;
+   Print("test");
+   
+   if (getFileLock()) {
+      writeOrderHistoryToFile();
+      releaseFileLock();
    }
    
 }
-//+------------------------------------------------------------------+
+

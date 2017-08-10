@@ -12,10 +12,11 @@
 #include <lang_stg_inc.mqh>
 
 //--- input
-input int      i_SL=100;      //take lose point
-input int      i_OPT=150;     //oo offset
+input int      i_SL=100;         //take lose point
+input int      i_OPT=150;        //oo offset
+input bool     i_skiptd=false;   //skip trend control
 
-//--- local
+//--- global
 string   com="event stg";
 int      mag=12345;
 int      time_ped=300;  //5 minutes
@@ -34,6 +35,8 @@ int OnInit()
       Print("OnInit()");
    }
    ea_init();
+   
+   //Print("has_order=",has_order);
    
    if (!for_test) {
       if (!timer_init()) return(INIT_FAILED);
@@ -72,12 +75,13 @@ void OnTick()
    bool isPd2=isNewsPd2(NULL,bar_shift-1);    //news zone control
    if (isPd2 && !has_order) {
       //Print("Open oo order");
-      OrderOO(com,mag,i_OPT,i_SL,-1);
-      has_order=true;
-      orderdt=now;
-      return;
+      if (OrderOO(com,mag,i_OPT,i_SL,-1)) {
+         has_order=true;
+         orderdt=now;
+         return;
+      }
    }
-   
+
    if (has_order) {
       if       (FindOrderA(NULL,1,com,mag)) {  //found buy order
          //Print("found buy order,close sellstop order");
@@ -87,7 +91,6 @@ void OnTick()
          if (movingStop2(NULL,1,com,mag,bar_shift,i_SL,0)) {
             Print("movingstop of buy order");
          }
-         
          
          if (ifClose(bar_shift)) {
             Print("closed buy order");
@@ -103,7 +106,6 @@ void OnTick()
          if (movingStop2(NULL,-1,com,mag,bar_shift,i_SL,0)) {
             Print("movingstop of sell order");
          }
-         
 
          if (ifClose(bar_shift)) {
             Print("closed sell order");
@@ -122,8 +124,9 @@ void OnTick()
             }
          }
       }
-      
    }
+   
+   //Print("has_order=",has_order);
    
 }
 //+------------------------------------------------------------------+
@@ -144,7 +147,8 @@ bool ifClose(int shift)
    
    int op1=ShotShootStgValue(shift+1);   //par and avg control
    int op2=ShotShootStgValue(shift);     //par and avg control
-   int td=TrendStgValue2(shift);          //trend control
+   int td=0;
+   if (!i_skiptd) td=TrendStgValue2(shift);          //trend control
 
    if ((op1<0 && op2<0)||td==3) {  // close buy signal
       printf("close buy order");

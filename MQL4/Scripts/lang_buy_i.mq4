@@ -21,7 +21,7 @@ extern double ProfitStopPrice = 0;
 void OnStart()
 {
    debug = false;
-   if (OrderBuy(Price, LossStopPrice, ProfitStopPrice, "buy", 12345) != 0)
+   if (OrderBuy2(Price, LossStopPrice, ProfitStopPrice, "buy", 12345) != 0)
    {
       printf("buy error");
    }

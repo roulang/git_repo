@@ -84,7 +84,7 @@ void OnTick()
       } else {
          if (FindOrderA(Symbol(),1,com,mag) == false) {
             OrderCloseA(Symbol(),0,com,mag);
-            if (OrderBuy(0,0,-1,com,mag) != 0) {
+            if (OrderBuy2(0,0,-1,com,mag) != 0) {
                printf("buy error");
             }
          }
@@ -98,7 +98,7 @@ void OnTick()
       } else {
          if (FindOrderA(Symbol(),-1,com,mag)== false) {
             OrderCloseA(Symbol(),0,com,mag);
-            if (OrderSell(0,0,-1,com,mag) != 0) {
+            if (OrderSell2(0,0,-1,com,mag) != 0) {
                printf("sell error");
             }
          }

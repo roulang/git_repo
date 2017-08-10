@@ -24,24 +24,49 @@
 //--- indicator buffers
 double    signalBuffer[];
 
-//local
-bool      for_test=false;
+//--- input
+input int i_timer_sec=SEC_H1;    //timer seconds
+input int i_news_bef=15*60;      //news before 15min
+input int i_news_aft=60*60;      //news after 1 hour
+input bool i_update_news=true;   //news update control
+input bool i_his_order_wrt=true; //history order write control
+
+//global
+bool      g_for_test=false;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   debug=false;
+   
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    
-   if (!for_test) {
-      if (!timer_init()) return(INIT_FAILED);
+   if (!g_for_test) {
+      if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
    
    news_read();
+   
 //---
    return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator deinitialization function                         |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+//---
+   if (debug) {
+      Print("OnDeinit()");
+   }
+   
+   //Print("OnDeinit(),release lock");
+   releaseFileLock();
+   
 }
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
@@ -58,6 +83,7 @@ int OnCalculate(const int rates_total,
                 const int &spread[])
 {
 //---
+   
    int limit=rates_total-prev_calculated;
    if(prev_calculated==0) {
       limit=InitializeAll();
@@ -65,7 +91,7 @@ int OnCalculate(const int rates_total,
    
    int st=limit;
    for(int i=st;i>=0;i--) {
-      if (isNewsPd(NULL,i)) signalBuffer[i]=1;
+      if (isNewsPd(NULL,i,i_news_bef,i_news_aft)) signalBuffer[i]=1;
       else signalBuffer[i]=0;
    }
    
@@ -87,8 +113,14 @@ int InitializeAll()
 void OnTimer()
 {
    if(debug) Print("OnTimer()");
-   
-   if (!for_test) {
-      news_read();
+     
+   if (!g_for_test) {
+      if (i_update_news) news_read();
+      if (i_his_order_wrt) {
+         if (getFileLock()) {
+            writeOrderHistoryToFile();
+            releaseFileLock();
+         }
+      }
    }
 }

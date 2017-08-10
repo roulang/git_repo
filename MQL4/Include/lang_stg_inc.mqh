@@ -9,8 +9,8 @@
 
 #include <lang_inc.mqh>
 
-//input
-input int      Adx_lev=40; //adx level
+//global
+int    g_adx_level=40; //adx level
 
 //each time period
 string u1="16:00";  //usa
@@ -23,14 +23,7 @@ static int ASIA_PD = 1;
 static int AMA_PD = 4;
 static int EUR_PD = 2;
 
-//news
-NewsImpact news[];
-string filen="lang_news.ex4.csv";
 
-int news_bef=SEC_H1*2;     //2 hr before news
-int news_aft=SEC_H1*2;     //2 hr after news
-int TimeZoneOffset=SEC_H1*5;
-int TimerSecond=SEC_H1*1;
 
 //adx
 double adx_thred=0.5;
@@ -95,7 +88,7 @@ int TrendStgValue(int shift)
    double adx2_mdi=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MINUSDI,shift);
    
    int adx_lv=0;
-   if (adx2>=Adx_lev) {
+   if (adx2>=g_adx_level) {
       adx_lv=1;
    }
    
@@ -277,106 +270,4 @@ int ATRValue(int shift)
    if (atr>atr_lvl) ret=1;
 
    return ret;
-}
-
-int news_read()
-{
-   int cnt=0;
-   int h=FileOpen(filen,FILE_CSV|FILE_SHARE_READ,',');
-   if(h!=INVALID_HANDLE) {
-      //read record count
-      while(!FileIsEnding(h)) {
-         string s;
-         s=FileReadString(h);
-         if(debug) Print(s);
-         s=FileReadString(h);
-         if(debug) Print(s);
-         s=FileReadString(h);
-         if(debug) Print(s);
-         cnt++;
-      }
-      
-      ArrayResize(news,cnt);
-      cnt=0;
-      //move to file's head
-      if (FileSeek(h,0,SEEK_SET)) {
-         while(!FileIsEnding(h)) {
-            news[cnt].n=FileReadNumber(h);
-            if(debug) Print(news[cnt].n);
-            news[cnt].cur=FileReadString(h);
-            if(debug) Print(news[cnt].cur);
-            news[cnt].dt=FileReadDatetime(h)-TimeZoneOffset;
-            if(debug) Print(news[cnt].dt);
-            cnt++;
-         }
-      }
-      
-      FileClose(h);
-   } else {
-      Print("Operation FileOpen failed, error: ",ErrorDescription(GetLastError()));
-      FileClose(h);
-   }
-
-   return cnt;
-}
-
-//+------------------------------------------------------------------+
-//| Timer function
-//| argSec: timer seconds
-//+------------------------------------------------------------------+
-bool timer_init(int argSec=0)
-{
-   if(debug) Print("timer_init");
-   if (argSec==0) argSec=TimerSecond;
-   bool ret=EventSetTimer(argSec);
-   return(ret);  
-}
-
-//+------------------------------------------------------------------+
-//| Timer function
-//+------------------------------------------------------------------+
-void timer_deinit()
-{
-   if(debug) Print("timer_deinit");
-   //relase timer
-   EventKillTimer();
-}
-
-//+------------------------------------------------------------------+
-//| Time of news function
-//+------------------------------------------------------------------+
-bool isNewsPd(string symbol,int shift)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-   
-   for (int i=0;i<ArraySize(news);i++) {
-      if (StringFind(cur,news[i].cur)>=0) {
-         datetime t=Time[shift];
-         datetime t2=news[i].dt;
-         if (t>=(t2-news_bef) && t<(t2+news_aft)) return true;
-      }
-   }
-   
-   return false;
-}
-//+------------------------------------------------------------------+
-//| Time of news function
-//+------------------------------------------------------------------+
-bool isNewsPd2(string symbol,int shift)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-   
-   for (int i=0;i<ArraySize(news);i++) {
-      if (StringFind(cur,news[i].cur)>=0) {
-         datetime t=Time[shift];
-         datetime t2=news[i].dt;
-         if (t>=(t2-60) && t<t2) return true;
-      }
-   }
-   
-   return false;
 }
