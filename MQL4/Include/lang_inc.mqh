@@ -62,7 +62,7 @@ datetime CurrentTimeStamp;
 bool     g_SendMail=true;
 int      g_LockFileH=0;          //lock file handle
 string   g_LockFileName="#Lock#";
-string   g_OrderHisFileName="lang_history_orders.csv";   //history order data file
+string   g_OrderHisFileName="lang_history_orders.ex4.csv";   //history order data file
 
 s_News   g_News[];
 string   g_NewsFileName="lang_news.ex4.csv";
