@@ -12,6 +12,7 @@
 #include <lang_stg_inc.mqh>
 
 //--- input parameters
+input bool  i_avoid_news_pd=false;
 
 //--- global
 datetime    tg_st=D'06:15:00';         //start time
@@ -24,11 +25,12 @@ string   com="tt stg";    //only for GBPUSD 15M
 int      mag=12345;
 int      TimeOffset=SEC_H1*4.25;    //from 6:15 to 10:15,4.25H
 int      g_num=0;
-int      l_o=50; //price offset
+//int      l_o=50; //price offset
 bool     has_order=false;
 int      order_tp=0;    //1:buy order, -1:sell order
-int      time_ped=SEC_H1*1;  //1 hours
 datetime orderdt;
+
+bool     g_for_test=false;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -49,6 +51,12 @@ int OnInit()
    delAllObj();
    
    ea_init();
+
+   if (!g_for_test) {
+      if (!timer_init()) return(INIT_FAILED);
+   }
+   
+   news_read();
    
 //---
    return(INIT_SUCCEEDED);
@@ -63,6 +71,9 @@ void OnDeinit(const int reason)
       Print("OnDeinit()");
    }
    
+   if (!g_for_test) {
+      timer_deinit();
+   }
    
 }
 //+------------------------------------------------------------------+
@@ -112,8 +123,9 @@ void OnTick()
          order_tp=0;
       }
 
-      bool isPd=isNewsPd(NULL,bar_shift-1);    //news zone control
-
+      bool isPd=false;
+      if(i_avoid_news_pd) isPd=isNewsPd(NULL,bar_shift-1);  //news zone control
+      
       //open order
       if (!has_order && !isPd) {
          double closeprice_st=Close[b_st];
@@ -154,5 +166,9 @@ void OnTimer()
 {
    if (debug) {
       Print("OnTimer()");
+   }
+
+   if (!g_for_test) {
+      news_read();
    }
 }
