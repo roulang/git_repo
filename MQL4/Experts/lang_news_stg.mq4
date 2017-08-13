@@ -149,7 +149,7 @@ bool ifClose(int shift)
    int op2=ShotShootStgValue(shift);     //par and avg control
    int td=0;
    if (!i_skiptd) td=TrendStgValue2(shift);          //trend control
-
+   
    if ((op1<0 && op2<0)||td==3) {  // close buy signal
       printf("close buy order");
       if (OrderCloseA(NULL,1,com,mag)>0) return true;
