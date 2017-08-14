@@ -161,7 +161,7 @@ int OrderBuy(double p, double ls_value, double ps_value, string comment, int mag
 // argCom: Comment
 // argMag: Magic
 //+------------------------------------------------------------------+
-bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, string argCom, int argMag)
+bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
 {
    double pt = Point;
    double g = Ask - Bid;
@@ -221,7 +221,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, string arg
 
    int ret = 0;
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, argCom, argMag, 0, Green);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Green);
    }
    
    if (ret <0 )
@@ -231,7 +231,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, string arg
    }
    
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,argCom,argMag);
+      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);
       return true;
    }
    else return false;
@@ -326,7 +326,7 @@ int OrderSell(double p, double ls_value, double ps_value, string comment, int ma
 // argCom: Comment
 // argMag: Magic
 //+------------------------------------------------------------------+
-bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, string argCom, int argMag)
+bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
 {
    double pt = Point;
    double g = Ask - Bid;
@@ -386,7 +386,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, string ar
 
    int ret = 0;
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, argCom, argMag, 0, Red);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Red);
    }
    
    if (ret < 0)
@@ -396,7 +396,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, string ar
    }
    
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,argCom,argMag);   
+      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);   
       return true;
    }
    else return false;
@@ -411,7 +411,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, string ar
 // argCom: Comment
 // argMag: Magic
 //+------------------------------------------------------------------+
-bool OrderOO(string argCom, int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
+bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
 {
    int ret = 0;
    double pt = Point;
@@ -470,11 +470,11 @@ bool OrderOO(string argCom, int argMag, int argOPt=0, int argLsPt=0, int argPsPt
    //debug>>>>
 
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, argCom, argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,argCom,argMag);   
+      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -482,11 +482,11 @@ bool OrderOO(string argCom, int argMag, int argOPt=0, int argLsPt=0, int argPsPt
    }
    
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, argCom, argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,argCom,argMag);   
+      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -508,7 +508,7 @@ bool OrderOO(string argCom, int argMag, int argOPt=0, int argLsPt=0, int argPsPt
 // argCom: Comment
 // argMag: Magic
 //+------------------------------------------------------------------+
-bool OrderOO2(string argCom, int argMag, double argPrice1, double argPrice2, double argLs1=0, double argPs1=0, double argLs2=0, double argPs2=0)
+bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, double argPs1=0, double argLs2=0, double argPs2=0)
 {
    
    if (argPrice1>=argPrice2 || argPrice1>=Bid || argPrice2<=Ask ) return false;
@@ -564,10 +564,10 @@ bool OrderOO2(string argCom, int argMag, double argPrice1, double argPrice2, dou
 
    int ret=0;
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, argCom, argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,argCom,argMag);   
+      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -576,10 +576,10 @@ bool OrderOO2(string argCom, int argMag, double argPrice1, double argPrice2, dou
 
    ret=0;
    if (!debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, argCom, argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,argCom,argMag);   
+      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -591,7 +591,7 @@ bool OrderOO2(string argCom, int argMag, double argPrice1, double argPrice2, dou
 }
 
 // type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
-int OrderCloseA(string symbol, int type, string comment, int magic)
+int OrderCloseA(string symbol, int type, int magic)
 {
    string cur;
    if (symbol==NULL) cur=Symbol();
@@ -606,11 +606,11 @@ int OrderCloseA(string symbol, int type, string comment, int magic)
       //Print("ret=",ret);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
+         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
+            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
+            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
+            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
+            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
          {
             if(OrderType()==OP_BUY) {
                //Print("send close buy order command");
@@ -645,7 +645,7 @@ int OrderCloseA(string symbol, int type, string comment, int magic)
 }
 
 // type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
-bool FindOrderA(string symbol, int type, string comment, int magic)
+bool FindOrderA(string symbol, int type, int magic)
 {
    string cur;
    if (symbol==NULL) cur=Symbol();
@@ -656,11 +656,11 @@ bool FindOrderA(string symbol, int type, string comment, int magic)
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
+         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
+            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
+            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
+            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
+            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
          {
             return true;
          }
@@ -725,7 +725,7 @@ int isNewBar()
 //| type:1 buy,-1 sell
 //| spt:stop point
 //+------------------------------------------------------------------+
-bool movingStop(string symbol, int type, string comment, int magic, int shift, int spt)
+bool movingStop(string symbol, int type, int magic, int shift, int spt)
 {
    string cur;
    if (symbol==NULL) cur=Symbol();
@@ -737,7 +737,7 @@ bool movingStop(string symbol, int type, string comment, int magic, int shift, i
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic))
+         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
          {
             //buy order
             //double cur_price=Bid;
@@ -754,7 +754,7 @@ bool movingStop(string symbol, int type, string comment, int magic, int shift, i
                }
             }
          }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
+         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
          {
             //sell order
             //double cur_price=Ask;
@@ -786,7 +786,7 @@ bool movingStop(string symbol, int type, string comment, int magic, int shift, i
 //| tpt:threhold point
 //| ppt:profit point
 //+------------------------------------------------------------------+
-bool movingStop2(string symbol, int type, string comment, int magic, int shift, int tpt, int ppt)
+bool movingStop2(string symbol, int type, int magic, int shift, int tpt, int ppt)
 {
    string cur;
    if (symbol==NULL) cur=Symbol();
@@ -798,7 +798,7 @@ bool movingStop2(string symbol, int type, string comment, int magic, int shift, 
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic))
+         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
          {
             //buy order
             //double cur_price=Bid;
@@ -816,7 +816,7 @@ bool movingStop2(string symbol, int type, string comment, int magic, int shift, 
                }
             }
          }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && StringCompare(OrderComment(),comment)==0 && OrderMagicNumber()==magic)) 
+         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
          {
             //sell order
             //double cur_price=Ask;

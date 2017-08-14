@@ -17,8 +17,8 @@ input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
 
 //--- global
-string   com="event stg";
-int      mag=12345;
+//string   com="event stg";
+int      mag=1;         //event magic
 int      time_ped=300;  //5 minutes
 bool     has_order=false;
 bool     for_test=false;
@@ -75,7 +75,7 @@ void OnTick()
    bool isPd2=isNewsPd2(NULL,bar_shift-1);    //news zone control
    if (isPd2 && !has_order) {
       //Print("Open oo order");
-      if (OrderOO(com,mag,i_OPT,i_SL,-1)) {
+      if (OrderOO(mag,i_OPT,i_SL,-1)) {
          has_order=true;
          orderdt=now;
          return;
@@ -83,33 +83,33 @@ void OnTick()
    }
 
    if (has_order) {
-      if       (FindOrderA(NULL,1,com,mag)) {  //found buy order
+      if       (FindOrderA(NULL,1,mag)) {  //found buy order
          //Print("found buy order,close sellstop order");
-         OrderCloseA(NULL,-2,com,mag);   //close sellstop order
+         OrderCloseA(NULL,-2,mag);   //close sellstop order
 
          //move lose stop, set no risk
-         if (movingStop2(NULL,1,com,mag,bar_shift,i_SL,0)) {
+         if (movingStop2(NULL,1,mag,bar_shift,i_SL,0)) {
             Print("movingstop of buy order");
          }
          
          if (ifClose(bar_shift)) {
             Print("closed buy order");
-            if (!FindOrderA(NULL,0,com,mag)) {
+            if (!FindOrderA(NULL,0,mag)) {
                has_order=false;
             }
          }
-      } else if(FindOrderA(NULL,-1,com,mag)) {  //found sell order
+      } else if(FindOrderA(NULL,-1,mag)) {  //found sell order
          //Print("found sell order,close buystop order");
-         OrderCloseA(NULL,2,com,mag);    //close buystop order
+         OrderCloseA(NULL,2,mag);    //close buystop order
 
          //move lose stop, set no risk
-         if (movingStop2(NULL,-1,com,mag,bar_shift,i_SL,0)) {
+         if (movingStop2(NULL,-1,mag,bar_shift,i_SL,0)) {
             Print("movingstop of sell order");
          }
 
          if (ifClose(bar_shift)) {
             Print("closed sell order");
-            if (!FindOrderA(NULL,0,com,mag)) {
+            if (!FindOrderA(NULL,0,mag)) {
                has_order=false;
             }
          }
@@ -117,9 +117,9 @@ void OnTick()
          //Print("not found buy and sell order");
          if ((now-orderdt)>time_ped) {  //timeover
             Print("over time, close buy stop and sell stop order");
-            OrderCloseA(NULL,-2,com,mag);   //close sellstop order
-            OrderCloseA(NULL,2,com,mag);    //close buystop order
-            if (!FindOrderA(NULL,0,com,mag)) {
+            OrderCloseA(NULL,-2,mag);   //close sellstop order
+            OrderCloseA(NULL,2,mag);    //close buystop order
+            if (!FindOrderA(NULL,0,mag)) {
                has_order=false;
             }
          }
@@ -152,12 +152,12 @@ bool ifClose(int shift)
    
    if ((op1<0 && op2<0)||td==3) {  // close buy signal
       printf("close buy order");
-      if (OrderCloseA(NULL,1,com,mag)>0) return true;
+      if (OrderCloseA(NULL,1,mag)>0) return true;
    }
 
    if ((op1>0 && op2>0)||td==-3) {  // close sell signal
       printf("close sell order");
-      if (OrderCloseA(NULL,-1,com,mag)>0) return true;
+      if (OrderCloseA(NULL,-1,mag)>0) return true;
    }
    
    return false;

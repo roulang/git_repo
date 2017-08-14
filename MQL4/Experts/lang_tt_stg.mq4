@@ -21,8 +21,8 @@ int         i_lspt=300;                 //lose stop point
 int         i_pspt=300;                 //profit stop point
 int         i_cnt=3;
 
-string   com="tt stg";    //only for GBPUSD 15M
-int      mag=12345;
+//string   com="tt stg";    //only for GBPUSD 15M
+int      mag=2;   //tt magic
 int      TimeOffset=SEC_H1*4.25;    //from 6:15 to 10:15,4.25H
 int      g_num=0;
 //int      l_o=50; //price offset
@@ -91,7 +91,7 @@ void OnTick()
 
    if (has_order && order_tp!=0 && mi==0) {   //every hour to adjust lose stop
       //move lose stop
-      if (movingStop2(NULL,order_tp,com,mag,bar_shift,i_lspt,0)) {
+      if (movingStop2(NULL,order_tp,mag,bar_shift,i_lspt,0)) {
          Print("movingstop of buy order");
       }
    }
@@ -118,7 +118,7 @@ void OnTick()
       }
 
       if (has_order) {
-         OrderCloseA(NULL,0,com,mag);   //close all order
+         OrderCloseA(NULL,0,mag);   //close all order
          has_order=false;
          order_tp=0;
       }
@@ -136,7 +136,7 @@ void OnTick()
             bool ret=false;
             for (int i=0;i<i_cnt;i++) {
                ProfitStopPt=i_pspt*(i+1);
-               ret=OrderSell2(0,0,0,com,mag);
+               ret=OrderSell2(0,0,0,mag);
             }
             if (ret) {
                has_order=true;
@@ -148,7 +148,7 @@ void OnTick()
             bool ret=false;
             for (int i=0;i<i_cnt;i++) {
                ProfitStopPt=i_pspt*(i+1);
-               ret=OrderBuy2(0,0,0,com,mag);
+               ret=OrderBuy2(0,0,0,mag);
             }
             if (ret) {
                has_order=true;
