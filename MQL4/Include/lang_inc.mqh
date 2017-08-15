@@ -1101,12 +1101,13 @@ bool wrtOneOrderToFile(int h, int n, s_Order &order)
    string sl_p=dToStr(order.sym,order.sl_p);
    string tp_p=dToStr(order.sym,order.tp_p);
    string p2=dToStr(order.sym,order.close_p);
+   string lots=dToStr(NULL,order.lots,2);
    //Print("1=",tic,",2=",tm1,",3=",tp,",4=",lots,",5=",sym);
    //Print("6=",p1,",7=",sl_p,",8=",tp_p,",9=",tm2,",10=",p2);
    //Print("11=",pt,",12=",co,",13=",mg);
    
    //"0","order","open time","type#","type","size","symbol","open price","S/L","T/P","close time","close price","profit","comment","magic"
-   uint ret=FileWrite(h,n,order.tic,order.open_t,order.type,tp,order.lots,order.sym,p1,sl_p,tp_p,order.close_t,p2,order.profit,order.com,order.mag);
+   uint ret=FileWrite(h,n,order.tic,order.open_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,order.close_t,p2,order.profit,order.com,order.mag);
    
    if (ret>0) return true;
    else return false; 

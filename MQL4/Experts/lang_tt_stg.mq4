@@ -12,7 +12,7 @@
 #include <lang_stg_inc.mqh>
 
 //--- input parameters
-input bool  i_avoid_news_pd=false;
+input bool  i_avoid_news_pd=true;
 
 //--- global
 datetime    tg_st=D'06:15:00';         //start time
