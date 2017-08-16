@@ -16,37 +16,43 @@
 //--- plot up
 #property indicator_label1  "up"
 #property indicator_type1   DRAW_ARROW
-#property indicator_color1  clrSpringGreen
+//#property indicator_color1  clrSpringGreen
+#property indicator_color1  clrBlack
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot down
 #property indicator_label2  "down"
 #property indicator_type2   DRAW_ARROW
-#property indicator_color2  clrRed
+//#property indicator_color2  clrRed
+#property indicator_color2  clrBlack
 #property indicator_style2  STYLE_SOLID
 #property indicator_width2  1
 //--- plot inner
 #property indicator_label3  "inner"
 #property indicator_type3   DRAW_ARROW
-#property indicator_color3  clrYellow
+//#property indicator_color3  clrYellow
+#property indicator_color3  clrBlack
 #property indicator_style3  STYLE_SOLID
 #property indicator_width3  1
 //--- plot outter
 #property indicator_label4  "outter"
 #property indicator_type4   DRAW_ARROW
-#property indicator_color4  clrYellow
+//#property indicator_color4  clrYellow
+#property indicator_color4  clrBlack
 #property indicator_style4  STYLE_SOLID
 #property indicator_width4  1
 //--- plot midup
 #property indicator_label5  "midup"
 #property indicator_type5   DRAW_ARROW
 #property indicator_color5  clrSpringGreen
+//#property indicator_color5  clrBlack
 #property indicator_style5  STYLE_SOLID
 #property indicator_width5  1
 //--- plot middown
 #property indicator_label6  "middown"
 #property indicator_type6   DRAW_ARROW
 #property indicator_color6  clrRed
+//#property indicator_color6  clrBlack
 #property indicator_style6  STYLE_SOLID
 #property indicator_width6  1
 //--- plot zig
@@ -66,7 +72,7 @@ double         middownBuffer[];
 double         zigBuffer[];
 
 //input
-input bool i_debug = true;
+input bool i_debug = false;
 input int i_deviation=100;  // Deviation
 input int i_offset=60;
 
