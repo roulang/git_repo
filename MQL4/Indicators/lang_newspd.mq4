@@ -84,6 +84,7 @@ int OnCalculate(const int rates_total,
 //---
    
    int limit=rates_total-prev_calculated;
+   if (limit==0) return rates_total;
    if(prev_calculated==0) {
       limit=InitializeAll();
    }
