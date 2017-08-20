@@ -15,13 +15,13 @@
 input int      i_SL=100;         //take lose point
 input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
+input bool     i_for_test=false;
 
 //--- global
 //string   com="event stg";
 int      mag=1;         //event magic
 int      time_ped=300;  //5 minutes
 bool     has_order=false;
-bool     for_test=false;
 datetime orderdt;
 
 //+------------------------------------------------------------------+
@@ -29,16 +29,15 @@ datetime orderdt;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   Vol=1;
-   debug=false;
-   if (debug) {
+   g_max_lots=1;
+   if (i_debug) {
       Print("OnInit()");
    }
    ea_init();
    
    //Print("has_order=",has_order);
    
-   if (!for_test) {
+   if (!i_for_test) {
       if (!timer_init()) return(INIT_FAILED);
    }
    
@@ -52,11 +51,11 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-   if (debug) {
+   if (i_debug) {
       Print("OnDeinit()");
    }
 
-   if (!for_test) {
+   if (!i_for_test) {
       timer_deinit();
    }
       
@@ -135,8 +134,8 @@ void OnTick()
 void OnTimer()
 {
 //---
-   if(debug) Print("OnTimer()");
-   if (!for_test) {
+   if(i_debug) Print("OnTimer()");
+   if (!i_for_test) {
       news_read();
    }
 }

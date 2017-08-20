@@ -10,34 +10,48 @@
 
 #include <lang_stg_inc.mqh>
 
+//#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -10
-#property indicator_maximum 10
+#property indicator_minimum -5
+#property indicator_maximum 5
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
 #property indicator_label1  "signal"
+//#property indicator_type1   DRAW_ARROW
 #property indicator_type1   DRAW_HISTOGRAM
 #property indicator_color1  clrRed
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
+
 //--- indicator buffers
 double         signalBuffer[];
+
+//input
+input int i_deviation=100;  // Deviation,should set to equal to zigzag's deviation value
+
+//global
+bool      g_for_test=false;
+
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
 //+------------------------------------------------------------------+
 int OnInit()
-  {
+{
+
+   if (!g_for_test) {
+      //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
+   }
+
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    
-   //if (!timer_init()) return(INIT_FAILED);
+   //SetIndexArrow(0,SYMBOL_ARROWUP);
    
-   news_read();
    
 //---
    return(INIT_SUCCEEDED);
-  }
+}
 //+------------------------------------------------------------------+
 //| Custom indicator iteration function                              |
 //+------------------------------------------------------------------+
@@ -51,28 +65,39 @@ int OnCalculate(const int rates_total,
                 const long &tick_volume[],
                 const long &volume[],
                 const int &spread[])
-  {
+{
 //---
-   int limit=rates_total-prev_calculated;
+   int uncal_bars=rates_total-prev_calculated;
+   if (uncal_bars==0) return rates_total;
+   //Print("0:uncal_bars=",uncal_bars);
+   //return(rates_total);
+   
    if(prev_calculated==0) {
-      limit=InitializeAll();
+      InitializeAll();
    }
    
-   int st=limit;
-   for(int i=st;i>=0;i--) {
-      if (isNewsPd(NULL,i)) signalBuffer[i]=1;
-      else signalBuffer[i]=0;
+   int limit=Bars-1;
+
+   //1:skip last bar
+   int st=uncal_bars+1;
+   if (st>limit) st=limit;
+   if(i_debug) {
+      Print("1:st=",st);
+   }
+   for(int i=st-1;i>0;i--) {
+      signalBuffer[i]=getZigTurn(i,i_deviation,50);
    }
 
 //--- return value of prev_calculated for next call
    return(rates_total);
-  }
+   
+}
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
-   printf("init");
    ArrayInitialize(signalBuffer,0.0);
+
 //--- first counting position
    return(Bars-1);
 }
@@ -81,6 +106,6 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(debug) Print("OnTimer()");
-   news_read();
+   if(i_debug) Print("OnTimer()");
+
 }

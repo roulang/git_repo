@@ -39,7 +39,6 @@ bool      g_for_test=false;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   debug=false;
    
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
@@ -60,7 +59,7 @@ int OnInit()
 void OnDeinit(const int reason)
 {
 //---
-   if (debug) {
+   if (i_debug) {
       Print("OnDeinit()");
    }
    
@@ -112,7 +111,7 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(debug) Print("OnTimer()");
+   if(i_debug) Print("OnTimer()");
      
    if (!g_for_test) {
       if (i_update_news) news_read();

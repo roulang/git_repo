@@ -24,7 +24,6 @@ void OnStart()
    //mailNoticeOrderOpen(12345,Symbol(),2,0.1,1.4545,1.4500,1.4678,"some stg",12345);
    //return;
    
-   debug=true;
    Print("test");
    
    if (getFileLock()) {

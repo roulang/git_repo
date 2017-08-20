@@ -23,8 +23,6 @@ static int ASIA_PD = 1;
 static int AMA_PD = 4;
 static int EUR_PD = 2;
 
-
-
 //adx
 double adx_thred=0.5;
 
@@ -212,7 +210,7 @@ bool isCurPd(string symbol,int shift)
 
    int pd=TimepdValue(shift);
    
-   if (debug) {
+   if (i_debug) {
       printf("symbo=%s,pd=%d",cur,pd);
    }
    int pd2=(pd/AMA_PD)%2;
@@ -220,38 +218,38 @@ bool isCurPd(string symbol,int shift)
     
    if          (StringCompare(cur,EURUSD)==0) {
       pd2=(pd/EUR_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
    } else if   (StringCompare(cur,USDJPY)==0) {
       pd2=(pd/ASIA_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
    } else if   (StringCompare(cur,AUDUSD)==0) {
       pd2=(pd/ASIA_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
    } else if   (StringCompare(cur,NZDUSD)==0) {
       pd2=(pd/ASIA_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
    } else if   (StringCompare(cur,USDCAD)==0) {
    } else if   (StringCompare(cur,GBPUSD)==0) {
       pd2=(pd/EUR_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
    } else if   (StringCompare(cur,USDCHF)==0) {
       pd2=(pd/EUR_PD)%2;
-      if (debug) {
+      if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==1) return true;
@@ -270,4 +268,110 @@ int ATRValue(int shift)
    if (atr>atr_lvl) ret=1;
 
    return ret;
+}
+
+//+------------------------------------------------------------------+
+//| Zigzag strategy
+//| arg_shift: series
+//| arg_deviation: used by zigzag indicator
+//| arg_lsp: lose stop price
+//| arg_tpp: take profit price
+//| arg_thpt: threhold point
+//| return value: -1,turn down;1:turn up;0:n/a
+//+------------------------------------------------------------------+
+int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt=0)
+{
+   int up_idx=7;
+   int dw_idx=8;
+   int midup_idx=9;
+   int middw_idx=10;
+   
+   int high_shift=0;
+   int low_shift=0;
+   double high_p=0;
+   double low_p=0;
+   
+   int shortUpShift=0;
+   int shortDownShift=0;
+   int midUpShift=0;
+   int midDownShift=0;
+   int shortUpShift2=0;
+   int shortDownShift2=0;
+   shortUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,up_idx,arg_shift);
+   shortDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,dw_idx,arg_shift);
+   midUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,midup_idx,arg_shift);
+   midDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,middw_idx,arg_shift);
+
+   bool upSign=false;
+   //
+   if (shortUpShift>0 && midUpShift>0 && shortUpShift<midUpShift) {
+      if (Low[arg_shift+shortUpShift]>Low[arg_shift+midUpShift]) {
+         high_shift=iHighest(NULL,PERIOD_CURRENT,MODE_HIGH,midUpShift-shortUpShift-1,arg_shift+shortUpShift+1);
+         //high_p=iHigh(NULL,PERIOD_CURRENT,high_shift);
+         high_p=High[high_shift];
+         upSign=true;
+      }
+      shortUpShift2=shortUpShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,up_idx,arg_shift+shortUpShift);
+   }
+
+   bool downSign=false;
+   if (shortDownShift>0&& midDownShift>0 && shortDownShift<midDownShift) {
+      if (High[arg_shift+shortDownShift]<High[arg_shift+midDownShift]) {
+         low_shift=iLowest(NULL,PERIOD_CURRENT,MODE_LOW,midDownShift-shortDownShift-1,arg_shift+shortDownShift+1);
+         //low_p=iLow(NULL,PERIOD_CURRENT,low_shift);
+         low_p=Low[low_shift];
+         downSign=true;
+      }
+      shortDownShift2=shortDownShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,dw_idx,arg_shift+shortDownShift);
+   }
+   
+   if (upSign && shortUpShift2>midUpShift) upSign=true;  //start turn up
+   else upSign=false;
+
+   if (downSign && shortDownShift2>midDownShift) downSign=true;   //start turn down
+   else downSign=false;
+   
+   if (i_debug) {
+      Print("shortUpShift=",shortUpShift);
+      Print("midUpShift=",midUpShift);
+      Print("shortUpShift2=",shortUpShift2);
+      Print("shortDownShift=",shortDownShift);
+      Print("midDownShift=",midDownShift);
+      Print("shortDownShift2=",shortDownShift2);
+   }
+   
+   if (upSign && !downSign) {
+      if (Open[arg_shift]<Close[arg_shift] && Close[arg_shift]>(high_p+arg_thpt*Point)) {
+         Print("arg_shift=",arg_shift);
+         Print("shortUpShift=",shortUpShift);
+         Print("midUpShift=",midUpShift);
+         Print("shortUpShift2=",shortUpShift2);
+         Print("shortDownShift=",shortDownShift);
+         Print("midDownShift=",midDownShift);
+         Print("shortDownShift2=",shortDownShift2);
+         Print(Time[arg_shift],",high_shift*=",high_shift-arg_shift,",high_p=",high_p);
+         return 2;
+      } else {
+         return 1;
+      }
+   }
+   
+   if (downSign && !upSign) {
+      if (Open[arg_shift]>Close[arg_shift] && Close[arg_shift]<(low_p+arg_thpt*Point)) {
+         Print("arg_shift=",arg_shift);
+         Print("shortUpShift=",shortUpShift);
+         Print("midUpShift=",midUpShift);
+         Print("shortUpShift2=",shortUpShift2);
+         Print("shortDownShift=",shortDownShift);
+         Print("midDownShift=",midDownShift);
+         Print("shortDownShift2=",shortDownShift2);
+         Print(Time[arg_shift],",low_shift*=",low_shift-arg_shift,",low_p=",low_p);
+         return -2;
+      } else {
+         return -1;
+      }
+   }
+   
+   return 0;
+   
 }

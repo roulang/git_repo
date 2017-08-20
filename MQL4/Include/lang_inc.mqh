@@ -10,6 +10,11 @@
 #include <stderror.mqh> 
 #include <stdlib.mqh> 
 
+//input
+input bool  i_debug = false;
+input int   i_equity_percent = 1;
+input bool  i_sendmail=true;
+
 //currency
 #define EURUSD "EURUSD."
 #define USDJPY "USDJPY."
@@ -24,13 +29,13 @@
 #define SEC_H1 3600
 #define SEC_D1 86400
 
-int      EquityPercent = 1;
+//int      EquityPercent = 1;
 int      LossStopPt = 150;
 int      ProfitStopPt = 300;
 int      OOPt = 100;
-double   Vol = 0.1;
+//double   Vol = 0.1;
 
-bool     debug = false;
+//bool     debug = false;
 
 //struct
 struct s_News
@@ -58,8 +63,8 @@ struct s_Order
 };
 
 //global
+double g_max_lots = 0.1;
 datetime CurrentTimeStamp;
-bool     g_SendMail=true;
 int      g_LockFileH=0;          //lock file handle
 string   g_LockFileName="#Lock#";
 string   g_OrderHisFileName="lang_history_orders.ex4.csv";   //history order data file
@@ -200,11 +205,11 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
       ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
    }
 
-   double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Vol) risk_vol = Vol;
+   double risk_vol = getVolume(i_equity_percent, ls_pt);
+   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
    
    //<<<<debug
-   if (debug) {
+   if (i_debug) {
       Print("<<<<debug");
       printf("command=%d", cmd);
       printf("volume=%.5f", risk_vol);
@@ -220,7 +225,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    //debug>>>>
 
    int ret = 0;
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Green);
    }
    
@@ -365,11 +370,11 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
    }
 
-   double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Vol) risk_vol = Vol;
+   double risk_vol = getVolume(i_equity_percent, ls_pt);
+   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
 
    //<<<<debug
-   if (debug) {
+   if (i_debug) {
       Print("<<<<debug");
       printf("command=%d", cmd);
       printf("volume=%.5f", risk_vol);
@@ -385,7 +390,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    //debug>>>>
 
    int ret = 0;
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Red);
    }
    
@@ -446,11 +451,11 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
       ps_price2 = NormalizeDouble(price2 + argPsPt * pt, Digits);
    }
 
-   double risk_vol = getVolume(EquityPercent, argLsPt);
-   if (risk_vol > Vol) risk_vol = Vol;
+   double risk_vol = getVolume(i_equity_percent, argLsPt);
+   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
 
    //<<<<debug
-   if (debug) {
+   if (i_debug) {
       Print("<<<<debug");
       printf("command1=%d", cmd1);
       printf("command2=%d", cmd2);
@@ -469,7 +474,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    }
    //debug>>>>
 
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    
@@ -481,7 +486,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
       return false;
    }
    
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    
@@ -541,11 +546,11 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    double ls_pt1=(ls_price1-price1)/pt;
    double ls_pt2=(price2-ls_price2)/pt;
    double ls_pt=MathMax(ls_pt1,ls_pt2);
-   double risk_vol=getVolume(EquityPercent, ls_pt);
-   if (risk_vol>Vol) risk_vol=Vol;
+   double risk_vol=getVolume(i_equity_percent, ls_pt);
+   if (risk_vol>g_max_lots) risk_vol=g_max_lots;
 
    //<<<<debug
-   if (debug) {
+   if (i_debug) {
       Print("<<<<debug");
       printf("command1=%d", cmd1);
       printf("command2=%d", cmd2);
@@ -563,7 +568,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    //debug>>>>
 
    int ret=0;
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    if (ret > 0) {
@@ -575,7 +580,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    }
 
    ret=0;
-   if (!debug) {
+   if (!i_debug) {
       ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    if (ret > 0) {
@@ -686,7 +691,7 @@ double getVolume(int ep, double ls_point)
    volume = NormalizeDouble(volume, 2);
    
    //<<<<debug
-   if (debug) {
+   if (i_debug) {
       Print("<<<<debug");
       printf("risk amount=%.5f", risk_amount);
       printf("tick value=%.5f", tick_value);
@@ -872,7 +877,7 @@ bool mailNoticeOrderOpen(int arg_tic,string arg_sym,int arg_type,double arg_lots
          string co=OrderComment();
          int mg=OrderMagicNumber();
 */
-   if (!g_SendMail) return true;
+   if (!i_sendmail) return true;
    
    string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#)(",arg_lots," lots) placed");
    double sl_pt=0,tp_pt=0;
@@ -909,7 +914,7 @@ bool mailNoticeOrderMod(int arg_tic,string arg_sym,int arg_type,double arg_p,dou
          string co=OrderComment();
          int mg=OrderMagicNumber();
 */
-   if (!g_SendMail) return true;
+   if (!i_sendmail) return true;
    
    string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#) modified");
    double sl_pt=0,tp_pt=0;
@@ -1223,11 +1228,11 @@ int news_read()
       while(!FileIsEnding(h)) {
          string s;
          s=FileReadString(h);
-         if(debug) Print(s);
+         if(i_debug) Print(s);
          s=FileReadString(h);
-         if(debug) Print(s);
+         if(i_debug) Print(s);
          s=FileReadString(h);
-         if(debug) Print(s);
+         if(i_debug) Print(s);
          cnt++;
       }
       
@@ -1237,11 +1242,11 @@ int news_read()
       if (FileSeek(h,0,SEEK_SET)) {
          while(!FileIsEnding(h)) {
             g_News[cnt].n=FileReadNumber(h);
-            if(debug) Print(g_News[cnt].n);
+            if(i_debug) Print(g_News[cnt].n);
             g_News[cnt].cur=FileReadString(h);
-            if(debug) Print(g_News[cnt].cur);
+            if(i_debug) Print(g_News[cnt].cur);
             g_News[cnt].dt=FileReadDatetime(h)-g_TimeZoneOffset;
-            if(debug) Print(g_News[cnt].dt);
+            if(i_debug) Print(g_News[cnt].dt);
             cnt++;
          }
       }
@@ -1261,7 +1266,7 @@ int news_read()
 //+------------------------------------------------------------------+
 bool timer_init(int argSec=0)
 {
-   if(debug) Print("timer_init");
+   if(i_debug) Print("timer_init");
    if (argSec==0) argSec=g_TimerSecond;
    bool ret=EventSetTimer(argSec);
    return(ret);  
@@ -1272,7 +1277,7 @@ bool timer_init(int argSec=0)
 //+------------------------------------------------------------------+
 void timer_deinit()
 {
-   if(debug) Print("timer_deinit");
+   if(i_debug) Print("timer_deinit");
    //relase timer
    EventKillTimer();
 }

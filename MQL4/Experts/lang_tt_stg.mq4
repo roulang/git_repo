@@ -30,7 +30,7 @@ bool     has_order=false;
 int      order_tp=0;    //1:buy order, -1:sell order
 datetime orderdt;
 
-bool     g_for_test=false;
+bool     g_for_test=true;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -38,15 +38,14 @@ bool     g_for_test=false;
 int OnInit()
 {
 //---
-   debug=false;
-   if (debug) {
+   if (i_debug) {
       Print("OnInit()");
    }
 
    LossStopPt=i_lspt;
    ProfitStopPt=i_pspt;
-   double v=NormalizeDouble(getVolume(EquityPercent,i_lspt)/i_cnt,2);
-   Vol=v;
+   double v=NormalizeDouble(getVolume(i_equity_percent,i_lspt)/i_cnt,2);
+   g_max_lots=v;
    
    delAllObj();
    
@@ -67,7 +66,7 @@ int OnInit()
 void OnDeinit(const int reason)
 {
 //---
-   if (debug) {
+   if (i_debug) {
       Print("OnDeinit()");
    }
    
@@ -164,7 +163,7 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if (debug) {
+   if (i_debug) {
       Print("OnTimer()");
    }
 
