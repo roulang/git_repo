@@ -144,6 +144,25 @@ void DrawObjects(int arg_shift)
    long current_chart_id=ChartID();
    int widx=WindowFind("lang_newspd");
    
+   DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
+   if          (StringCompare(cur,EURUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
+   } else if   (StringCompare(cur,USDJPY)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
+   } else if   (StringCompare(cur,AUDUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
+   } else if   (StringCompare(cur,NZDUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
+   } else if   (StringCompare(cur,USDCAD)==0) {
+   } else if   (StringCompare(cur,GBPUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
+   } else if   (StringCompare(cur,USDCHF)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
+   } else if   (StringCompare(cur,XAUUSD)==0) {
+   }   
+   
+   
+   /*
    //usa zone
    int pd3=pd & AMA_PD;
    int pd4=pd2 & AMA_PD;
@@ -204,9 +223,46 @@ void DrawObjects(int arg_shift)
       //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
       DrawLine(current_chart_id,widx,obj_name,arg_shift+1,clrIvory,STYLE_DASH);
    }
-
+   */
 }
+//+------------------------------------------------------------------+
+//| Draw timezone function
+//| arg_type:ASIA_PD,AMA_PD,EUR_PD
+//+------------------------------------------------------------------+
+void DrawTimeZone(long arg_chart_id,int arg_window,int arg_pd,int arg_pd2,int arg_type,int arg_shift)
+{
+   int pd3=arg_pd & arg_type;
+   int pd4=arg_pd2 & arg_type;
+   string text="";
+   int c=0;
+   if       (arg_type==AMA_PD) {
+      text="USA";
+      c=clrChocolate;
+   } else if  (arg_type==EUR_PD) {
+      text="EUR";
+      c=clrCornflowerBlue;
+   } else if  (arg_type==ASIA_PD) {
+      text="ASIA";
+      c=clrIvory;
+   } else return;
+   
+   if (pd3!=0 && pd4==0) {          //start
+      g_obj_cnt++;
+      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
+      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
+      DrawLine(arg_chart_id,arg_window,obj_name,arg_shift,c,STYLE_SOLID);
 
+      g_obj_cnt2++;
+      string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
+      DrawText(arg_chart_id,arg_window,obj_name2,text,arg_shift,c);
+      
+   } else if (pd3==0 && pd4!=0) {   //end
+      g_obj_cnt++;
+      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
+      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
+      DrawLine(arg_chart_id,arg_window,obj_name,arg_shift+1,c,STYLE_DASH);
+   }
+}
 void DelObjects()
 {
    int obj_total=ObjectsTotal(); 

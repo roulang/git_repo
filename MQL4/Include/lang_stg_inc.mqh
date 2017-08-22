@@ -279,8 +279,10 @@ int ATRValue(int shift)
 //| arg_thpt: threhold point
 //| return value: -1,turn down;1:turn up;0:n/a
 //+------------------------------------------------------------------+
-int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt=0)
+int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
 {
+   arg_lst_stupi=arg_lst_mdupi=arg_lst_stdwi=arg_lst_mddwi=0;
+
    int up_idx=7;
    int dw_idx=8;
    int midup_idx=9;
@@ -357,6 +359,10 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt=0)
                Print("shortDownShift2=",shortDownShift2);
                Print(Time[arg_shift],",high_shift*=",high_shift-arg_shift,",high_p=",high_p);
          }
+         arg_lst_stupi=shortUpShift;
+         arg_lst_mdupi=midUpShift;
+         arg_lst_stdwi=shortDownShift;
+         arg_lst_mddwi=midDownShift;
          return 2;
       } else {
          return 1;
@@ -375,6 +381,10 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt=0)
             Print("shortDownShift2=",shortDownShift2);
             Print(Time[arg_shift],",low_shift*=",low_shift-arg_shift,",low_p=",low_p);
          }
+         arg_lst_stupi=shortUpShift;
+         arg_lst_mdupi=midUpShift;
+         arg_lst_stdwi=shortDownShift;
+         arg_lst_mddwi=midDownShift;
          return -2;
       } else {
          return -1;

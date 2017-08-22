@@ -85,8 +85,12 @@ int OnCalculate(const int rates_total,
    if(i_debug) {
       Print("1:st=",st);
    }
+   int i1,i2,i3,i4;
    for(int i=st-1;i>0;i--) {
-      signalBuffer[i]=getZigTurn(i,i_deviation,i_thredhold);
+      signalBuffer[i]=getZigTurn(i,i_deviation,i_thredhold,i1,i2,i3,i4);
+      if (MathAbs(signalBuffer[i])>1) {
+         //Print(Time[i],",i1=",i1,",i2=",i2,",i3=",i3,",i4=",i4);
+      }
    }
 
 //--- return value of prev_calculated for next call
