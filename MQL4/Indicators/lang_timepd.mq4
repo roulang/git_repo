@@ -61,7 +61,8 @@ int OnCalculate(const int rates_total,
    int st=limit;
    for(int i=st;i>=0;i--) {
       //if (i==st) printf("loop");
-      tmBuffer[i]=TimepdValue(i);
+      //tmBuffer[i]=TimepdValue(i);
+      tmBuffer[i]=TimepdValue2(i);
       //if (isCurPd(NULL,i)) tmBuffer[i]=1;
       //else tmBuffer[i]=0;
    }

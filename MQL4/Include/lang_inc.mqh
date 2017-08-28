@@ -24,6 +24,7 @@ input bool  i_sendmail=true;
 #define GBPUSD "GBPUSD."
 #define USDCHF "USDCHF."
 #define XAUUSD "XAUUSD."
+#define GBPJPY "GBPJPY."
 
 //datetime
 #define SEC_H1 3600
@@ -63,7 +64,7 @@ struct s_Order
 };
 
 //global
-double g_max_lots = 0.1;
+double   g_max_lots = 0.1;
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
 string   g_LockFileName="#Lock#";

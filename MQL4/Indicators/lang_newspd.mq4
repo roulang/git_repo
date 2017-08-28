@@ -25,18 +25,23 @@
 double    signalBuffer[];
 
 //--- input
-input int i_timer_sec=SEC_H1;       //timer seconds
-input int i_news_bef=15*60;         //news before 15min
-input int i_news_aft=60*60;         //news after 1 hour
-input bool i_update_news=true;      //news update control
-input bool i_his_order_wrt=false;   //history order write control
-
+input int   i_timer_sec=SEC_H1;           //timer seconds
+input int   i_news_bef=15*60;             //news before 15min
+input int   i_news_aft=60*60;             //news after 1 hour
+input bool  i_update_news=true;           //news update control
+input bool  i_his_order_wrt=false;        //history order write control
+input int   i_timeoffset=SEC_H1*4.25;     //from 6:15 to 10:15,4.25H
+input int   i_timeoffset2=SEC_H1*3;       //from 0:00 to 03:00,3H
 //global
-bool      g_for_test=false;
-int       g_obj_cnt=0;
-string    g_obj_name="vline";
-int       g_obj_cnt2=0;
-string    g_obj_name2="txt";
+string      g_myname="lang_newspd";
+bool        g_for_test=false;
+int         g_obj_cnt=0;
+string      g_obj_name="vline";
+int         g_obj_cnt2=0;
+string      g_obj_name2="txt";
+int         g_last_txt_shift[5]={0,0,0,0,0};
+int         g_obj_cnt3=0;
+string      g_obj_name3="rect";
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -52,8 +57,6 @@ int OnInit()
    }
    
    news_read();
-   
-   DelObjects();
    
 //---
    return(INIT_SUCCEEDED);
@@ -113,6 +116,7 @@ int InitializeAll()
 {
    printf("init");
    ArrayInitialize(signalBuffer,0.0);
+   DelObjects();
 //--- first counting position
    return(Bars-1);
 }
@@ -137,93 +141,42 @@ void OnTimer()
 void DrawObjects(int arg_shift)
 {
    string cur=Symbol();
-   int pd=TimepdValue(arg_shift);
-   int pd2=TimepdValue(arg_shift+1);
-   if (pd==0 && pd2==0) return;
+   int pd=TimepdValue2(arg_shift);
+   int pd2=TimepdValue2(arg_shift+1);
+   //if (pd==0 && pd2==0) return;
 
    long current_chart_id=ChartID();
    int widx=WindowFind("lang_newspd");
    
-   DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
    if          (StringCompare(cur,EURUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
    } else if   (StringCompare(cur,USDJPY)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
    } else if   (StringCompare(cur,AUDUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
    } else if   (StringCompare(cur,NZDUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
    } else if   (StringCompare(cur,USDCAD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
    } else if   (StringCompare(cur,GBPUSD)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
+      DrawTimeRec(current_chart_id,arg_shift,10,30,i_timeoffset);   //GBPUSD tt 10:30 start,from 6:15 to 10:15,4.25H
    } else if   (StringCompare(cur,USDCHF)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
    } else if   (StringCompare(cur,XAUUSD)==0) {
-   }   
-   
-   
-   /*
-   //usa zone
-   int pd3=pd & AMA_PD;
-   int pd4=pd2 & AMA_PD;
-   
-   if (pd3!=0 && pd4==0) {  //start
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift,clrChocolate,STYLE_SOLID);
-
-      g_obj_cnt2++;
-      string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
-      DrawText(current_chart_id,widx,obj_name2,"USA",arg_shift,clrChocolate);
-      
-   } else if (pd3==0 && pd4!=0) {                //end
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift+1,clrChocolate,STYLE_DASH);
+      DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
+   } else if   (StringCompare(cur,GBPJPY)==0) {
+      DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
+      DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
+      DrawTimeRec(current_chart_id,arg_shift,3,0,i_timeoffset2);   //GBPJPY 03:00 start,from 0:0 to 3:0,3H
    }
-
-   //eur zone
-   pd3=pd & EUR_PD;
-   pd4=pd2 & EUR_PD;
-   if (pd3!=0 && pd4==0) {  //start
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift,clrCornflowerBlue,STYLE_SOLID);
-
-      g_obj_cnt2++;
-      string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
-      DrawText(current_chart_id,widx,obj_name2,"EUR",arg_shift,clrCornflowerBlue);
-      
-   } else if (pd3==0 && pd4!=0) {                //end
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift+1,clrCornflowerBlue,STYLE_DASH);
-   }
-
-   //asia zone
-   pd3=pd & ASIA_PD;
-   pd4=pd2 & ASIA_PD;
-   if (pd3!=0 && pd4==0) {  //start
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift,clrIvory,STYLE_SOLID);
-
-      g_obj_cnt2++;
-      string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
-      DrawText(current_chart_id,widx,obj_name2,"ASIA",arg_shift,clrIvory);
-      
-   } else if (pd3==0 && pd4!=0) {                //end
-      g_obj_cnt++;
-      string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
-      //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
-      DrawLine(current_chart_id,widx,obj_name,arg_shift+1,clrIvory,STYLE_DASH);
-   }
-   */
+   
 }
 //+------------------------------------------------------------------+
 //| Draw timezone function
@@ -234,15 +187,23 @@ void DrawTimeZone(long arg_chart_id,int arg_window,int arg_pd,int arg_pd2,int ar
    int pd3=arg_pd & arg_type;
    int pd4=arg_pd2 & arg_type;
    string text="";
+   string text2="";
+   string text3="";
    int c=0;
    if       (arg_type==AMA_PD) {
-      text="USA";
+      text=">>USA";
+      text2="USA<<";
+      text3="USA";
       c=clrChocolate;
    } else if  (arg_type==EUR_PD) {
-      text="EUR";
+      text=">>EUR";
+      text2="EUR<<";
+      text3="EUR";
       c=clrCornflowerBlue;
    } else if  (arg_type==ASIA_PD) {
-      text="ASIA";
+      text=">>ASIA";
+      text2="ASIA<<";
+      text3="ASIA";
       c=clrIvory;
    } else return;
    
@@ -251,31 +212,54 @@ void DrawTimeZone(long arg_chart_id,int arg_window,int arg_pd,int arg_pd2,int ar
       string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
       //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
       DrawLine(arg_chart_id,arg_window,obj_name,arg_shift,c,STYLE_SOLID);
-
+      
       g_obj_cnt2++;
       string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
-      DrawText(arg_chart_id,arg_window,obj_name2,text,arg_shift,c);
+      DrawText(arg_chart_id,arg_window,obj_name2,text,arg_shift,c,ANCHOR_LEFT);
+
+      g_last_txt_shift[arg_type]=arg_shift;
       
    } else if (pd3==0 && pd4!=0) {   //end
       g_obj_cnt++;
       string obj_name=StringConcatenate(g_obj_name,g_obj_cnt);
       //Print(Time[arg_shift],",pd=",pd,",pd2=",pd2,",pd3=",pd3,",pd4=",pd4);
       DrawLine(arg_chart_id,arg_window,obj_name,arg_shift+1,c,STYLE_DASH);
+      
+      if ((g_last_txt_shift[arg_type]-arg_shift)>10) {
+         g_obj_cnt2++;
+         string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
+         DrawText(arg_chart_id,arg_window,obj_name2,text2,arg_shift+1,c,ANCHOR_RIGHT);
+      }
+      g_last_txt_shift[arg_type]=0;
+   
+   } else if (pd3!=0 && g_last_txt_shift[arg_type]>0) {
+      if ((g_last_txt_shift[arg_type]-arg_shift)>20) {
+         g_obj_cnt2++;
+         string obj_name2=StringConcatenate(g_obj_name2,g_obj_cnt2);
+         DrawText(arg_chart_id,arg_window,obj_name2,text3,arg_shift,c,ANCHOR_LEFT);
+         g_last_txt_shift[arg_type]=arg_shift;
+      }
    }
+   
 }
 void DelObjects()
 {
    int obj_total=ObjectsTotal(); 
    for(int i=obj_total-1;i>=0;i--) { 
       string name=ObjectName(i); 
-      PrintFormat("object %d: %s",i,name);
+      //PrintFormat("del object %d: %s",i,name);
       if (StringFind(name,g_obj_name)>=0) {
          ObjectDelete(name);
       }
       if (StringFind(name,g_obj_name2)>=0) {
          ObjectDelete(name);
       }
+      if (StringFind(name,g_obj_name3)>=0) {
+         ObjectDelete(name);
+      }
    }
+   g_obj_cnt=g_obj_cnt2=g_obj_cnt3=0;
+   g_last_txt_shift[AMA_PD]=g_last_txt_shift[EUR_PD]=g_last_txt_shift[ASIA_PD]=0;
 }
 
 void DrawLine(long arg_chart_id, int arg_window, string arg_obj_name, int arg_shift, int arg_color, int arg_style)
@@ -293,7 +277,7 @@ void DrawLine(long arg_chart_id, int arg_window, string arg_obj_name, int arg_sh
    ObjectSetInteger(arg_chart_id,arg_obj_name,OBJPROP_BACK,true);
 }
 
-void DrawText(long arg_chart_id, int arg_window, string arg_obj_name, string arg_text, int arg_shift, int arg_color)
+void DrawText(long arg_chart_id, int arg_window, string arg_obj_name, string arg_text, int arg_shift, int arg_color, int arg_anchor)
 {
    if(!ObjectCreate(arg_chart_id,arg_obj_name,OBJ_TEXT,arg_window,Time[arg_shift],2)) {
       Print("Object Create Error: ", ErrorDescription(GetLastError()));
@@ -307,9 +291,38 @@ void DrawText(long arg_chart_id, int arg_window, string arg_obj_name, string arg
    //--- set the slope angle of the text
    //ObjectSetDouble(arg_chart_id,arg_obj_name,OBJPROP_ANGLE,angle);
    //--- set anchor type
-   ObjectSetInteger(arg_chart_id,arg_obj_name,OBJPROP_ANCHOR,ANCHOR_LEFT);
+   ObjectSetInteger(arg_chart_id,arg_obj_name,OBJPROP_ANCHOR,arg_anchor);
    //--- set color
    ObjectSetInteger(arg_chart_id,arg_obj_name,OBJPROP_COLOR,arg_color);
    //--- display in the foreground (false) or background (true)
    ObjectSetInteger(arg_chart_id,arg_obj_name,OBJPROP_BACK,true);
+}
+
+void DrawTimeRec(long arg_chart_id,int arg_shift,int arg_h,int arg_mi,int arg_timeoffset)
+{
+   int h=TimeHour(Time[arg_shift]);
+   int mi=TimeMinute(Time[arg_shift]);
+   datetime cur_tm=Time[arg_shift];
+   
+   if (h==arg_h && mi==arg_mi) {
+      
+      int b_ed=iBarShift(NULL,PERIOD_CURRENT,cur_tm-arg_timeoffset);
+      int b_st=arg_shift+1;
+      int b_range=b_ed-b_st+1;
+      //Print("b_st=",b_st,",b_range=",b_range);
+      int low=iLowest(NULL,PERIOD_CURRENT,MODE_LOW,b_range,b_st);
+      int high=iHighest(NULL,PERIOD_CURRENT,MODE_HIGH,b_range,b_st);
+      double high_p=High[high];
+      double low_p=Low[low];
+      //Print("ilow=",low,",ihigh=",high);
+      //Print("low=",low_p,",high=",high_p);
+      
+      //draw objects
+      g_obj_cnt3++;
+      string o=StringConcatenate(g_obj_name3,g_obj_cnt3);
+      if (!ObjectCreate(arg_chart_id,o,OBJ_RECTANGLE,0,Time[b_ed],low_p,Time[b_st],high_p)) {
+         Print("Object Create Error: ", ErrorDescription(GetLastError()));
+      }
+      ObjectSetInteger(arg_chart_id,o,OBJPROP_BACK,true);
+   }
 }

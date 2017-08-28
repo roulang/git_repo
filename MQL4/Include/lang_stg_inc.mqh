@@ -13,15 +13,15 @@
 int    g_adx_level=40; //adx level
 
 //each time period
-string u1="16:00";  //usa
-string u2="00:00";  //usa
-string a1="03:00";  //asia
-string a2="11:00";  //asia
-string g1="10:00";  //england
-string g2="18:00";  //england
-static int ASIA_PD = 1;
-static int AMA_PD = 4;
-static int EUR_PD = 2;
+const string u1="16:00";  //usa
+const string u2="00:00";  //usa
+const string a1="03:00";  //asia
+const string a2="11:00";  //asia
+const string g1="10:00";  //england
+const string g2="18:00";  //england
+const  int ASIA_PD = 1;
+const  int AMA_PD = 4;
+const  int EUR_PD = 2;
 
 //adx
 double adx_thred=0.5;
@@ -170,18 +170,18 @@ int TrendStgValue2(int shift)
    
    return ret;
 }
-
+/*
 //+------------------------------------------------------------------+
 //| Time strategy
-//| ret/ASIA_PD==1:asia
-//| ret/AMA_PD==1:america
-//| ret/EUR_PD==1:europa
+//| ret^ASIA_PD==1:asia
+//| ret^AMA_PD==4:america
+//| ret^EUR_PD==2:europa
 //+------------------------------------------------------------------+
-int TimepdValue(int shift)
+int TimepdValue(int arg_shift)
 {
    int ret=0;
 
-   string t=TimeToStr(Time[shift],TIME_MINUTES);
+   string t=TimeToStr(Time[arg_shift],TIME_MINUTES);
 
    //asia
    if (StringCompare(t,a1,true)>=0 && StringCompare(t,a2,true)<0) {
@@ -198,17 +198,18 @@ int TimepdValue(int shift)
    
    return ret;
 }
+*/
 //+------------------------------------------------------------------+
 //| Time function
 //+------------------------------------------------------------------+
-bool isCurPd(string symbol,int shift)
+bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
 {
    bool ret=false;
    string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
 
-   int pd=TimepdValue(shift);
+   int pd=TimepdValue2(arg_shift,arg_bef,arg_aft);
    
    if (i_debug) {
       printf("symbo=%s,pd=%d",cur,pd);
@@ -259,6 +260,73 @@ bool isCurPd(string symbol,int shift)
 }
 //+------------------------------------------------------------------+
 //| Time strategy
+//| ret^ASIA_PD==1:asia
+//| ret^AMA_PD==4:america
+//| ret^EUR_PD==2:europa
+//+------------------------------------------------------------------+
+int TimepdValue2(int arg_shift,int arg_bef=0,int arg_aft=0)
+{
+   int ret=0;
+   string t=TimeToStr(Time[arg_shift],TIME_MINUTES);
+
+   if (arg_bef==0 && arg_aft==0) {
+      //asia
+      if (StringCompare(t,a1,true)>=0 && StringCompare(t,a2,true)<0) {
+         ret+=ASIA_PD;
+      }
+      //euro
+      if (StringCompare(t,g1,true)>=0 && StringCompare(t,g2,true)<0) {
+         ret+=EUR_PD;
+      }
+      //america
+      if (StringCompare(t,u1,true)>=0) {
+         ret+=AMA_PD;
+      }
+      
+      return ret;
+   }
+      
+   datetime tm0=Time[arg_shift];
+   //datetime tm1=Time[arg_shift]+arg_bef;
+   datetime tm2=Time[arg_shift]-arg_aft;
+   int d0=TimeDay(tm0);
+   //int d1=TimeDay(tm1);
+   int d2=TimeDay(tm2);
+
+   datetime t0,t1,t2;
+   if (d0!=d2) {
+      t0=StringToTime(StringConcatenate("2010.10.11 ",t));
+   } else {
+      t0=StringToTime(StringConcatenate("2010.10.10 ",t));
+   }
+   
+   //asia
+   t1=StringToTime(StringConcatenate("2010.10.10 ",a1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.10 ",a2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=ASIA_PD;
+   }
+   //euro
+   t1=StringToTime(StringConcatenate("2010.10.10 ",g1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.10 ",g2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=EUR_PD;
+   }
+   
+   //america
+   t1=StringToTime(StringConcatenate("2010.10.10 ",u1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.11 ",u2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=AMA_PD;
+   }
+   
+   return ret;
+}
+//+------------------------------------------------------------------+
+//| Time strategy
 //+------------------------------------------------------------------+
 int ATRValue(int shift)
 {
@@ -277,6 +345,10 @@ int ATRValue(int shift)
 //| arg_lsp: lose stop price
 //| arg_tpp: take profit price
 //| arg_thpt: threhold point
+//| arg_lst_stupi: last short up shift
+//| arg_lst_mdupi: last middle up shift
+//| arg_lst_stdwi: last short down shift
+//| arg_lst_mddwi: last middle down shift
 //| return value: -1,turn down;1:turn up;0:n/a
 //+------------------------------------------------------------------+
 int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
@@ -287,6 +359,7 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
    int dw_idx=8;
    int midup_idx=9;
    int middw_idx=10;
+   int zig_idx=11;
    
    int high_shift=0;
    int low_shift=0;
@@ -346,6 +419,11 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
       //Print("midDownShift=",midDownShift);
       //Print("shortDownShift2=",shortDownShift2);
    }
+
+   arg_lst_stupi=shortUpShift;
+   arg_lst_mdupi=midUpShift;
+   arg_lst_stdwi=shortDownShift;
+   arg_lst_mddwi=midDownShift;
    
    if (upSign && !downSign) {
       if (Open[arg_shift]<Close[arg_shift] && Close[arg_shift]>(high_p+arg_thpt*Point)) {
@@ -359,10 +437,6 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
                Print("shortDownShift2=",shortDownShift2);
                Print(Time[arg_shift],",high_shift*=",high_shift-arg_shift,",high_p=",high_p);
          }
-         arg_lst_stupi=shortUpShift;
-         arg_lst_mdupi=midUpShift;
-         arg_lst_stdwi=shortDownShift;
-         arg_lst_mddwi=midDownShift;
          return 2;
       } else {
          return 1;
@@ -381,10 +455,6 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
             Print("shortDownShift2=",shortDownShift2);
             Print(Time[arg_shift],",low_shift*=",low_shift-arg_shift,",low_p=",low_p);
          }
-         arg_lst_stupi=shortUpShift;
-         arg_lst_mdupi=midUpShift;
-         arg_lst_stdwi=shortDownShift;
-         arg_lst_mddwi=midDownShift;
          return -2;
       } else {
          return -1;
