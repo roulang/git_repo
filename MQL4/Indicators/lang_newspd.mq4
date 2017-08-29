@@ -148,30 +148,30 @@ void DrawObjects(int arg_shift)
    long current_chart_id=ChartID();
    int widx=WindowFind("lang_newspd");
    
-   if          (StringCompare(cur,EURUSD)==0) {
+   if          (StringFind(cur,EURUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
-   } else if   (StringCompare(cur,USDJPY)==0) {
+   } else if   (StringFind(cur,USDJPY)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
-   } else if   (StringCompare(cur,AUDUSD)==0) {
+   } else if   (StringFind(cur,AUDUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
-   } else if   (StringCompare(cur,NZDUSD)==0) {
+   } else if   (StringFind(cur,NZDUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
-   } else if   (StringCompare(cur,USDCAD)==0) {
+   } else if   (StringFind(cur,USDCAD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
-   } else if   (StringCompare(cur,GBPUSD)==0) {
+   } else if   (StringFind(cur,GBPUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
       DrawTimeRec(current_chart_id,arg_shift,10,30,i_timeoffset);   //GBPUSD tt 10:30 start,from 6:15 to 10:15,4.25H
-   } else if   (StringCompare(cur,USDCHF)==0) {
+   } else if   (StringFind(cur,USDCHF)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
-   } else if   (StringCompare(cur,XAUUSD)==0) {
+   } else if   (StringFind(cur,XAUUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
-   } else if   (StringCompare(cur,GBPJPY)==0) {
+   } else if   (StringFind(cur,GBPJPY)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
       DrawTimeRec(current_chart_id,arg_shift,3,0,i_timeoffset2);   //GBPJPY 03:00 start,from 0:0 to 3:0,3H

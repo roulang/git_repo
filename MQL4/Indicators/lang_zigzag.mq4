@@ -11,8 +11,8 @@
 #property indicator_chart_window
 //#property indicator_minimum -10
 //#property indicator_maximum 10
-#property indicator_buffers 11
-#property indicator_plots   7
+#property indicator_buffers 12
+#property indicator_plots   8
 //--- plot up
 #property indicator_label1  "up"
 #property indicator_type1   DRAW_ARROW
@@ -77,6 +77,14 @@
 #property indicator_label11  "lastmdwi"
 #property indicator_type11   DRAW_ARROW
 #property indicator_color11  clrBlack
+//--- plot last zig idx
+#property indicator_label12  "lastzigi"
+#property indicator_type12   DRAW_ARROW
+#property indicator_color12  clrBlack
+//--- plot last second zig idx
+#property indicator_label13  "lastseczigi"
+#property indicator_type13   DRAW_ARROW
+#property indicator_color13  clrBlack
 
 //--- indicator buffers
 double         upBuffer[];
@@ -90,6 +98,8 @@ double         lstUpIdxBuffer[];
 double         lstDownIdxBuffer[];
 double         lstMidUpIdxBuffer[];
 double         lstMidDownIdxBuffer[];
+double         lstZigIdxBuffer[];
+double         lstZigSecIdxBuffer[];
 
 //input
 input bool i_debug = false;
@@ -124,6 +134,8 @@ int OnInit()
    SetIndexBuffer(8,lstDownIdxBuffer);
    SetIndexBuffer(9,lstMidUpIdxBuffer);
    SetIndexBuffer(10,lstMidDownIdxBuffer);
+   SetIndexBuffer(11,lstZigIdxBuffer);
+   SetIndexBuffer(12,lstZigSecIdxBuffer);
    
    SetIndexArrow(0,SYMBOL_ARROWUP);
    SetIndexArrow(1,SYMBOL_ARROWDOWN);
@@ -135,6 +147,8 @@ int OnInit()
    SetIndexArrow(8,SYMBOL_CHECKSIGN);
    SetIndexArrow(9,SYMBOL_CHECKSIGN);
    SetIndexArrow(10,SYMBOL_CHECKSIGN);
+   SetIndexArrow(11,SYMBOL_CHECKSIGN);
+   SetIndexArrow(12,SYMBOL_CHECKSIGN);
       
 //---
    return(INIT_SUCCEEDED);

@@ -217,44 +217,44 @@ bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
    int pd2=pd ^ AMA_PD;
    if (pd2==AMA_PD) return true;
     
-   if          (StringCompare(cur,EURUSD)==0) {
+   if          (StringFind(cur,EURUSD)>=0) {
       pd2=pd ^ EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
-   } else if   (StringCompare(cur,USDJPY)==0) {
+   } else if   (StringFind(cur,USDJPY)>=0) {
       pd2= pd ^ ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
-   } else if   (StringCompare(cur,AUDUSD)==0) {
+   } else if   (StringFind(cur,AUDUSD)>=0) {
       pd2= pd ^ ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
-   } else if   (StringCompare(cur,NZDUSD)==0) {
+   } else if   (StringFind(cur,NZDUSD)>=0) {
       pd2= pd ^ ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
-   } else if   (StringCompare(cur,USDCAD)==0) {
-   } else if   (StringCompare(cur,GBPUSD)==0) {
+   } else if   (StringFind(cur,USDCAD)>=0) {
+   } else if   (StringFind(cur,GBPUSD)>=0) {
       pd2=pd ^ EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
-   } else if   (StringCompare(cur,USDCHF)==0) {
+   } else if   (StringFind(cur,USDCHF)>=0) {
       pd2=pd ^ EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
-   } else if   (StringCompare(cur,XAUUSD)==0) {
+   } else if   (StringFind(cur,XAUUSD)>=0) {
    }   
    return false;
 }

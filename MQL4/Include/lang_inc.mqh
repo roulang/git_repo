@@ -16,15 +16,15 @@ input int   i_equity_percent = 1;
 input bool  i_sendmail=true;
 
 //currency
-#define EURUSD "EURUSD."
-#define USDJPY "USDJPY."
-#define AUDUSD "AUDUSD."
-#define NZDUSD "NZDUSD."
-#define USDCAD "USDCAD."
-#define GBPUSD "GBPUSD."
-#define USDCHF "USDCHF."
-#define XAUUSD "XAUUSD."
-#define GBPJPY "GBPJPY."
+#define EURUSD "EURUSD"
+#define USDJPY "USDJPY"
+#define AUDUSD "AUDUSD"
+#define NZDUSD "NZDUSD"
+#define USDCAD "USDCAD"
+#define GBPUSD "GBPUSD"
+#define USDCHF "USDCHF"
+#define XAUUSD "XAUUSD"
+#define GBPJPY "GBPJPY"
 
 //datetime
 #define SEC_H1 3600
