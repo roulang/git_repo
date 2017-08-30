@@ -34,14 +34,19 @@ double atr_lvl=0.0002;
 //+------------------------------------------------------------------+
 int ShotShootStgValue(int shift)
 {
+   int tm=getMAPeriod(PERIOD_CURRENT);
+   Print("tm=",tm);
+   if (tm==0) {
+      return 0;
+   }
+
    int ma_pos=0;  //2 for price above SMA(60),-2 for price below SMA(60)
    int sar_pos=0; //2 for price above SAR(0.02,0.2),-2 for price below SAR(0.02,0.2)
    int ma_break=0;//-1 for SMA(60) from down to up the price,1 for SMA(60) from up to down the price
    int sar_break=0;//-1 for SAR(0.02,0.2) from down to up the price,1 for SAR(0.02,0.2) from up to down the price
    int ret=0;
-   
-   double ma1=iMA(NULL,PERIOD_CURRENT,60,0,MODE_SMA,PRICE_CLOSE,shift+1);
-   double ma2=iMA(NULL,PERIOD_CURRENT,60,0,MODE_SMA,PRICE_CLOSE,shift);
+   double ma1=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,shift+1);
+   double ma2=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,shift);
    //if (open[i]>ma2 && close[i]>ma2) { //price is above sma(60)
    if (Close[shift]>ma2) { //price is above sma(60)
       ma_pos=2;
@@ -214,42 +219,42 @@ bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
    if (i_debug) {
       printf("symbo=%s,pd=%d",cur,pd);
    }
-   int pd2=pd ^ AMA_PD;
+   int pd2=pd & AMA_PD;
    if (pd2==AMA_PD) return true;
     
    if          (StringFind(cur,EURUSD)>=0) {
-      pd2=pd ^ EUR_PD;
+      pd2=pd & EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
    } else if   (StringFind(cur,USDJPY)>=0) {
-      pd2= pd ^ ASIA_PD;
+      pd2= pd & ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,AUDUSD)>=0) {
-      pd2= pd ^ ASIA_PD;
+      pd2= pd & ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,NZDUSD)>=0) {
-      pd2= pd ^ ASIA_PD;
+      pd2= pd & ASIA_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,USDCAD)>=0) {
    } else if   (StringFind(cur,GBPUSD)>=0) {
-      pd2=pd ^ EUR_PD;
+      pd2=pd & EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
    } else if   (StringFind(cur,USDCHF)>=0) {
-      pd2=pd ^ EUR_PD;
+      pd2=pd & EUR_PD;
       if (i_debug) {
          printf("pd2=%d",pd2);
       }
@@ -353,6 +358,17 @@ int ATRValue(int shift)
 //+------------------------------------------------------------------+
 int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
 {
+   int tm=getMAPeriod(PERIOD_CURRENT);
+   Print("tm=",tm);
+   if (tm==0) {
+      return 0;
+   }
+   double ma=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,arg_shift);
+   
+   //filter ma across
+   if ((Open[arg_shift]>ma && Close[arg_shift]<ma) || (Open[arg_shift]<ma && Close[arg_shift]>ma))
+      return 0;
+   
    arg_lst_stupi=arg_lst_mdupi=arg_lst_stdwi=arg_lst_mddwi=0;
 
    int up_idx=7;
@@ -437,7 +453,12 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
                Print("shortDownShift2=",shortDownShift2);
                Print(Time[arg_shift],",high_shift*=",high_shift-arg_shift,",high_p=",high_p);
          }
-         return 2;
+         //add ma check
+         if (Open[arg_shift]>=ma && Close[arg_shift]>=ma) {
+            return 3; 
+         } else {
+            return 2;
+         }
       } else {
          return 1;
       }
@@ -455,7 +476,12 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
             Print("shortDownShift2=",shortDownShift2);
             Print(Time[arg_shift],",low_shift*=",low_shift-arg_shift,",low_p=",low_p);
          }
-         return -2;
+         //add ma check
+         if (Open[arg_shift]<=ma && Close[arg_shift]<=ma) {
+            return -3;
+         } else {
+            return -2;
+         }
       } else {
          return -1;
       }
@@ -463,4 +489,123 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
    
    return 0;
    
+}
+//+------------------------------------------------------------------+
+//| get Moving Average period
+//| arg_timeperiod:M1,M5,M15,M30,H1,H4,D1,W1,WN1
+//| arg_type:0,short;1,middle;2,long
+//+------------------------------------------------------------------+
+int getMAPeriod(int arg_timeperiod,int arg_type=0)
+{
+   int ret=0;
+   if (arg_timeperiod==PERIOD_CURRENT) arg_timeperiod=Period();
+   switch (arg_type) {
+      case 0:
+         switch (arg_timeperiod) {
+            case PERIOD_M1: 
+               ret=60;
+               break;
+            case PERIOD_M5:
+               ret=60;
+               break;
+            case PERIOD_M15:
+               ret=12;
+               break;
+            case PERIOD_M30:
+               ret=12;
+               break;
+            case PERIOD_H1:
+               ret=12;
+               break;
+            case PERIOD_H4:
+               ret=12;
+               break;
+            case PERIOD_D1:
+               ret=10;
+               break;
+            case PERIOD_W1:
+               ret=12;
+               break;
+            case PERIOD_MN1:
+               ret=12;
+               break;
+            default:
+               Print("error on time period");
+               break;
+         }
+         break;
+      case 1:
+         switch (arg_timeperiod) {
+            case PERIOD_M1: 
+               ret=60;
+               break;
+            case PERIOD_M5:
+               ret=12;
+               break;
+            case PERIOD_M15:
+               ret=12;
+               break;
+            case PERIOD_M30:
+               ret=12;
+               break;
+            case PERIOD_H1:
+               ret=12;
+               break;
+            case PERIOD_H4:
+               ret=12;
+               break;
+            case PERIOD_D1:
+               ret=10;
+               break;
+            case PERIOD_W1:
+               ret=12;
+               break;
+            case PERIOD_MN1:
+               ret=12;
+               break;
+            default:
+               Print("error on time period");
+               break;
+         }
+         break;
+      case 2:
+         switch (arg_timeperiod) {
+            case PERIOD_M1: 
+               ret=60;
+               break;
+            case PERIOD_M5:
+               ret=12;
+               break;
+            case PERIOD_M15:
+               ret=12;
+               break;
+            case PERIOD_M30:
+               ret=12;
+               break;
+            case PERIOD_H1:
+               ret=12;
+               break;
+            case PERIOD_H4:
+               ret=12;
+               break;
+            case PERIOD_D1:
+               ret=10;
+               break;
+            case PERIOD_W1:
+               ret=12;
+               break;
+            case PERIOD_MN1:
+               ret=12;
+               break;
+            default:
+               Print("error on time period");
+               break;
+         }
+         break;
+      default:
+         Print("arg_type error");
+         break;
+   }
+   
+   return ret;
 }

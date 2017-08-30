@@ -15,7 +15,6 @@
 input int      i_SL=100;         //take lose point
 input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
-input bool     i_for_test=false;
 
 //--- global
 //string   com="event stg";

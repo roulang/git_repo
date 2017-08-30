@@ -13,7 +13,8 @@
 //input
 input bool  i_debug = false;
 input int   i_equity_percent = 1;
-input bool  i_sendmail=true;
+input bool  i_sendmail=false;
+input bool  i_for_test=false;
 
 //currency
 #define EURUSD "EURUSD"

@@ -34,7 +34,6 @@ input int   i_timeoffset=SEC_H1*4.25;     //from 6:15 to 10:15,4.25H
 input int   i_timeoffset2=SEC_H1*3;       //from 0:00 to 03:00,3H
 //global
 string      g_myname="lang_newspd";
-bool        g_for_test=false;
 int         g_obj_cnt=0;
 string      g_obj_name="vline";
 int         g_obj_cnt2=0;
@@ -52,7 +51,7 @@ int OnInit()
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    
-   if (!g_for_test) {
+   if (!i_for_test) {
       if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
    
@@ -127,7 +126,7 @@ void OnTimer()
 {
    if(i_debug) Print("OnTimer()");
      
-   if (!g_for_test) {
+   if (!i_for_test) {
       if (i_update_news) news_read();
       if (i_his_order_wrt) {
          if (getFileLock()) {

@@ -31,8 +31,6 @@ double         signalBuffer[];
 input int i_deviation=100;    // Deviation,should set to equal to zigzag's deviation value
 input int i_thredhold=0;     // breakthrough thredhold point
 
-//global
-bool      g_for_test=false;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -40,7 +38,7 @@ bool      g_for_test=false;
 int OnInit()
 {
 
-   if (!g_for_test) {
+   if (!i_for_test) {
       //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
 

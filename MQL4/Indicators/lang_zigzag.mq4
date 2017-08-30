@@ -81,10 +81,6 @@
 #property indicator_label12  "lastzigi"
 #property indicator_type12   DRAW_ARROW
 #property indicator_color12  clrBlack
-//--- plot last second zig idx
-#property indicator_label13  "lastseczigi"
-#property indicator_type13   DRAW_ARROW
-#property indicator_color13  clrBlack
 
 //--- indicator buffers
 double         upBuffer[];
@@ -99,7 +95,6 @@ double         lstDownIdxBuffer[];
 double         lstMidUpIdxBuffer[];
 double         lstMidDownIdxBuffer[];
 double         lstZigIdxBuffer[];
-double         lstZigSecIdxBuffer[];
 
 //input
 input bool i_debug = false;
@@ -135,7 +130,6 @@ int OnInit()
    SetIndexBuffer(9,lstMidUpIdxBuffer);
    SetIndexBuffer(10,lstMidDownIdxBuffer);
    SetIndexBuffer(11,lstZigIdxBuffer);
-   SetIndexBuffer(12,lstZigSecIdxBuffer);
    
    SetIndexArrow(0,SYMBOL_ARROWUP);
    SetIndexArrow(1,SYMBOL_ARROWDOWN);
@@ -148,7 +142,6 @@ int OnInit()
    SetIndexArrow(9,SYMBOL_CHECKSIGN);
    SetIndexArrow(10,SYMBOL_CHECKSIGN);
    SetIndexArrow(11,SYMBOL_CHECKSIGN);
-   SetIndexArrow(12,SYMBOL_CHECKSIGN);
       
 //---
    return(INIT_SUCCEEDED);
@@ -420,14 +413,14 @@ int OnCalculate(const int rates_total,
          if (midupBuffer[i]>0) last_up_i=i;
       }
    }
-
+   
    //7.set for last low up index buffer
-   st=limit;
-   //st=MathMax(last_mid_up_shift,last_mid_down_shift);
+   //st=limit;
+   st=MathMax(last_mid_up_shift,last_mid_down_shift);
    if(i_debug) {
       Print("7:st=",st);
    }
-   for(int i=st-1;i>0;i--) {
+   for(int i=st-1;i>=0;i--) {
       lstUpIdxBuffer[i]=0;
       lstDownIdxBuffer[i]=0;
       lstMidUpIdxBuffer[i]=0;
@@ -466,7 +459,7 @@ int OnCalculate(const int rates_total,
          k++;
       }
    }
-   
+
    //8.set for next onCalculate() to start process   
    if (last_down_i!=0) {
       last_mid_down_shift=last_down_i;
@@ -483,9 +476,10 @@ int OnCalculate(const int rates_total,
       Print("8:g_last_mid_down_time=",g_last_mid_down_time);
       Print("8:g_last_mid_up_time=",g_last_mid_up_time);
    }
-   
+         
    //9. loop for build zigzag, skip last 2 bars
    st=last_zig_shift;
+   //Print("9:st=",st,",lookfor=",g_lookfor);
    if(i_debug) {
       Print("9:st=",st);
    }
@@ -512,7 +506,9 @@ int OnCalculate(const int rates_total,
             if (middownBuffer[i]!=0 && midupBuffer[i]==0) {  //found middown
                //find lowest of shortlow
                int k=0;
-               for (int j=high_i-1;j>i;j--) {
+               int st2=high_i;
+               if (st2==0) st2=last_zig_shift;
+               for (int j=st2-1;j>i;j--) {
                   if (upBuffer[j]!=0) {
                      if (k==0) {
                         k=j;
@@ -541,7 +537,9 @@ int OnCalculate(const int rates_total,
             if (midupBuffer[i]!=0 && middownBuffer[i]==0) {  //found midup
                //find highest of shorthigh
                int k=0;
-               for (int j=low_i-1;j>i;j--) {
+               int st2=low_i;
+               if (st2==0) st2=last_zig_shift;
+               for (int j=st2-1;j>i;j--) {
                   if (downBuffer[j]!=0) {
                      if (k==0) {
                         k=j;
@@ -569,21 +567,44 @@ int OnCalculate(const int rates_total,
       }
    }
 
-   //10.set for next onCalculate() to start process
+   //10.set for last zig index buffer
+   //st=limit;
+   st=last_zig_shift;
+   if(i_debug) {
+      Print("10:st=",st);
+   }
+   for(int i=st-1;i>=0;i--) {
+      lstZigIdxBuffer[i]=0;
+      int k=0;
+      k=i+1;
+      while (k<=st) {
+         //if ((downBuffer[k]!=0 || middownBuffer[k]!=0) && zigBuffer[k]>0) {   //high zig
+         if (zigBuffer[k]==high[k]) {   //high zig
+            lstZigIdxBuffer[i]=k-i;    //plus
+            break;
+         //} else if ((upBuffer[k]!=0 || midupBuffer[k]!=0) && zigBuffer[k]>0) { //low zig
+         } else if (zigBuffer[k]==low[k]) { //low zig
+            lstZigIdxBuffer[i]=i-k;    //minus
+            break;
+         }
+         k++;
+      }
+   }
+   
+   //11.set for next onCalculate() to start process
    if (high_i!=0 || low_i!=0) {
-      if (high_i!=0) last_zig_shift=high_i;
-      else if (low_i!=0) last_zig_shift=low_i;
+      if (high_i!=0 && low_i==0) last_zig_shift=high_i;
+      else if (low_i!=0 && high_i==0) last_zig_shift=low_i;
       else last_zig_shift=MathMin(high_i,low_i);
       g_last_zig_time=Time[last_zig_shift];
    }
 
    if(i_debug) {
-      Print("10:last_zig_shift=",last_zig_shift);
-      Print("10:g_last_zig_time=",g_last_zig_time);
-      Print("10:g_lookfor=",g_lookfor);
+      Print("11:last_zig_shift=",last_zig_shift);
+      Print("11:g_last_zig_time=",g_last_zig_time);
+      Print("11:g_lookfor=",g_lookfor);
    }
 
-   
    /*
    lstUpIdxBuffer[0]=last_short_up_shift;
    lstDownIdxBuffer[0]=last_short_down_shift;
