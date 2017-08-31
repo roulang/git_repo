@@ -35,7 +35,7 @@ double atr_lvl=0.0002;
 int ShotShootStgValue(int shift)
 {
    int tm=getMAPeriod(PERIOD_CURRENT);
-   Print("tm=",tm);
+   //Print("tm=",tm);
    if (tm==0) {
       return 0;
    }
@@ -356,10 +356,10 @@ int ATRValue(int shift)
 //| arg_lst_mddwi: last middle down shift
 //| return value: -1,turn down;1:turn up;0:n/a
 //+------------------------------------------------------------------+
-int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
+int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_deviation_lg,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
 {
    int tm=getMAPeriod(PERIOD_CURRENT);
-   Print("tm=",tm);
+   //Print("tm=",tm);
    if (tm==0) {
       return 0;
    }
@@ -371,11 +371,11 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
    
    arg_lst_stupi=arg_lst_mdupi=arg_lst_stdwi=arg_lst_mddwi=0;
 
-   int up_idx=7;
-   int dw_idx=8;
-   int midup_idx=9;
-   int middw_idx=10;
-   int zig_idx=11;
+   int up_idx=8;
+   int dw_idx=9;
+   int midup_idx=10;
+   int middw_idx=11;
+   int zig_idx=15;
    
    int high_shift=0;
    int low_shift=0;
@@ -388,10 +388,10 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
    int midDownShift=0;
    int shortUpShift2=0;
    int shortDownShift2=0;
-   shortUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,up_idx,arg_shift);
-   shortDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,dw_idx,arg_shift);
-   midUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,midup_idx,arg_shift);
-   midDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,middw_idx,arg_shift);
+   shortUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,arg_shift);
+   shortDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,arg_shift);
+   midUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,arg_shift);
+   midDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,arg_shift);
 
    bool upSign=false;
    //
@@ -402,7 +402,7 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
          high_p=High[high_shift];
          upSign=true;
       }
-      shortUpShift2=shortUpShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,up_idx,arg_shift+shortUpShift);
+      shortUpShift2=shortUpShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,arg_shift+shortUpShift);
    }
 
    bool downSign=false;
@@ -413,7 +413,7 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
          low_p=Low[low_shift];
          downSign=true;
       }
-      shortDownShift2=shortDownShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation,0,dw_idx,arg_shift+shortDownShift);
+      shortDownShift2=shortDownShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,arg_shift+shortDownShift);
    }
    
    if (upSign && shortUpShift2>midUpShift) upSign=true;  //start turn up
@@ -490,6 +490,7 @@ int getZigTurn(int arg_shift,int arg_deviation,int arg_thpt,int &arg_lst_stupi,i
    return 0;
    
 }
+
 //+------------------------------------------------------------------+
 //| get Moving Average period
 //| arg_timeperiod:M1,M5,M15,M30,H1,H4,D1,W1,WN1

@@ -28,8 +28,10 @@
 double         signalBuffer[];
 
 //input
-input int i_deviation=100;    // Deviation,should set to equal to zigzag's deviation value
-input int i_thredhold=0;     // breakthrough thredhold point
+input int i_deviation_st=0;     // Deviation(short),should set to equal to zigzag's deviation value
+input int i_deviation_md=0;     // Deviation(mid),should set to equal to zigzag's deviation value
+input int i_deviation_lg=0;     // Deviation(long),should set to equal to zigzag's deviation value
+input int i_thredhold=0;         // breakthrough thredhold point
 
 
 //+------------------------------------------------------------------+
@@ -85,7 +87,7 @@ int OnCalculate(const int rates_total,
    }
    int i1,i2,i3,i4;
    for(int i=st-1;i>0;i--) {
-      signalBuffer[i]=getZigTurn(i,i_deviation,i_thredhold,i1,i2,i3,i4);
+      signalBuffer[i]=getZigTurn(i,i_deviation_st,i_deviation_md,i_deviation_lg,i_thredhold,i1,i2,i3,i4);
       if (MathAbs(signalBuffer[i])>1) {
          //Print(Time[i],",i1=",i1,",i2=",i2,",i3=",i3,",i4=",i4);
       }
