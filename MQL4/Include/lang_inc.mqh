@@ -11,10 +11,11 @@
 #include <stdlib.mqh> 
 
 //input
-input bool  i_debug = false;
-input int   i_equity_percent = 1;
-input bool  i_sendmail=false;
-input bool  i_for_test=false;
+input bool     i_debug = false;
+input int      i_equity_percent = 1;
+input bool     i_sendmail=false;
+input bool     i_for_test=false;
+input double   i_max_lots = 0.1;
 
 //currency
 #define EURUSD "EURUSD"
@@ -65,7 +66,6 @@ struct s_Order
 };
 
 //global
-double   g_max_lots = 0.1;
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
 string   g_LockFileName="#Lock#";
@@ -208,7 +208,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    }
 
    double risk_vol = getVolume(i_equity_percent, ls_pt);
-   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
+   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
    
    //<<<<debug
    if (i_debug) {
@@ -373,7 +373,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    }
 
    double risk_vol = getVolume(i_equity_percent, ls_pt);
-   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
+   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
 
    //<<<<debug
    if (i_debug) {
@@ -454,7 +454,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    }
 
    double risk_vol = getVolume(i_equity_percent, argLsPt);
-   if (risk_vol > g_max_lots) risk_vol = g_max_lots;
+   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
 
    //<<<<debug
    if (i_debug) {
@@ -549,7 +549,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    double ls_pt2=(price2-ls_price2)/pt;
    double ls_pt=MathMax(ls_pt1,ls_pt2);
    double risk_vol=getVolume(i_equity_percent, ls_pt);
-   if (risk_vol>g_max_lots) risk_vol=g_max_lots;
+   if (risk_vol>i_max_lots) risk_vol=i_max_lots;
 
    //<<<<debug
    if (i_debug) {

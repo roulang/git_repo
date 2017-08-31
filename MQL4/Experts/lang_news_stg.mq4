@@ -28,7 +28,6 @@ datetime orderdt;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   g_max_lots=1;
    if (i_debug) {
       Print("OnInit()");
    }

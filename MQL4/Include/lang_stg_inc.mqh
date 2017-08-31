@@ -550,7 +550,7 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=12;
                break;
             case PERIOD_H1:
-               ret=12;
+               ret=36;
                break;
             case PERIOD_H4:
                ret=12;
@@ -584,7 +584,7 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=12;
                break;
             case PERIOD_H1:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_H4:
                ret=12;
@@ -609,4 +609,56 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
    }
    
    return ret;
+}
+//+------------------------------------------------------------------+
+//| Trend strategy Open/Close
+//| date: 2017/08/31
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: -1,sell(open);1:buy(open);1:close;0:n/a
+//+------------------------------------------------------------------+
+int isTrendStgOpen(int arg_shift,double &arg_ls_price)
+{
+   int short_tm=getMAPeriod(PERIOD_CURRENT,0);  //short
+   if (short_tm==0) {
+      return 0;
+   }
+   int middle_tm=getMAPeriod(PERIOD_CURRENT,1);  //middle
+   //Print("tm=",tm);
+   if (middle_tm==0) {
+      return 0;
+   }
+   double short_ma1=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
+   double short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
+   double middle_ma1=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
+   double middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
+   if (short_ma1>middle_ma1 && short_ma2<middle_ma2) {   //EMA12>EMA36,for up trend
+      if (Close[arg_shift]>Open[arg_shift] && Close[arg_shift]>short_ma1) {   //break EMA12
+         arg_ls_price=NormalizeDouble(middle_ma1,Digits);
+         return 1;
+      }
+      return 0;
+   }
+   if (short_ma1<middle_ma1 && short_ma2>middle_ma2) {   //EMA12<EMA36,for down trend
+      if (Close[arg_shift]<Open[arg_shift] && Close[arg_shift]<short_ma1) {   //break EMA12
+         arg_ls_price=NormalizeDouble(middle_ma1,Digits);
+         return -1;
+      }
+      return 0;
+   }
+
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Trend strategy Close
+//| date: 2017/08/31
+//| return value: 1:close;0:n/a
+//+------------------------------------------------------------------+
+int isTrendStgClose(int arg_shift)
+{
+   double adx1=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift);
+   double adx2=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift+1);
+   double adx3=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift+1);
+   if (adx1<g_adx_level && (adx2>g_adx_level || adx3>g_adx_level)) return 1;
+   return 0;
 }
