@@ -25,8 +25,12 @@ input double   i_max_lots = 0.1;
 #define USDCAD "USDCAD"
 #define GBPUSD "GBPUSD"
 #define USDCHF "USDCHF"
-#define XAUUSD "XAUUSD"
+//#define XAUUSD "XAUUSD"
+#define XAUUSD "XAUUSDGOLD"  //for FxPro
 #define GBPJPY "GBPJPY"
+
+#define SLASH  "/"
+#define DOT    "."
 
 //datetime
 #define SEC_H1 3600
@@ -66,13 +70,13 @@ struct s_Order
 };
 
 //global
+const string   g_LockFileName="#Lock#";
+const string   g_OrderHisFileName="lang_history_orders.ex4.csv";   //history order data file
+const string   g_NewsFileName="lang_news.ex4.csv";
+
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
-string   g_LockFileName="#Lock#";
-string   g_OrderHisFileName="lang_history_orders.ex4.csv";   //history order data file
-
 s_News   g_News[];
-string   g_NewsFileName="lang_news.ex4.csv";
 int      g_TimeZoneOffset=SEC_H1*5;
 int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
@@ -1109,12 +1113,15 @@ bool wrtOneOrderToFile(int h, int n, s_Order &order)
    string tp_p=dToStr(order.sym,order.tp_p);
    string p2=dToStr(order.sym,order.close_p);
    string lots=dToStr(NULL,order.lots,2);
+   string o_t=covDateString(TimeToString(order.open_t),SLASH);
+   string c_t=covDateString(TimeToString(order.close_t),SLASH);
    //Print("1=",tic,",2=",tm1,",3=",tp,",4=",lots,",5=",sym);
    //Print("6=",p1,",7=",sl_p,",8=",tp_p,",9=",tm2,",10=",p2);
    //Print("11=",pt,",12=",co,",13=",mg);
    
    //"0","order","open time","type#","type","size","symbol","open price","S/L","T/P","close time","close price","profit","comment","magic"
-   uint ret=FileWrite(h,n,order.tic,order.open_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,order.close_t,p2,order.profit,order.com,order.mag);
+   //uint ret=FileWrite(h,n,order.tic,order.open_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,order.close_t,p2,order.profit,order.com,order.mag);
+   uint ret=FileWrite(h,n,order.tic,o_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,c_t,p2,order.profit,order.com,order.mag);
    
    if (ret>0) return true;
    else return false; 
@@ -1129,7 +1136,8 @@ bool rdOneOrderFromFile(int h, s_Order &order)
    if (n==0) rdSkipOneLineFromFile(h);
    while(!FileIsEnding(h) && !FileIsLineEnding(h)) {
       order.tic=(int)FileReadNumber(h);
-      order.open_t=FileReadDatetime(h);
+      //order.open_t=FileReadDatetime(h);
+      order.open_t=StringToTime(covDateString(FileReadString(h),DOT));
       order.type=(int)FileReadNumber(h);
       //skip one
       string dummy=FileReadString(h);
@@ -1138,7 +1146,8 @@ bool rdOneOrderFromFile(int h, s_Order &order)
       order.open_p=FileReadNumber(h);
       order.sl_p=FileReadNumber(h);
       order.tp_p=FileReadNumber(h);
-      order.close_t=FileReadDatetime(h);
+      //order.close_t=FileReadDatetime(h);
+      order.close_t=StringToTime(covDateString(FileReadString(h),DOT));
       order.close_p=FileReadNumber(h);
       order.profit=FileReadNumber(h);
       order.com=FileReadString(h);
@@ -1323,4 +1332,20 @@ bool isNewsPd2(string symbol,int shift)
    }
    
    return false;
+}
+//+------------------------------------------------------------------+
+//| Convert Date format string
+//| arg_pat: "." or ","
+//| 2017.01.01 <-> 2017/01/01
+//+------------------------------------------------------------------+
+string covDateString(string arg_date_str,string arg_pat)
+{
+   string s=arg_date_str;
+   int p=0;
+   if (StringCompare(arg_pat,SLASH)==0 && StringFind(s,DOT)>=0) {     //convert "." to "/"
+      p=StringReplace(s,DOT,SLASH);
+   } else if (StringCompare(arg_pat,DOT)==0 && StringFind(s,SLASH)>=0) {
+      p=StringReplace(s,SLASH,DOT);
+   }
+   return s;
 }
