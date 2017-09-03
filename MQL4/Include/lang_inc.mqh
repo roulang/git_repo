@@ -25,8 +25,8 @@ input double   i_max_lots = 0.1;
 #define USDCAD "USDCAD"
 #define GBPUSD "GBPUSD"
 #define USDCHF "USDCHF"
-//#define XAUUSD "XAUUSD"
-#define XAUUSD "XAUUSDGOLD"  //for FxPro
+#define XAUUSD "XAUUSD"
+#define GOLD   "GOLD"      //for FxPro
 #define GBPJPY "GBPJPY"
 
 #define SLASH  "/"
@@ -71,7 +71,7 @@ struct s_Order
 
 //global
 const string   g_LockFileName="#Lock#";
-const string   g_OrderHisFileName="lang_history_orders.ex4.csv";   //history order data file
+const string   g_OrderHisFileName="lang_history_orders.csv";   //history order data file
 const string   g_NewsFileName="lang_news.ex4.csv";
 
 datetime CurrentTimeStamp;

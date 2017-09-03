@@ -259,8 +259,8 @@ bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
-   } else if   (StringFind(cur,XAUUSD)>=0) {
-   }   
+   } else if   (StringFind(cur,XAUUSD)>=0 || StringFind(cur,GOLD)>=0) {
+   }
    return false;
 }
 //+------------------------------------------------------------------+

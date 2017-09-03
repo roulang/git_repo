@@ -168,7 +168,7 @@ void DrawObjects(int arg_shift)
    } else if   (StringFind(cur,USDCHF)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
-   } else if   (StringFind(cur,XAUUSD)>=0) {
+   } else if   (StringFind(cur,XAUUSD)>=0 || StringFind(cur,GOLD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
    } else if   (StringFind(cur,GBPJPY)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
