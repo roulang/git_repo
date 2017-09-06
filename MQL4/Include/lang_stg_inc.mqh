@@ -610,6 +610,25 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
    
    return ret;
 }
+void getLargerLastMidUpDw(int arg_period,int arg_shift,double &arg_midup,double &arg_middw)
+{
+   int up_idx=8;
+   int dw_idx=9;
+   int midup_idx=10;
+   int middw_idx=11;
+   int lgup_idx=12;
+   int lgdw_idx=13;
+   int zig_idx=15;
+   
+   int midUpShift,midDwShift;
+   int larger_shift,larger_pd;
+   larger_pd=getLargerPeriod(arg_period,arg_shift,larger_shift);
+   midUpShift=(int)iCustom(NULL,larger_pd,"lang_zigzag",false,0,0,0,0,midup_idx,larger_shift);
+   midDwShift=(int)iCustom(NULL,larger_pd,"lang_zigzag",false,0,0,0,0,middw_idx,larger_shift);
+   arg_midup=iLow(NULL,larger_pd,midUpShift+larger_shift);
+   arg_middw=iHigh(NULL,larger_pd,midDwShift+larger_shift);
+   
+}
 //+------------------------------------------------------------------+
 //| Trend strategy Open/Close
 //| date: 2017/08/31
@@ -654,11 +673,11 @@ int isTrendStgOpen(int arg_shift,double &arg_ls_price)
 //| date: 2017/08/31
 //| return value: 1:close;0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgClose(int arg_shift)
+int isTrendStgClose(int arg_shift,int arg_period=PERIOD_CURRENT)
 {
-   double adx1=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift);
-   double adx2=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift+1);
-   double adx3=iADX(NULL,PERIOD_CURRENT,14,PRICE_CLOSE,MODE_MAIN,arg_shift+1);
+   double adx1=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,arg_shift);
+   double adx2=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,arg_shift+1);
+   double adx3=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,arg_shift+2);
    if (adx1<g_adx_level && (adx2>g_adx_level || adx3>g_adx_level)) return 1;
    return 0;
 }

@@ -98,7 +98,6 @@
 #property indicator_type15   DRAW_SECTION    //do not set 0 value
 #property indicator_color15  clrRed
 #property indicator_style15  STYLE_SOLID
-#property indicator_width15  2
 #property indicator_width15  1
 //--- plot last zig idx
 #property indicator_label16  "lastzigi"
@@ -109,7 +108,6 @@
 #property indicator_type17   DRAW_SECTION    //do not set 0 value
 #property indicator_color17  clrYellow
 #property indicator_style17  STYLE_DASH
-#property indicator_width17  2
 #property indicator_width17  1
 //--- plot last longzig idx
 #property indicator_label18  "lastlongzigi"
@@ -138,10 +136,10 @@ double         lstLongZigIdxBuffer[];
 
 //input
 input bool i_debug = false;
-input int i_deviation_st=100;    // Deviation(short)
-input int i_deviation_md=200;    // Deviation(middle)
-input int i_deviation_lg=200;    // Deviation(long)
-input int i_offset=60;
+input int i_deviation_st=0;    // Deviation(short)
+input int i_deviation_md=0;    // Deviation(middle)
+input int i_deviation_lg=0;    // Deviation(long)
+input int i_offset=1;
 
 //global
 int g_innerCount=0;

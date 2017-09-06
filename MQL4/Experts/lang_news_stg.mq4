@@ -8,7 +8,6 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_inc.mqh>
 #include <lang_stg_inc.mqh>
 
 //--- input

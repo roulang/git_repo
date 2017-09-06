@@ -11,12 +11,12 @@
 #include <stdlib.mqh> 
 
 //input
-input bool     i_debug = false;
-input int      i_equity_percent = 1;
+input bool     i_debug=false;
+input int      i_equity_percent=1;
 input bool     i_sendmail=false;
 input bool     i_for_test=false;
-input double   i_max_lots = 0.1;
-
+input double   i_max_lots=0.1;
+input int      i_slippage=50;
 //currency
 #define EURUSD "EURUSD"
 #define USDJPY "USDJPY"
@@ -232,7 +232,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
 
    int ret = 0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Green);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, i_slippage, ls_price, ps_price, "", argMag, 0, Green);
    }
    
    if (ret <0 )
@@ -397,7 +397,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
 
    int ret = 0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, "", argMag, 0, Red);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, i_slippage, ls_price, ps_price, "", argMag, 0, Red);
    }
    
    if (ret < 0)
@@ -481,7 +481,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    //debug>>>>
 
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    
    if (ret > 0) {
@@ -493,7 +493,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    }
    
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    
    if (ret > 0) {
@@ -575,7 +575,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
 
    int ret=0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, 0, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
@@ -587,7 +587,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
 
    ret=0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, 0, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
@@ -1348,4 +1348,66 @@ string covDateString(string arg_date_str,string arg_pat)
       p=StringReplace(s,SLASH,DOT);
    }
    return s;
+}
+//+------------------------------------------------------------------+
+//| Time Period function
+//| arg_period: 
+//+------------------------------------------------------------------+
+int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift)
+{
+   int curPd;
+   if (arg_period==PERIOD_CURRENT) {
+      curPd=Period();
+   } else {
+      curPd=arg_period;
+   }
+   /*
+   datetime cur_t=Time[arg_shift];
+   int cur_d=TimeDayOfWeek(cur_t);
+   int cur_h=TimeHour(cur_t);
+   int cur_mi=TimeMinute(cur_t);   
+   */
+   int ret=0;
+   switch (curPd) {
+      case PERIOD_M1:
+         //return M5's shift
+         arg_larger_shift=arg_shift/5;
+         ret=PERIOD_M5;
+         break;
+      case PERIOD_M5:
+         //return M15's shift
+         arg_larger_shift=arg_shift/3;
+         ret=PERIOD_M15;
+         break;
+      case PERIOD_M15:
+         //return M30's shift
+         arg_larger_shift=arg_shift/2;
+         ret=PERIOD_M30;
+         break;
+      case PERIOD_M30:
+         //return H1's shift
+         arg_larger_shift=arg_shift/2;
+         ret=PERIOD_H1;
+         break;
+      case PERIOD_H1:
+         //return H4's shift
+         arg_larger_shift=arg_shift/4;
+         ret=PERIOD_H4;
+         break;
+      case PERIOD_H4:
+         //return D1's shift
+         arg_larger_shift=arg_shift/6;
+         ret=PERIOD_D1;
+         break;
+      case PERIOD_D1:
+         //return W1's shift
+         arg_larger_shift=arg_shift/5;
+         ret=PERIOD_W1;
+         break;
+      default:
+         //unknown
+         break;
+   }
+   
+   return ret;
 }
