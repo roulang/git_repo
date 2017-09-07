@@ -12,8 +12,10 @@
 
 //--- input
 input int      i_SL=100;         //take lose point
+input int      i_rate_SL=100;    //take lose point(rate control)
 input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
+input bool     i_rate_ctl=true;  //rate control(not do OO,avoid slippage)
 
 //--- global
 //string   com="event stg";
@@ -68,6 +70,7 @@ void OnTick()
 
    datetime now=Time[bar_shift-1];
    
+/*
    bool isPd2=isNewsPd2(NULL,bar_shift-1);    //news zone control
    if (isPd2 && !has_order) {
       //Print("Open oo order");
@@ -75,6 +78,33 @@ void OnTick()
          has_order=true;
          orderdt=now;
          return;
+      }
+   }
+*/
+   int isPd3=isNewsPd3(NULL,bar_shift-1);    //news zone control
+   if (isPd3>0 && !has_order) {
+      if (!i_rate_ctl) {
+         //Print("Open oo order");
+         if (OrderOO(mag,i_OPT,i_SL,-1)) {
+            has_order=true;
+            orderdt=now;
+            return;
+         }
+      } else {
+         if (isPd3==1) {            //not rate change news
+            //Print("Open oo order");
+            if (OrderOO(mag,i_OPT,i_SL,-1)) {
+               has_order=true;
+               orderdt=now;
+               return;
+            }
+         } else if (isPd3==2) {     //is rate change news
+            if (OrderOO3(mag,i_rate_SL,-1)) {
+               has_order=true;
+               orderdt=now;
+               return;
+            }
+         }
       }
    }
 

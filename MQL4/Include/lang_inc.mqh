@@ -47,9 +47,10 @@ int      OOPt = 100;
 //struct
 struct s_News
 { 
-   double n;      //index
-   string cur;    // currency 
-   datetime dt;   // date 
+   double n;         //index
+   string cur;       //currency 
+   datetime dt;      //date
+   double for_rate;  //rate change (0:not rate,1:is rate)
 }; 
 
 struct s_Order
@@ -600,7 +601,95 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    return true;
 
 }
+//+------------------------------------------------------------------+
+// OrderOO (buy direct and sell direct at two directions,auto set risk volume)
+// argLsPt: Loss Stop Point (0 for not set, use LossStopPt)
+// argPsPt: Profit Stop Point (0 use ProfitStopPt, -1 not set profit stop)
+// argCom: Comment
+// argMag: Magic
+//+------------------------------------------------------------------+
+bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
+{
+   int ret = 0;
+   double pt = Point;
+   double g = Ask - Bid;
+   double gap = NormalizeDouble(g / pt, 0);
+   double price1 = Bid;
+   double price2 = Ask;
+   int cmd1 = OP_SELL;
+   int cmd2 = OP_BUY;
 
+   if (argLsPt == 0) argLsPt = LossStopPt;
+   if (argPsPt == 0) argPsPt = ProfitStopPt;
+   
+   double ls_price1; //sell's lose stop
+   double ps_price1; //sell's profit stop
+   ls_price1 = NormalizeDouble(price1 + argLsPt * pt, Digits);
+   if (argPsPt == -1) {
+      ps_price1 = 0;
+   } else {
+      ps_price1 = NormalizeDouble(price1 - argPsPt * pt, Digits);
+   }
+
+   double ls_price2; //buy's lose stop
+   double ps_price2; //buy's profit stop
+   ls_price2 = NormalizeDouble(price2 - argLsPt * pt, Digits);
+   if (argPsPt == -1) {
+      ps_price2 = 0;
+   } else {
+      ps_price2 = NormalizeDouble(price2 + argPsPt * pt, Digits);
+   }
+
+   double risk_vol = getVolume(i_equity_percent, argLsPt);
+   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
+
+   //<<<<debug
+   if (i_debug) {
+      Print("<<<<debug");
+      printf("command1=%d", cmd1);
+      printf("command2=%d", cmd2);
+      printf("volume=%.5f", risk_vol);
+      printf("point=%.5f", pt);
+      printf("price1=%.5f", price1);
+      printf("price2=%.5f", price2);
+      printf("loss stop point=%.5f", argLsPt);
+      printf("profit stop point=%.5f", argPsPt);
+      printf("loss stop price1=%.5f", ls_price1);
+      printf("profit stop price1=%.5f", ps_price1);
+      printf("loss stop price2=%.5f", ls_price2);
+      printf("profit stop price2=%.5f", ps_price2);
+      printf("gap=%.0f", gap);
+      Print("debug>>>>");
+   }
+   //debug>>>>
+
+   if (!i_debug) {
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell order
+   }
+   
+   if (ret > 0) {
+      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
+   } else {
+      int check=GetLastError(); 
+      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
+      return false;
+   }
+   
+   if (!i_debug) {
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy order
+   }
+   
+   if (ret > 0) {
+      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
+   } else {
+      int check=GetLastError(); 
+      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
+      return false;
+   }
+
+   return true;
+
+}
 // type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
 int OrderCloseA(string symbol, int type, int magic)
 {
@@ -1238,11 +1327,13 @@ int news_read()
       //read record count
       while(!FileIsEnding(h)) {
          string s;
-         s=FileReadString(h);
+         s=FileReadString(h);    //1
          if(i_debug) Print(s);
-         s=FileReadString(h);
+         s=FileReadString(h);    //2
          if(i_debug) Print(s);
-         s=FileReadString(h);
+         s=FileReadString(h);    //3
+         if(i_debug) Print(s);
+         s=FileReadString(h);    //4
          if(i_debug) Print(s);
          cnt++;
       }
@@ -1258,6 +1349,8 @@ int news_read()
             if(i_debug) Print(g_News[cnt].cur);
             g_News[cnt].dt=FileReadDatetime(h)-g_TimeZoneOffset;
             if(i_debug) Print(g_News[cnt].dt);
+            g_News[cnt].for_rate=FileReadNumber(h);
+            if(i_debug) Print(g_News[cnt].for_rate);
             cnt++;
          }
       }
@@ -1332,6 +1425,29 @@ bool isNewsPd2(string symbol,int shift)
    }
    
    return false;
+}
+//+------------------------------------------------------------------+
+//| Time of news function(for rate control)
+//| return:0,not pd;1,news(not rate),2,news(is rate)
+//+------------------------------------------------------------------+
+int isNewsPd3(string symbol,int shift)
+{
+   string cur;
+   if (symbol==NULL) cur=Symbol();
+   else cur=symbol;
+   
+   for (int i=0;i<ArraySize(g_News);i++) {
+      if (StringFind(cur,g_News[i].cur)>=0) {
+         datetime t=Time[shift];
+         datetime t2=g_News[i].dt;
+         if (t>=(t2-60) && t<t2) {
+            if (g_News[i].for_rate==0) return 1;
+            if (g_News[i].for_rate==1) return 2;
+         }
+      }
+   }
+   
+   return 0;
 }
 //+------------------------------------------------------------------+
 //| Convert Date format string
