@@ -1437,7 +1437,8 @@ int isNewsPd3(string symbol,int shift)
    else cur=symbol;
    
    for (int i=0;i<ArraySize(g_News);i++) {
-      if (StringFind(cur,g_News[i].cur)>=0) {
+      //if (StringFind(cur,g_News[i].cur)>=0) {
+      if (isNewsRelated(cur,g_News[i].cur)) {
          datetime t=Time[shift];
          datetime t2=g_News[i].dt;
          if (t>=(t2-60) && t<t2) {
@@ -1448,6 +1449,22 @@ int isNewsPd3(string symbol,int shift)
    }
    
    return 0;
+}
+bool isNewsRelated(string arg_symbol,string arg_currency)
+{
+   string cur;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
+   
+   if(StringCompare(arg_currency,"USD")==0) {   //USD currency
+      if(StringFind(cur,"JPY")>=0 || StringFind(cur,"CHF")>=0)    //exclude JPY and CHF
+         return false;
+      return true;
+   }
+   if(StringFind(cur,arg_currency)>=0)
+      return true;
+   
+   return false;
 }
 //+------------------------------------------------------------------+
 //| Convert Date format string
