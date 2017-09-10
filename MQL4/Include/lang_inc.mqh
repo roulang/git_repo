@@ -17,6 +17,8 @@ input bool     i_sendmail=false;
 input bool     i_for_test=false;
 input double   i_max_lots=0.1;
 input int      i_slippage=50;
+input bool     i_skip_jpychf_usd_relate=false;
+
 //currency
 #define EURUSD "EURUSD"
 #define USDJPY "USDJPY"
@@ -1456,7 +1458,7 @@ bool isNewsRelated(string arg_symbol,string arg_currency)
    if (arg_symbol==NULL) cur=Symbol();
    else cur=arg_symbol;
    
-   if(StringCompare(arg_currency,"USD")==0) {   //USD currency
+   if(i_skip_jpychf_usd_relate && StringCompare(arg_currency,"USD")==0) {   //USD currency
       if(StringFind(cur,"JPY")>=0 || StringFind(cur,"CHF")>=0)    //exclude JPY and CHF
          return false;
       return true;
