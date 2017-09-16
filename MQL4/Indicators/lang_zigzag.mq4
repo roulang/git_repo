@@ -141,12 +141,16 @@ input int i_deviation_md=0;    // Deviation(middle)
 input int i_deviation_lg=0;    // Deviation(long)
 input int i_offset=1;
 
+#define MAX_INT 2147483647
+
 //global
 int g_innerCount=0;
 int g_outterCount=0;
 int g_totalCount=0;
 int g_lookfor=0;
 int g_lookfor_long=0;
+int g_zigCount=0;
+int g_long_zigCount=0;
 datetime g_last_short_up_time;
 datetime g_last_short_down_time;
 datetime g_last_mid_up_time;
@@ -237,6 +241,10 @@ int OnCalculate(const int rates_total,
       g_totalCount=limit+1;
       upBuffer[limit]=low[limit]-i_offset*Point;
       downBuffer[limit]=high[limit]+i_offset*Point;
+      midupBuffer[limit]=low[limit]-(i_offset*2)*Point;
+      middownBuffer[limit]=high[limit]+(i_offset*2)*Point;;
+      longupBuffer[limit]=low[limit]-(i_offset*3)*Point;
+      longdownBuffer[limit]=high[limit]+(i_offset*3)*Point;;
       
       last_short_up_shift=last_short_down_shift=limit;
       g_last_short_up_time=Time[last_short_up_shift];
@@ -728,12 +736,14 @@ int OnCalculate(const int rates_total,
          case 0:
             if (middownBuffer[i]!=0 && midupBuffer[i]==0) {
                zigBuffer[i]=high[i];
+               g_zigCount++;
                g_lookfor=-1; //look for ziglow
                high_i=i;
                break;
             }
             if (midupBuffer[i]!=0 && middownBuffer[i]==0) {
                zigBuffer[i]=low[i];
+               g_zigCount++;
                g_lookfor=1;  //look for zighigh
                low_i=i;
                break;
@@ -759,6 +769,8 @@ int OnCalculate(const int rates_total,
                if (k!=0) {
                   zigBuffer[k]=low[k];
                   zigBuffer[i]=high[i];
+                  g_zigCount++;
+                  g_zigCount++;
                   g_lookfor=-1; //look for ziglow
                   high_i=i;
                }
@@ -766,6 +778,7 @@ int OnCalculate(const int rates_total,
             }
             if (midupBuffer[i]!=0 && middownBuffer[i]==0) {
                zigBuffer[i]=low[i];
+               g_zigCount++;
                g_lookfor=1;  //look for zighigh
                low_i=i;
             }
@@ -790,6 +803,8 @@ int OnCalculate(const int rates_total,
                if (k!=0) {
                   zigBuffer[k]=high[k];
                   zigBuffer[i]=low[i];
+                  g_zigCount++;
+                  g_zigCount++;
                   g_lookfor=1;  //look for zighigh
                   low_i=i;
                }
@@ -797,11 +812,17 @@ int OnCalculate(const int rates_total,
             }
             if (middownBuffer[i]!=0 && midupBuffer[i]==0) {
                zigBuffer[i]=high[i];
+               g_zigCount++;
                g_lookfor=-1; //look for ziglow
                high_i=i;
             }
             break;
       }
+      /*
+      if (i==2) {
+         printf("zig_count=%d/%d=%2.1f%%",g_zigCount,g_totalCount,double(g_zigCount)/g_totalCount*100);
+      }
+      */
    }
 
    //14.set for last zig index buffer
@@ -854,12 +875,14 @@ int OnCalculate(const int rates_total,
          case 0:
             if (longdownBuffer[i]!=0 && longupBuffer[i]==0) {
                longzigBuffer[i]=high[i];
+               g_long_zigCount++;
                g_lookfor_long=-1; //look for long ziglow
                high_i=i;
                break;
             }
             if (longupBuffer[i]!=0 && longdownBuffer[i]==0) {
                longzigBuffer[i]=low[i];
+               g_long_zigCount++;
                g_lookfor_long=1;  //look for long zighigh
                low_i=i;
                break;
@@ -885,6 +908,8 @@ int OnCalculate(const int rates_total,
                if (k!=0) {
                   longzigBuffer[k]=low[k];
                   longzigBuffer[i]=high[i];
+                  g_long_zigCount++;
+                  g_long_zigCount++;
                   g_lookfor_long=-1; //look for long ziglow
                   high_i=i;
                }
@@ -892,6 +917,7 @@ int OnCalculate(const int rates_total,
             }
             if (longupBuffer[i]!=0 && longdownBuffer[i]==0) {
                longzigBuffer[i]=low[i];
+               g_long_zigCount++;
                g_lookfor_long=1;  //look for long zighigh
                low_i=i;
             }
@@ -916,6 +942,8 @@ int OnCalculate(const int rates_total,
                if (k!=0) {
                   longzigBuffer[k]=high[k];
                   longzigBuffer[i]=low[i];
+                  g_long_zigCount++;
+                  g_long_zigCount++;
                   g_lookfor_long=1;  //look for zighigh
                   low_i=i;
                }
@@ -923,11 +951,17 @@ int OnCalculate(const int rates_total,
             }
             if (longdownBuffer[i]!=0 && longupBuffer[i]==0) {
                longzigBuffer[i]=high[i];
+               g_long_zigCount++;
                g_lookfor_long=-1; //look for ziglow
                high_i=i;
             }
             break;
       }
+      /*
+      if (i==2) {
+         printf("long_zig_count=%d/%d=%2.1f%%",g_long_zigCount,g_totalCount,double(g_long_zigCount)/g_totalCount*100);
+      }
+      */
    }
 
    //17.set for last zig index buffer
@@ -967,12 +1001,24 @@ int OnCalculate(const int rates_total,
       Print("18:g_last_longzig_time=",g_last_longzig_time);
       Print("18:g_lookfor_long=",g_lookfor_long);
    }
+
    
    /*
    lstUpIdxBuffer[0]=last_short_up_shift;
    lstDownIdxBuffer[0]=last_short_down_shift;
    lstMidUpIdxBuffer[0]=last_mid_up_shift;
    lstMidDownIdxBuffer[0]=last_mid_down_shift;
+
+   Print("limit=",limit,",Time[limit]",Time[limit],",upBuffer[limit]=",upBuffer[limit],",downBuffer[limit]=",downBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",innerBuffer[limit]=",innerBuffer[limit],",outterBuffer[limit]=",outterBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",midupBuffer[limit]=",midupBuffer[limit],",middownBuffer[limit]=",middownBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",longupBuffer[limit]=",longupBuffer[limit],",longdownBuffer[limit]=",longdownBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",lstUpIdxBuffer[limit]=",lstUpIdxBuffer[limit],",lstDownIdxBuffer[limit]=",lstDownIdxBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",lstMidUpIdxBuffer[limit]=",lstMidUpIdxBuffer[limit],",lstMidDownIdxBuffer[limit]=",lstMidDownIdxBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",lstLongUpIdxBuffer[limit]=",lstLongUpIdxBuffer[limit],",lstLongDownIdxBuffer[limit]=",lstLongDownIdxBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",zigBuffer[limit]=",zigBuffer[limit],",lstZigIdxBuffer[limit]=",lstZigIdxBuffer[limit]);
+   Print("limit=",limit,",Time[limit]",Time[limit],",longzigBuffer[limit]=",longzigBuffer[limit],",lstLongZigIdxBuffer[limit]=",lstLongZigIdxBuffer[limit]);
+
    */
    
 //--- return value of prev_calculated for next call
@@ -983,14 +1029,22 @@ int OnCalculate(const int rates_total,
 int InitializeAll()
 {
    printf("init");
-   ArrayInitialize(upBuffer,0.0);
-   ArrayInitialize(downBuffer,0.0);
    ArrayInitialize(innerBuffer,0.0);
    ArrayInitialize(outterBuffer,0.0);
+   ArrayInitialize(upBuffer,0.0);
+   ArrayInitialize(downBuffer,0.0);
    ArrayInitialize(midupBuffer,0.0);
    ArrayInitialize(middownBuffer,0.0);
    ArrayInitialize(longupBuffer,0.0);
    ArrayInitialize(longdownBuffer,0.0);
+   ArrayInitialize(lstUpIdxBuffer,0.0);
+   ArrayInitialize(lstDownIdxBuffer,0.0);
+   ArrayInitialize(lstMidUpIdxBuffer,0.0);
+   ArrayInitialize(lstMidDownIdxBuffer,0.0);
+   ArrayInitialize(lstLongUpIdxBuffer,0.0);
+   ArrayInitialize(lstLongDownIdxBuffer,0.0);
+   ArrayInitialize(lstZigIdxBuffer,0.0);
+   ArrayInitialize(lstLongZigIdxBuffer,0.0);
    //ArrayInitialize(zigBuffer,0.0);      //do not set 0 value
    //ArrayInitialize(longzigBuffer,0.0);      //do not set 0 value
 

@@ -34,6 +34,8 @@ input bool     i_skip_jpychf_usd_relate=false;
 #define SLASH  "/"
 #define DOT    "."
 
+#define MAX_INT 2147483647
+
 //datetime
 #define SEC_H1 3600
 #define SEC_D1 86400
@@ -1496,47 +1498,47 @@ int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift)
    } else {
       curPd=arg_period;
    }
+   datetime cur_time=Time[arg_shift];
    /*
-   datetime cur_t=Time[arg_shift];
-   int cur_d=TimeDayOfWeek(cur_t);
-   int cur_h=TimeHour(cur_t);
-   int cur_mi=TimeMinute(cur_t);   
+   int cur_d=TimeDayOfWeek(cur_time);
+   int cur_h=TimeHour(cur_time);
+   int cur_mi=TimeMinute(cur_time);   
    */
    int ret=0;
    switch (curPd) {
       case PERIOD_M1:
          //return M5's shift
-         arg_larger_shift=arg_shift/5;
+         arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
          ret=PERIOD_M5;
          break;
       case PERIOD_M5:
-         //return M15's shift
-         arg_larger_shift=arg_shift/3;
-         ret=PERIOD_M15;
-         break;
-      case PERIOD_M15:
          //return M30's shift
-         arg_larger_shift=arg_shift/2;
+         arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
          ret=PERIOD_M30;
          break;
-      case PERIOD_M30:
+      case PERIOD_M15:
          //return H1's shift
-         arg_larger_shift=arg_shift/2;
+         arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
          ret=PERIOD_H1;
+         break;
+      case PERIOD_M30:
+         //return H4's shift
+         arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+         ret=PERIOD_H4;
          break;
       case PERIOD_H1:
          //return H4's shift
-         arg_larger_shift=arg_shift/4;
+         arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
          ret=PERIOD_H4;
          break;
       case PERIOD_H4:
          //return D1's shift
-         arg_larger_shift=arg_shift/6;
+         arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
          ret=PERIOD_D1;
          break;
       case PERIOD_D1:
          //return W1's shift
-         arg_larger_shift=arg_shift/5;
+         arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
          ret=PERIOD_W1;
          break;
       default:
@@ -1545,4 +1547,13 @@ int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift)
    }
    
    return ret;
+}
+void PrintTwoDimArray(double &arg_array[][])
+{
+   for (int i=0;i<ArrayRange(arg_array,0);i++) {
+      for (int j=0;j<ArrayRange(arg_array,1);j++) {
+         Print("arg_array[",i,",",j,"]=",arg_array[i][j]);
+      }
+   }
+
 }
