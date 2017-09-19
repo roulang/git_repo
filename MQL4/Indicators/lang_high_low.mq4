@@ -177,30 +177,31 @@ int OnCalculate(const int rates_total,
       
       getNearestHighLowPrice4(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
 
-      if (g_high_low[1][0]>0) {
+      if (g_high_low[1][0]>0) {     //nearest low
          range_high_Buffer[i]=g_high_low[1][0];
          range_high_sht_Buffer[i]=g_high_low[1][1];
       } else {
-         //Print("Time1[",i,"]=",Time[i]);
+         Print("Time1[",i,"]=",Time[i]);
       }
-      if (g_high_low[2][0]>0) {
+      if (g_high_low[2][0]>0) {     //nearest high
          range_low_Buffer[i]=g_high_low[2][0];
          range_low_sht_Buffer[i]=g_high_low[2][1];
       } else {
-         //Print("Time2[",i,"]=",Time[i]);
+         Print("Time2[",i,"]=",Time[i]);
       }
-      if (g_high_low[0][0]>0) {
+      if (g_high_low[0][0]>0) {     //second nearest high
          range_high2_Buffer[i]=g_high_low[0][0];
          range_high2_sht_Buffer[i]=g_high_low[0][1];
       } else {
          //Print("Time0[",i,"]=",Time[i]);
       }
-      if (g_high_low[3][0]>0) {
+      if (g_high_low[3][0]>0) {     //second nearest low
          range_low2_Buffer[i]=g_high_low[3][0];
          range_low2_sht_Buffer[i]=g_high_low[3][1];
       } else {
          //Print("Time3[",i,"]=",Time[i]);
       }
+      
    }
    
 //--- return value of prev_calculated for next call

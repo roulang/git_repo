@@ -1489,8 +1489,9 @@ string covDateString(string arg_date_str,string arg_pat)
 //+------------------------------------------------------------------+
 //| Time Period function
 //| arg_period: 
+//| arg_type:0,short;1,middle;2,long 
 //+------------------------------------------------------------------+
-int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift)
+int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0)
 {
    int curPd;
    if (arg_period==PERIOD_CURRENT) {
@@ -1507,39 +1508,173 @@ int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift)
    int ret=0;
    switch (curPd) {
       case PERIOD_M1:
-         //return M5's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
-         ret=PERIOD_M5;
+         switch (arg_type) {
+            case 0:
+               //return M5's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
+               ret=PERIOD_M5;
+               break;
+            case 1:
+               //return H1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
+               ret=PERIOD_H1;
+               break;
+            case 2:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            default:
+               //return M5's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
+               ret=PERIOD_M5;
+               break;
+         }
+         
          break;
       case PERIOD_M5:
-         //return M30's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
-         ret=PERIOD_M30;
+         switch (arg_type) {
+            case 0:
+               //return M30's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
+               ret=PERIOD_M30;
+               break;
+            case 1:
+               //return H1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
+               ret=PERIOD_H1;
+               break;
+            case 2:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            default:
+               //return M30's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
+               ret=PERIOD_M30;
+               break;
+         }
          break;
       case PERIOD_M15:
-         //return H1's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
-         ret=PERIOD_H1;
+         switch (arg_type) {
+            case 0:
+               //return H1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
+               ret=PERIOD_H1;
+               break;
+            case 1:
+               //return H4's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+               ret=PERIOD_H4;
+               break;
+            case 2:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            default:
+               //return H1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
+               ret=PERIOD_H1;
+               break;
+         }
          break;
       case PERIOD_M30:
-         //return H4's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-         ret=PERIOD_H4;
+         switch (arg_type) {
+            case 0:
+               //return H4's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+               ret=PERIOD_H4;
+               break;
+            case 1:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            case 2:
+               //return W1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
+               ret=PERIOD_W1;
+               break;
+            default:
+               //return H4's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+               ret=PERIOD_H4;
+               break;
+         }
          break;
       case PERIOD_H1:
-         //return H4's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-         ret=PERIOD_H4;
+         switch (arg_type) {
+            case 0:
+               //return H4's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+               ret=PERIOD_H4;
+               break;
+            case 1:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            case 2:
+               //return W1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
+               ret=PERIOD_W1;
+               break;
+            default:
+               //return H4's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
+               ret=PERIOD_H4;
+               break;
+         }
          break;
       case PERIOD_H4:
-         //return D1's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-         ret=PERIOD_D1;
+         switch (arg_type) {
+            case 0:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+            case 1:
+               //return W1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
+               ret=PERIOD_W1;
+               break;
+            case 2:
+               //return MN1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
+               ret=PERIOD_MN1;
+               break;
+            default:
+               //return D1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
+               ret=PERIOD_D1;
+               break;
+         }
          break;
       case PERIOD_D1:
-         //return W1's shift
-         arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-         ret=PERIOD_W1;
+         switch (arg_type) {
+            case 0:
+               //return W1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
+               ret=PERIOD_W1;
+               break;
+            case 1:
+               //return MN1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
+               ret=PERIOD_MN1;
+               break;
+            case 2:
+               //return MN1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
+               ret=PERIOD_MN1;
+               break;
+            default:
+               //return W1's shift
+               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
+               ret=PERIOD_W1;
+               break;
+         }
          break;
       default:
          //unknown
