@@ -1491,7 +1491,7 @@ string covDateString(string arg_date_str,string arg_pat)
 //| arg_period: 
 //| arg_type:0,short;1,middle;2,long 
 //+------------------------------------------------------------------+
-int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0)
+int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0)
 {
    int curPd;
    if (arg_period==PERIOD_CURRENT) {
@@ -1682,6 +1682,12 @@ int getLargerPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_t
    }
    
    return ret;
+}
+int shrinkPeriod(int arg_larger_period,int arg_shift)
+{
+   datetime cur_time=Time[arg_shift];
+   int larger_shift=iBarShift(NULL,arg_larger_period,cur_time);
+   return larger_shift;
 }
 void PrintTwoDimArray(double &arg_array[][])
 {

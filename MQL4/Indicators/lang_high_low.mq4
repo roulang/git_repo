@@ -62,7 +62,7 @@
 #property indicator_type7   DRAW_ARROW
 #property indicator_color7  clrBlack
 //--- plot range high2 shift
-#property indicator_label8  "range_high_shift"
+#property indicator_label8  "range_high2_shift"
 #property indicator_type8   DRAW_ARROW
 #property indicator_color8  clrBlack
 
@@ -79,10 +79,13 @@ double         range_high2_sht_Buffer[];
 //input
 input int      i_range=10;
 input int      i_long=1;
+input int      i_thredhold_pt=0;
+input int      i_expand=0;    //0:not expand,1:expand one level,2:expand two level
 
 //global
-double g_zigBuf[][3];
-double g_high_low[4][2];
+double         g_zigBuf[][3];
+double         g_high_low[4][2];
+int            g_larger_shift=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -167,27 +170,33 @@ int OnCalculate(const int rates_total,
          //break
          //Print("here to set breakpoint");
       }
-      if (High[i]<High[i+1] && Low[i]>Low[i+1]) {     //filter inner bar
-         if (range_low_Buffer[i+1]!=MAX_INT) range_low_Buffer[i]=range_low_Buffer[i+1];
-         if (range_high_Buffer[i+1]!=MAX_INT) range_high_Buffer[i]=range_high_Buffer[i+1];
-         if (range_low2_Buffer[i+1]!=MAX_INT) range_low2_Buffer[i]=range_low2_Buffer[i+1];
-         if (range_high2_Buffer[i+1]!=MAX_INT) range_high2_Buffer[i]=range_high2_Buffer[i+1];
+      if (High[i]<(High[i+1]+i_thredhold_pt*Point) && Low[i]>(Low[i+1]-i_thredhold_pt*Point)) {     //filter inner bar
+         copyToNextValue(i);
          continue;
       }
-      
-      getNearestHighLowPrice4(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
-
-      if (g_high_low[1][0]>0) {     //nearest low
+      int larger_shift=0;
+      int larger_pd=0;
+      if (i_expand==0) {         //not expand
+         getNearestHighLowPrice(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
+      } else if (i_expand==1 || i_expand==2) {  //expand to larger period
+         larger_pd=expandPeriod(PERIOD_CURRENT,i,larger_shift,i_expand);
+         if (g_larger_shift>0 && g_larger_shift==larger_shift) {     //
+            getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long,true);
+         }
+         getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
+         g_larger_shift=larger_shift;
+      }
+      if (g_high_low[1][0]>0) {     //nearest high
          range_high_Buffer[i]=g_high_low[1][0];
          range_high_sht_Buffer[i]=g_high_low[1][1];
       } else {
-         Print("Time1[",i,"]=",Time[i]);
+         //Print("Time1[",i,"]=",Time[i]);
       }
-      if (g_high_low[2][0]>0) {     //nearest high
+      if (g_high_low[2][0]>0) {     //nearest low
          range_low_Buffer[i]=g_high_low[2][0];
          range_low_sht_Buffer[i]=g_high_low[2][1];
       } else {
-         Print("Time2[",i,"]=",Time[i]);
+         //Print("Time2[",i,"]=",Time[i]);
       }
       if (g_high_low[0][0]>0) {     //second nearest high
          range_high2_Buffer[i]=g_high_low[0][0];
@@ -202,13 +211,62 @@ int OnCalculate(const int rates_total,
          //Print("Time3[",i,"]=",Time[i]);
       }
       
+      /*
+      //debug
+      datetime t=Time[i];
+      datetime t1=StringToTime("2017.9.14 15:30");
+      if (t==t1) {
+         Print("time=",t);
+         Print("shift=",i);
+         Print("larger_pd=",larger_pd);
+         Print("larger_shift=",larger_shift);
+         Print("g_larger_shift=",g_larger_shift);
+         Print("cur_price=",cur_price);
+         Print("g_high_low=");
+         PrintTwoDimArray(g_high_low);
+      }
+      */
    }
    
 //--- return value of prev_calculated for next call
    return(rates_total);
 }
 //+------------------------------------------------------------------+
-
+void copyToNextValue(int arg_n)
+{
+   if (range_low_Buffer[arg_n+1]!=MAX_INT) {
+      range_low_Buffer[arg_n]=range_low_Buffer[arg_n+1];
+      if (range_low_sht_Buffer[arg_n+1]>0) {
+         range_low_sht_Buffer[arg_n]=range_low_sht_Buffer[arg_n+1]+1;
+      } else {
+         range_low_sht_Buffer[arg_n]=range_low_sht_Buffer[arg_n+1]-1;
+      }
+   }
+   if (range_high_Buffer[arg_n+1]!=MAX_INT) {
+      range_high_Buffer[arg_n]=range_high_Buffer[arg_n+1];
+      if (range_high_sht_Buffer[arg_n+1]>0) {
+         range_high_sht_Buffer[arg_n]=range_high_sht_Buffer[arg_n+1]+1;
+      } else {
+         range_high_sht_Buffer[arg_n]=range_high_sht_Buffer[arg_n+1]-1;
+      }
+   }
+   if (range_low2_Buffer[arg_n+1]!=MAX_INT) {
+      range_low2_Buffer[arg_n]=range_low2_Buffer[arg_n+1];
+      if (range_low2_sht_Buffer[arg_n+1]>0) {
+         range_low2_sht_Buffer[arg_n]=range_low2_sht_Buffer[arg_n+1]+1;
+      } else {
+         range_low2_sht_Buffer[arg_n]=range_low2_sht_Buffer[arg_n+1]-1;
+      }
+   }
+   if (range_high2_Buffer[arg_n+1]!=MAX_INT) {
+      range_high2_Buffer[arg_n]=range_high2_Buffer[arg_n+1];
+      if (range_high2_sht_Buffer[arg_n+1]>0) {
+         range_high2_sht_Buffer[arg_n]=range_high2_sht_Buffer[arg_n+1]+1;
+      } else {
+         range_high2_sht_Buffer[arg_n]=range_high2_sht_Buffer[arg_n+1]-1;
+      }
+   }
+}
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
