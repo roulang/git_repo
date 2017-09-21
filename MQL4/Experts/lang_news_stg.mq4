@@ -66,21 +66,12 @@ void OnTick()
 {
 //---
    int bar_shift=isNewBar();
-   if (bar_shift==0) return;
+   if (bar_shift==0) {
+      return;
+   }
 
    datetime now=Time[bar_shift-1];
    
-/*
-   bool isPd2=isNewsPd2(NULL,bar_shift-1);    //news zone control
-   if (isPd2 && !has_order) {
-      //Print("Open oo order");
-      if (OrderOO(mag,i_OPT,i_SL,-1)) {
-         has_order=true;
-         orderdt=now;
-         return;
-      }
-   }
-*/
    int isPd3=isNewsPd3(NULL,bar_shift-1);    //news zone control
    if (isPd3>0 && !has_order) {
       if (!i_rate_ctl) {
