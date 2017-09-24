@@ -1077,7 +1077,7 @@ string dToStr(string arg_sym,double arg_value,int arg_digits=0)
    return DoubleToStr(arg_value,vdigits);
 }
 
-int writeOrderHistoryToFile()
+int writeOrderHistoryToFile(int arg_wrt_all=0)
 {
 
    int orderTickets[];
@@ -1160,7 +1160,10 @@ int writeOrderHistoryToFile()
          */
          s_Order order;
          order.type=OrderType();
-         if (order.type!=OP_BUY && order.type!=OP_SELL) continue;   //skip pending cancel order
+         //modified at 20170921
+         if (arg_wrt_all==0) {
+            if (order.type!=OP_BUY && order.type!=OP_SELL) continue;   //skip pending cancel order
+         }
          order.tic=OrderTicket();
          int t=ArrayBsearch(orderTickets,order.tic);
          if (orderTickets[t]==order.tic) continue;  //found order exists in the file, skip.
