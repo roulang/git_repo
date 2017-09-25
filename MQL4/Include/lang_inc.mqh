@@ -11,6 +11,7 @@
 #include <stdlib.mqh> 
 
 //input
+input int      i_clt_svr_offset=0;
 input bool     i_debug=false;
 input int      i_equity_percent=1;
 input bool     i_sendmail=false;
@@ -40,13 +41,20 @@ input bool     i_skip_jpychf_usd_relate=false;
 #define SEC_H1 3600
 #define SEC_D1 86400
 
-//int      EquityPercent = 1;
+//each time period (GMT)
+const string us1="13:00";  //usa
+const string ue2="21:00";  //usa
+const string as1="00:00";  //asia
+const string ae2="08:00";  //asia
+const string gs1="07:00";  //europe
+const string ge2="15:00";  //europe
+const  int ASIA_PD = 1;
+const  int AMA_PD = 4;
+const  int EUR_PD = 2;
+
 int      LossStopPt = 150;
 int      ProfitStopPt = 300;
 int      OOPt = 100;
-//double   Vol = 0.1;
-
-//bool     debug = false;
 
 //struct
 struct s_News
@@ -82,7 +90,8 @@ const string   g_NewsFileName="lang_news.ex4.csv";
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
 s_News   g_News[];
-int      g_TimeZoneOffset=SEC_H1*5;
+//int      g_TimeZoneOffset=SEC_H1*5;
+int      g_clt_srv_offset=0;
 int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
@@ -808,6 +817,7 @@ double getVolume(int ep, double ls_point)
 void ea_init()
 {
    CurrentTimeStamp = Time[0];
+   getClientServerOffset();
 }
 //+------------------------------------------------------------------+
 // isNewBar: check new bar
@@ -1329,6 +1339,7 @@ void releaseFileLock()
 int news_read()
 {
    int cnt=0;
+   int time_offset=getClientServerOffset();
    int h=FileOpen(g_NewsFileName,FILE_CSV|FILE_SHARE_READ,',');
    if(h!=INVALID_HANDLE) {
       //read record count
@@ -1354,7 +1365,7 @@ int news_read()
             if(i_debug) Print(g_News[cnt].n);
             g_News[cnt].cur=FileReadString(h);
             if(i_debug) Print(g_News[cnt].cur);
-            g_News[cnt].dt=FileReadDatetime(h)-g_TimeZoneOffset;
+            g_News[cnt].dt=FileReadDatetime(h)-time_offset;
             if(i_debug) Print(g_News[cnt].dt);
             g_News[cnt].for_rate=FileReadNumber(h);
             if(i_debug) Print(g_News[cnt].for_rate);
@@ -1468,7 +1479,7 @@ bool isNewsRelated(string arg_symbol,string arg_currency)
          return false;
       return true;
    }
-   if(StringFind(cur,arg_currency)>=0)
+   if(StringFind(cur,arg_currency)>=0 || (StringCompare(arg_currency,"USD")==0 && StringFind(cur,"GOLD")>=0))
       return true;
    
    return false;
@@ -1700,4 +1711,167 @@ void PrintTwoDimArray(double &arg_array[][])
       }
    }
 
+}
+int getServerGMTOffset(void)
+{
+   datetime srv_t=TimeCurrent();
+   datetime gmt=TimeGMT();
+   datetime t_offset=srv_t-gmt;
+   int h_offset=TimeHour(t_offset);
+   int m_offset=TimeMinute(t_offset);
+   if (m_offset>=30) h_offset++;
+   
+   return h_offset;
+}
+int getClientServerOffset(void)
+{
+   if (i_clt_svr_offset!=0) {
+      g_clt_srv_offset=i_clt_svr_offset;
+      return g_clt_srv_offset;
+   }
+   if (g_clt_srv_offset==0) {
+      int clt_offset=-TimeGMTOffset()/SEC_H1;
+      int srv_offset=getServerGMTOffset();
+      g_clt_srv_offset=clt_offset-srv_offset;
+      return g_clt_srv_offset;
+   }
+   return g_clt_srv_offset;
+}
+//+------------------------------------------------------------------+
+//| Time function
+//+------------------------------------------------------------------+
+bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
+{
+   bool ret=false;
+   string cur;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
+
+   int pd=TimepdValue(arg_shift,arg_bef,arg_aft);
+   
+   if (i_debug) {
+      printf("symbo=%s,pd=%d",cur,pd);
+   }
+   int pd2=pd & AMA_PD;
+   if (pd2==AMA_PD) return true;
+    
+   if          (StringFind(cur,EURUSD)>=0) {
+      pd2=pd & EUR_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==EUR_PD) return true;
+   } else if   (StringFind(cur,USDJPY)>=0) {
+      pd2= pd & ASIA_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==ASIA_PD) return true;
+   } else if   (StringFind(cur,AUDUSD)>=0) {
+      pd2= pd & ASIA_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==ASIA_PD) return true;
+   } else if   (StringFind(cur,NZDUSD)>=0) {
+      pd2= pd & ASIA_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==ASIA_PD) return true;
+   } else if   (StringFind(cur,USDCAD)>=0) {
+   } else if   (StringFind(cur,GBPUSD)>=0) {
+      pd2=pd & EUR_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==EUR_PD) return true;
+   } else if   (StringFind(cur,USDCHF)>=0) {
+      pd2=pd & EUR_PD;
+      if (i_debug) {
+         printf("pd2=%d",pd2);
+      }
+      if (pd2==EUR_PD) return true;
+   } else if   (StringFind(cur,XAUUSD)>=0 || StringFind(cur,GOLD)>=0) {
+   }
+   return false;
+}
+//+------------------------------------------------------------------+
+//| Time strategy
+//| ret^ASIA_PD==1:asia
+//| ret^AMA_PD==4:america
+//| ret^EUR_PD==2:europa
+//+------------------------------------------------------------------+
+int TimepdValue(int arg_shift,int arg_bef=0,int arg_aft=0,int arg_tz_offset_h=0)
+{
+   int ret=0;
+
+   int srv_offset_h;
+   if (arg_tz_offset_h==0) {
+      srv_offset_h=getServerGMTOffset();
+   } else {
+      srv_offset_h=arg_tz_offset_h;
+   }
+   
+   datetime svr_t=Time[arg_shift];
+   datetime t_gmo=svr_t-srv_offset_h*SEC_H1;
+   string t=TimeToStr(t_gmo,TIME_MINUTES);     
+
+   if (arg_bef==0 && arg_aft==0) {
+      //asia
+      if (StringCompare(t,as1,true)>=0 && StringCompare(t,ae2,true)<0) {
+         ret+=ASIA_PD;
+      }
+      //euro
+      if (StringCompare(t,gs1,true)>=0 && StringCompare(t,ge2,true)<0) {
+         ret+=EUR_PD;
+      }
+      //america
+      if (StringCompare(t,us1,true)>=0 && StringCompare(t,ue2,true)<0) {
+         ret+=AMA_PD;
+      }
+      return ret;
+   }
+   
+   datetime tm0=t_gmo;
+   datetime tm1=t_gmo+arg_bef;
+   datetime tm2=t_gmo-arg_aft;
+   int d0=TimeDay(tm0);
+   int d1=TimeDay(tm1);
+   int d2=TimeDay(tm2);
+
+   datetime t0,t1,t2;
+   if (d0!=d1) {
+      t0=StringToTime(StringConcatenate("2010.10.09 ",t));
+   } else if (d0!=d2) {
+      t0=StringToTime(StringConcatenate("2010.10.11 ",t));
+   } else {
+      t0=StringToTime(StringConcatenate("2010.10.10 ",t));
+   }
+   
+   //asia
+   t1=StringToTime(StringConcatenate("2010.10.10 ",as1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.10 ",ae2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=ASIA_PD;
+   }
+   //euro
+   t1=StringToTime(StringConcatenate("2010.10.10 ",gs1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.10 ",ge2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=EUR_PD;
+   }
+   
+   //america
+   t1=StringToTime(StringConcatenate("2010.10.10 ",us1))-arg_bef;
+   t2=StringToTime(StringConcatenate("2010.10.10 ",ue2))+arg_aft;
+   if (t0>=t1 && t0<t2) {
+      //Print("t0=",t0,",t1=",t1,",t2=",t2);
+      ret+=AMA_PD;
+   }
+   
+   return ret;
+   
 }

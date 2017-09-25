@@ -140,8 +140,8 @@ void OnTimer()
 void DrawObjects(int arg_shift)
 {
    string cur=Symbol();
-   int pd=TimepdValue2(arg_shift);
-   int pd2=TimepdValue2(arg_shift+1);
+   int pd=TimepdValue(arg_shift);
+   int pd2=TimepdValue(arg_shift+1);
    //if (pd==0 && pd2==0) return;
 
    long current_chart_id=ChartID();
