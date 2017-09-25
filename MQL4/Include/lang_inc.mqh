@@ -17,7 +17,7 @@ input int      i_equity_percent=1;
 input bool     i_sendmail=false;
 input bool     i_for_test=false;
 input double   i_max_lots=0.1;
-input int      i_slippage=50;
+input int      i_slippage=5;
 input bool     i_skip_jpychf_usd_relate=false;
 
 //currency
@@ -245,8 +245,9 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    //debug>>>>
 
    int ret = 0;
+   int slippage=getSlippage(NULL,i_slippage);
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, i_slippage, ls_price, ps_price, "", argMag, 0, Green);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Green);
    }
    
    if (ret <0 )
@@ -410,8 +411,9 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    //debug>>>>
 
    int ret = 0;
+   int slippage=getSlippage(NULL,i_slippage);
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, i_slippage, ls_price, ps_price, "", argMag, 0, Red);
+      ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Red);
    }
    
    if (ret < 0)
@@ -494,8 +496,9 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    }
    //debug>>>>
 
+   int slippage=getSlippage(NULL,i_slippage);
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    
    if (ret > 0) {
@@ -507,7 +510,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    }
    
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    
    if (ret > 0) {
@@ -587,9 +590,11 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    }
    //debug>>>>
 
+   int slippage=getSlippage(NULL,i_slippage);
+
    int ret=0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
@@ -601,7 +606,7 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
 
    ret=0;
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
@@ -676,8 +681,10 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    }
    //debug>>>>
 
+   int slippage=getSlippage(NULL,i_slippage);
+
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, i_slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell order
+      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell order
    }
    
    if (ret > 0) {
@@ -689,7 +696,7 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    }
    
    if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, i_slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy order
+      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy order
    }
    
    if (ret > 0) {
@@ -1873,5 +1880,19 @@ int TimepdValue(int arg_shift,int arg_bef=0,int arg_aft=0,int arg_tz_offset_h=0)
    }
    
    return ret;
-   
+}
+int getSlippage(string arg_symbol,int arg_slip_pips)
+{
+   string cur;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
+
+   int calc_digits=(int)MarketInfo(cur,MODE_DIGITS);
+   int calc_slip_pips=0;
+   if (calc_digits==2 || calc_digits==4) {
+      calc_slip_pips=arg_slip_pips;
+   } else if (calc_digits==3 || calc_digits==5) {
+      calc_slip_pips=arg_slip_pips*10;
+   }
+   return calc_slip_pips;
 }
