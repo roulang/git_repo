@@ -10,16 +10,6 @@
 #include <stderror.mqh> 
 #include <stdlib.mqh> 
 
-//input
-input int      i_clt_svr_offset=0;
-input bool     i_debug=false;
-input int      i_equity_percent=1;
-input bool     i_sendmail=false;
-input bool     i_for_test=false;
-input double   i_max_lots=0.1;
-input int      i_slippage=5;
-input bool     i_skip_jpychf_usd_relate=false;
-
 //currency
 #define EURUSD "EURUSD"
 #define USDJPY "USDJPY"
@@ -39,6 +29,17 @@ input bool     i_skip_jpychf_usd_relate=false;
 
 //datetime
 #define SEC_H1 3600
+
+//input
+input bool     i_debug=false;
+input int      i_equity_percent=1;
+input bool     i_sendmail=false;
+input bool     i_for_test=false;
+input double   i_max_lots=0.1;
+input int      i_slippage=5;
+input bool     i_skip_jpychf_usd_relate=false;
+input int      i_client_server_timezone_offset=0;
+
 #define SEC_D1 86400
 
 //each time period (GMT)
@@ -91,7 +92,6 @@ datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
 s_News   g_News[];
 //int      g_TimeZoneOffset=SEC_H1*5;
-int      g_clt_srv_offset=0;
 int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
@@ -1347,6 +1347,7 @@ int news_read()
 {
    int cnt=0;
    int time_offset=getClientServerOffset();
+   Print("time_offset=",time_offset);
    int h=FileOpen(g_NewsFileName,FILE_CSV|FILE_SHARE_READ,',');
    if(h!=INVALID_HANDLE) {
       //read record count
@@ -1372,7 +1373,7 @@ int news_read()
             if(i_debug) Print(g_News[cnt].n);
             g_News[cnt].cur=FileReadString(h);
             if(i_debug) Print(g_News[cnt].cur);
-            g_News[cnt].dt=FileReadDatetime(h)-time_offset;
+            g_News[cnt].dt=FileReadDatetime(h)-time_offset*SEC_H1;
             if(i_debug) Print(g_News[cnt].dt);
             g_News[cnt].for_rate=FileReadNumber(h);
             if(i_debug) Print(g_News[cnt].for_rate);
@@ -1423,29 +1424,13 @@ bool isNewsPd(string arg_sym,int arg_shift,int arg_news_bef=0,int arg_news_aft=0
    if (arg_news_aft==0) arg_news_aft=g_news_aft;
    
    for (int i=0;i<ArraySize(g_News);i++) {
-      if (StringFind(cur,g_News[i].cur)>=0) {
+      if (isNewsRelated(cur,g_News[i].cur)) {
          datetime t=Time[arg_shift];
          datetime t2=g_News[i].dt;
-         if (t>=(t2-arg_news_bef) && t<(t2+arg_news_aft)) return true;
-      }
-   }
-   
-   return false;
-}
-//+------------------------------------------------------------------+
-//| Time of news function
-//+------------------------------------------------------------------+
-bool isNewsPd2(string symbol,int shift)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-   
-   for (int i=0;i<ArraySize(g_News);i++) {
-      if (StringFind(cur,g_News[i].cur)>=0) {
-         datetime t=Time[shift];
-         datetime t2=g_News[i].dt;
-         if (t>=(t2-60) && t<t2) return true;
+         if (t>=(t2-arg_news_bef) && t<(t2+arg_news_aft)) {
+            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2);
+            return true;
+         }
       }
    }
    
@@ -1462,11 +1447,11 @@ int isNewsPd3(string symbol,int shift)
    else cur=symbol;
    
    for (int i=0;i<ArraySize(g_News);i++) {
-      //if (StringFind(cur,g_News[i].cur)>=0) {
       if (isNewsRelated(cur,g_News[i].cur)) {
          datetime t=Time[shift];
          datetime t2=g_News[i].dt;
          if (t>=(t2-60) && t<t2) {
+            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2,",t2-60=",(t2-60));
             if (g_News[i].for_rate==0) return 1;
             if (g_News[i].for_rate==1) return 2;
          }
@@ -1732,17 +1717,12 @@ int getServerGMTOffset(void)
 }
 int getClientServerOffset(void)
 {
-   if (i_clt_svr_offset!=0) {
-      g_clt_srv_offset=i_clt_svr_offset;
-      return g_clt_srv_offset;
+   if (i_for_test && i_client_server_timezone_offset!=0) {
+      return i_client_server_timezone_offset;
    }
-   if (g_clt_srv_offset==0) {
-      int clt_offset=-TimeGMTOffset()/SEC_H1;
-      int srv_offset=getServerGMTOffset();
-      g_clt_srv_offset=clt_offset-srv_offset;
-      return g_clt_srv_offset;
-   }
-   return g_clt_srv_offset;
+   int clt_offset=-TimeGMTOffset()/SEC_H1;
+   int srv_offset=getServerGMTOffset();
+   return(clt_offset-srv_offset);
 }
 //+------------------------------------------------------------------+
 //| Time function

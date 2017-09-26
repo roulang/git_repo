@@ -75,7 +75,7 @@ void OnTick()
    int isPd3=isNewsPd3(NULL,bar_shift-1);    //news zone control
    if (isPd3>0 && !has_order) {
       if (!i_rate_ctl) {
-         //Print("Open oo order");
+         //Print("Open oo order,",now);
          if (OrderOO(mag,i_OPT,i_SL,-1)) {
             has_order=true;
             orderdt=now;
@@ -83,13 +83,14 @@ void OnTick()
          }
       } else {
          if (isPd3==1) {            //not rate change news
-            //Print("Open oo order");
+            //Print("Open oo order,",now);
             if (OrderOO(mag,i_OPT,i_SL,-1)) {
                has_order=true;
                orderdt=now;
                return;
             }
          } else if (isPd3==2) {     //is rate change news
+            //Print("Open oo3 order,",now);
             if (OrderOO3(mag,i_rate_SL,-1)) {
                has_order=true;
                orderdt=now;
