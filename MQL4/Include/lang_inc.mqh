@@ -38,7 +38,7 @@ input bool     i_for_test=false;
 input double   i_max_lots=0.1;
 input int      i_slippage=5;
 input bool     i_skip_jpychf_usd_relate=false;
-input int      i_client_server_timezone_offset=0;
+input int      i_server_timezone_offset=0;
 
 #define SEC_D1 86400
 
@@ -95,7 +95,7 @@ s_News   g_News[];
 int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
-
+int      g_srv_tz_offset=0;
 
 //+------------------------------------------------------------------+
 // OrderBuy (auto set risk volume) deprecated
@@ -1706,22 +1706,38 @@ void PrintTwoDimArray(double &arg_array[][])
 }
 int getServerGMTOffset(void)
 {
+   if (g_srv_tz_offset!=0) {
+      return g_srv_tz_offset;
+   }   
+
    datetime srv_t=TimeCurrent();
+   //Print("srv_t=",srv_t);
    datetime gmt=TimeGMT();
-   datetime t_offset=srv_t-gmt;
+   //Print("gmt=",gmt);
+   datetime t_offset;
+   if (srv_t>gmt) {
+      t_offset=srv_t-gmt;
+   } else {
+      t_offset=gmt-srv_t;
+   }
+   //Print("t_offset=",t_offset);
    int h_offset=TimeHour(t_offset);
    int m_offset=TimeMinute(t_offset);
    if (m_offset>=30) h_offset++;
    
-   return h_offset;
+   g_srv_tz_offset=h_offset;
+   
+   return g_srv_tz_offset;
 }
 int getClientServerOffset(void)
 {
-   if (i_for_test && i_client_server_timezone_offset!=0) {
-      return i_client_server_timezone_offset;
+   if (i_for_test) {
+      g_srv_tz_offset=i_server_timezone_offset;
    }
    int clt_offset=-TimeGMTOffset()/SEC_H1;
+   //Print("clt_offset=",clt_offset);
    int srv_offset=getServerGMTOffset();
+   //Print("srv_offset=",srv_offset);
    return(clt_offset-srv_offset);
 }
 //+------------------------------------------------------------------+
