@@ -30,8 +30,8 @@ input int      i_news_bef=15*60;             //news before 15min
 input int      i_news_aft=60*60;             //news after 1 hour
 input bool     i_update_news=true;           //news update control
 input bool     i_his_order_wrt=false;        //history order write control
-input datetime i_tt_start=D'05:30:00';       //english tea(GMT)
-input datetime i_tt2_start=D'22:00:00';      //english japan(GMT)
+input datetime i_tt_start=D'07:30:00';       //english tea(GMT)
+input datetime i_tt2_start=D'00:00:00';      //english japan(GMT)
 input int      i_timeoffset=SEC_H1*4.25;     //from 6:15 to 10:15,4.25H
 input int      i_timeoffset2=SEC_H1*3;       //from 0:00 to 03:00,3H
 //global
@@ -168,7 +168,7 @@ void DrawObjects(int arg_shift)
    } else if   (StringFind(cur,GBPUSD)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
-      DrawTimeRec(current_chart_id,arg_shift,i_tt_start,i_timeoffset);   //GBPUSD tt 10:30(GMT+5) start,from 6:15 to 10:15,4.25H
+      DrawTimeRec(current_chart_id,arg_shift,i_tt_start,i_timeoffset);   //GBPUSD tt 10:30(GMT+3) start,from 6:15 to 10:15,4.25H
    } else if   (StringFind(cur,USDCHF)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,AMA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
@@ -177,7 +177,7 @@ void DrawObjects(int arg_shift)
    } else if   (StringFind(cur,GBPJPY)>=0) {
       DrawTimeZone(current_chart_id,widx,pd,pd2,ASIA_PD,arg_shift);
       DrawTimeZone(current_chart_id,widx,pd,pd2,EUR_PD,arg_shift);
-      DrawTimeRec(current_chart_id,arg_shift,i_tt2_start,i_timeoffset2);   //GBPJPY 03:00(GMT+5) start,from 0:0 to 3:0,3H
+      DrawTimeRec(current_chart_id,arg_shift,i_tt2_start,i_timeoffset2);   //GBPJPY 03:00(GMT+3) start,from 0:0 to 3:0,3H
    }
    
 }
@@ -306,7 +306,7 @@ void DrawTimeRec(long arg_chart_id,int arg_shift,datetime arg_start_time,int arg
    int h=TimeHour(Time[arg_shift]);
    int mi=TimeMinute(Time[arg_shift]);
    datetime cur_tm=Time[arg_shift];
-   int st_h=TimeHour(arg_start_time)+getClientServerOffset();
+   int st_h=TimeHour(arg_start_time)+g_srv_tz_offset;
    if (st_h>=24) st_h -= 24;
    int st_mi=TimeMinute(arg_start_time);
    //Print("st_h=",st_h,",st_mi=",st_mi);
