@@ -85,7 +85,8 @@ struct s_Order
 
 //global
 const string   g_LockFileName="#Lock#";
-const string   g_OrderHisFileName="lang_history_orders.csv";   //history order data file
+const string   g_OrderHisFileName="lang_history_orders.csv";            //history order data file
+const string   g_OrderHisFileName_all="lang_history_orders_all.csv";    //history order data file(all)
 const string   g_NewsFileName="lang_news.ex4.csv";
 
 datetime CurrentTimeStamp;
@@ -1098,8 +1099,13 @@ int writeOrderHistoryToFile(int arg_wrt_all=0)
 {
 
    int orderTickets[];
-   
-   int h=FileOpen(g_OrderHisFileName,FILE_CSV|FILE_SHARE_READ,',');
+   string file_name;
+   if (arg_wrt_all==0) {
+      file_name=g_OrderHisFileName;
+   } else {
+      file_name=g_OrderHisFileName_all;
+   }
+   int h=FileOpen(file_name,FILE_CSV|FILE_SHARE_READ,',');
    if(h==INVALID_HANDLE) {
       Print("Operation FileOpen failed, error: ",GetLastError());
       return 0;
@@ -1128,7 +1134,7 @@ int writeOrderHistoryToFile(int arg_wrt_all=0)
    
    Print("write history order file");
    ResetLastError();
-   h=FileOpen(g_OrderHisFileName,FILE_READ|FILE_WRITE|FILE_CSV,',');
+   h=FileOpen(file_name,FILE_READ|FILE_WRITE|FILE_CSV,',');
    if(h==INVALID_HANDLE) {
       Print("Operation FileOpen failed, error: ",GetLastError());
       return 0;
