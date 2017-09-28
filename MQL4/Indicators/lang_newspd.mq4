@@ -311,7 +311,6 @@ void DrawTimeRec(long arg_chart_id,int arg_shift,datetime arg_start_time,int arg
    int st_mi=TimeMinute(arg_start_time);
    //Print("st_h=",st_h,",st_mi=",st_mi);
    if (h==st_h && mi==st_mi) {
-      
       int b_ed=iBarShift(NULL,PERIOD_CURRENT,cur_tm-arg_timeoffset);
       int b_st=arg_shift+1;
       int b_range=b_ed-b_st+1;
@@ -320,6 +319,8 @@ void DrawTimeRec(long arg_chart_id,int arg_shift,datetime arg_start_time,int arg
       int high=iHighest(NULL,PERIOD_CURRENT,MODE_HIGH,b_range,b_st);
       double high_p=High[high];
       double low_p=Low[low];
+      double st_p=Close[b_ed];
+      double ed_p=Close[b_st];
       //Print("ilow=",low,",ihigh=",high);
       //Print("low=",low_p,",high=",high_p);
       
@@ -330,5 +331,9 @@ void DrawTimeRec(long arg_chart_id,int arg_shift,datetime arg_start_time,int arg
          Print("Object Create Error: ", ErrorDescription(GetLastError()));
       }
       ObjectSetInteger(arg_chart_id,o,OBJPROP_BACK,true);
+      int c;
+      if (st_p<ed_p) c=clrDarkGreen;
+      else c=clrMaroon;
+      ObjectSetInteger(arg_chart_id,o,OBJPROP_COLOR,c);
    }
 }
