@@ -15,7 +15,7 @@ input int      i_SL=100;         //take lose point
 input int      i_rate_SL=100;    //take lose point(rate control)
 input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
-input bool     i_rate_ctl=true;  //rate control(not do OO,avoid slippage)
+input bool     i_rate_ctl=false; //rate control(not do OO,avoid slippage)
 
 //--- global
 //string   com="event stg";
