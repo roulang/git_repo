@@ -1503,7 +1503,7 @@ string covDateString(string arg_date_str,string arg_pat)
 //| arg_period: 
 //| arg_type:0,short;1,middle;2,long 
 //+------------------------------------------------------------------+
-int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0)
+int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0,int arg_period2=0)
 {
    int curPd;
    if (arg_period==PERIOD_CURRENT) {
@@ -1538,8 +1538,8 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                break;
             default:
                //return M5's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
-               ret=PERIOD_M5;
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          
@@ -1562,9 +1562,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_D1;
                break;
             default:
-               //return M30's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
-               ret=PERIOD_M30;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
@@ -1586,9 +1586,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_D1;
                break;
             default:
-               //return H1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
-               ret=PERIOD_H1;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
@@ -1610,9 +1610,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_W1;
                break;
             default:
-               //return H4's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-               ret=PERIOD_H4;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
@@ -1634,9 +1634,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_W1;
                break;
             default:
-               //return H4's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-               ret=PERIOD_H4;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
@@ -1658,9 +1658,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_MN1;
                break;
             default:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
@@ -1682,9 +1682,9 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_MN1;
                break;
             default:
-               //return W1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-               ret=PERIOD_W1;
+               //return specific shift
+               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+               ret=arg_period2;
                break;
          }
          break;
