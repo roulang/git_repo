@@ -446,7 +446,7 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
 }
 
 //+------------------------------------------------------------------+
-//| get nearest high and low price (use zigzag middle point)
+//| get nearest high and low price (use lang_zig_zag indicator)
 //| arg_shift: bar shift
 //| &arg_zig_buf[][]: to store high and low zig value.[0]:time,[1]:value,[2]:shift
 //| &arg_high_low[][]: to store last two high and low zig value.four items,
@@ -646,18 +646,18 @@ int isTrendStgClose(int arg_shift,int arg_period=PERIOD_CURRENT)
    return 0;
 }
 //+------------------------------------------------------------------+
-//| Break and Bounce Open (use zigzag)
+//| Hit break and rebound (use lang_zig_zag)
 //| date: 2017/09/11
 //| arg_shift: bar shift
 //| arg_thpt:threahold point
-//| return value: +2,up break;-2,down break;+1,bounce up;-1,bounce down;0:n/a
+//| return value: rebound(up),+1;rebound(down),-1;0:n/a
 //+------------------------------------------------------------------+
-int isBreak_Bounce_Open(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][])
+int isBreak_Rebound_Open(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],double &arg_sup_value)
 {
    
    int bar_shift=arg_shift+1;
    double last_price=Close[bar_shift];
-
+   
    getNearestHighLowPrice(last_price,PERIOD_CURRENT,bar_shift,arg_lengh,arg_zig_buf,arg_high_low,1);
    //Print("1.zigBuf=");
    //PrintTwoDimArray(arg_zig_buf);
@@ -673,21 +673,23 @@ int isBreak_Bounce_Open(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig
    if (arg_high_low[2][0]>0) {       //nearest low
       range_low=arg_high_low[2][0];
    }
+   
    double break_offset=arg_thpt*Point;
    
-   if (range_high>0 && High[arg_shift]>range_high) {   //break up
-      if (Close[arg_shift]>(range_high+break_offset)) {  //up break
-         //Print("Close=",Close[arg_shift],",high=",range_high+break_offset);
-         return 2;
+   if (range_high>0 && High[arg_shift]>(range_high+break_offset)) {   //hit high
+      if ((Open[arg_shift]>(Close[arg_shift]+break_offset)) && Close[arg_shift]<(range_high-break_offset)) {  //rebound(down)
+         arg_sup_value=High[arg_shift];
+         return -1;
       }
-      if (Close[arg_shift]<(range_high)) return -1;      //bounce down
    }
-   if (range_low>0 && Close[arg_shift]<range_low) {   //break down
-      if (Close[arg_shift]<(range_low-break_offset)) {   //down break
+   if (range_low>0 && Low[arg_shift]<(range_low-break_offset)) {     //hit low
+      if ((Open[arg_shift]<(Close[arg_shift]-break_offset)) && Close[arg_shift]>(range_low+break_offset)) {   //rebound(up)
          //Print("Close=",Close[arg_shift],",low=",range_low-break_offset);
-         return -2;
+         arg_sup_value=Low[arg_shift];
+         return 1;
       }
-      if (Close[arg_shift]>(range_low)) return 1;        //bounce up
    }
+
+   arg_sup_value=0;
    return 0;
 }
