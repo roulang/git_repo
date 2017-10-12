@@ -68,6 +68,7 @@ double         pivot_Buffer[];
 
 //global
 int            g_last_shift=0;
+double         g_pivot_buf[5];
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -134,28 +135,12 @@ int OnCalculate(const int rates_total,
          //Print("here to set breakpoint");
       }
       
-      int larger_sht;
-      int larger_pd=expandPeriod(PERIOD_CURRENT,i,larger_sht,-1,PERIOD_D1);
-      larger_sht=larger_sht+1;
-      if (g_last_shift !=0 && g_last_shift==larger_sht) {
-         pivot_Buffer[i]=pivot_Buffer[i+1];
-         high_Buffer[i]=high_Buffer[i+1];
-         low_Buffer[i]=low_Buffer[i+1];
-         high2_Buffer[i]=high2_Buffer[i+1];
-         low2_Buffer[i]=low2_Buffer[i+1];
-         continue;
-      }
-      double h=iHigh(NULL,larger_pd,larger_sht);
-      double l=iLow(NULL,larger_pd,larger_sht);
-      double c=iClose(NULL,larger_pd,larger_sht);
-      double p=NormalizeDouble((h+l+c)/3,Digits);
-      pivot_Buffer[i]=p;
-      high_Buffer[i]=2*p-l;
-      low_Buffer[i]=2*p-h;
-      high2_Buffer[i]=p+(h-l);
-      low2_Buffer[i]=p-(h-l);
-      g_last_shift=larger_sht;
-      
+      getPivotValue(PERIOD_CURRENT,i,g_pivot_buf,g_last_shift);
+      pivot_Buffer[i]=g_pivot_buf[0];
+      high_Buffer[i]=g_pivot_buf[1];
+      low_Buffer[i]=g_pivot_buf[2];
+      high2_Buffer[i]=g_pivot_buf[3];
+      low2_Buffer[i]=g_pivot_buf[4];
    }
    
 //--- return value of prev_calculated for next call
@@ -166,6 +151,8 @@ int OnCalculate(const int rates_total,
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
+
+   ArrayInitialize(g_pivot_buf,0);
 
 //--- first counting position
    return(Bars-1);

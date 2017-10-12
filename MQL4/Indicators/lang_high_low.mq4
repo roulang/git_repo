@@ -3,7 +3,7 @@
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
-//use lang_zig_zap indicator
+//use lang_zig_zag indicator
 #property copyright "Copyright 2017, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
@@ -81,12 +81,15 @@ double         range_high2_sht_Buffer[];
 input int      i_range=10;
 input int      i_long=1;
 input int      i_thredhold_pt=0;
-input int      i_expand=0;    //0:not expand,1:expand one level,2:expand two level
+input int      i_expand=0;          //0:not expand,1:expand one level,2:expand two level
+input int      i_add_pivot=0;       //0:not add pivot value,1:add pivot value
 
 //global
 double         g_zigBuf[][3];
 double         g_high_low[4][2];
 int            g_larger_shift=0;
+double         g_pivotBuf[5];
+int            g_pivot_sht=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -102,7 +105,8 @@ int OnInit()
    ArrayResize(g_zigBuf,i_range);
    ArrayInitialize(g_zigBuf,0);
    ArrayInitialize(g_high_low,0);
-
+   ArrayInitialize(g_pivotBuf,0);
+   
 //--- indicator buffers mapping
    SetIndexBuffer(0,range_low_Buffer);
    SetIndexBuffer(1,range_high_Buffer);
@@ -178,13 +182,16 @@ int OnCalculate(const int rates_total,
       int larger_shift=0;
       int larger_pd=0;
       if (i_expand==0) {         //not expand
-         getNearestHighLowPrice(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
+         //getNearestHighLowPrice(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
+         getNearestHighLowPrice2(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
       } else if (i_expand==1 || i_expand==2) {  //expand to larger period
          larger_pd=expandPeriod(PERIOD_CURRENT,i,larger_shift,i_expand);
          if (g_larger_shift>0 && g_larger_shift==larger_shift) {     //
-            getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long,true);
+            //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long,true);
+            getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,true);
          }
-         getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
+         //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
+         getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
          g_larger_shift=larger_shift;
       }
       if (g_high_low[1][0]>0) {     //nearest high
