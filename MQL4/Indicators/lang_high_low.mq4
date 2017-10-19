@@ -189,10 +189,11 @@ int OnCalculate(const int rates_total,
          if (g_larger_shift>0 && g_larger_shift==larger_shift) {     //
             //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long,true);
             getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,true);
+         } else {
+            //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
+            getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
+            g_larger_shift=larger_shift;
          }
-         //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
-         getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
-         g_larger_shift=larger_shift;
       }
       if (g_high_low[1][0]>0) {     //nearest high
          range_high_Buffer[i]=g_high_low[1][0];
@@ -222,7 +223,7 @@ int OnCalculate(const int rates_total,
       /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.9.14 15:30");
+      datetime t1=StringToTime("2017.10.13 04:00");
       if (t==t1) {
          Print("time=",t);
          Print("shift=",i);

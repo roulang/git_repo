@@ -964,7 +964,58 @@ bool movingStop2(string symbol, int type, int magic, int shift, int tpt, int ppt
    }
    return ret2;
 }
+//+------------------------------------------------------------------+
+//| moving stop function 
+//| if (open_price!=ls_price && price>open_price+(open_price-ls_price)) set ls_price=open_price
+//+------------------------------------------------------------------+
+bool movingStop3(string arg_sym, int arg_mag, int arg_sht)
+{
+   string cur;
+   if (arg_sym==NULL) cur=Symbol();
+   else cur=arg_sym;
 
+   bool ret2=false;
+   int t=OrdersTotal();
+   for(int i=t-1;i>=0;i--) {
+      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if (ret==true) {
+         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
+         if((StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==arg_mag)) {
+            double cur_price=Close[arg_sht];
+            double cur_open_price=NormalizeDouble(OrderOpenPrice(),Digits);
+            double cur_ls_price=NormalizeDouble(OrderStopLoss(),Digits);
+            double cur_tp_price=NormalizeDouble(OrderTakeProfit(),Digits);
+            double cur_open_ls_gap=MathAbs(cur_open_price-cur_ls_price);
+            if (cur_open_ls_gap>0 && OrderType()==OP_BUY) {    //buy order(not yet adjusted)
+               if (cur_price>=(cur_open_price+cur_open_ls_gap)) {
+                  ret2=OrderModify(OrderTicket(),cur_open_price,cur_open_price,cur_tp_price,0,Green);
+                  if (ret2) {
+                     mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),cur_open_price,cur_tp_price);
+                  } else {
+                     int check=GetLastError(); 
+                     if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
+                  }
+               }
+            }
+            if (cur_open_ls_gap>0 && OrderType()==OP_SELL) {    //sell order(not yet adjusted)
+               if (cur_price<=(cur_open_price-cur_open_ls_gap)) {
+                  ret2=OrderModify(OrderTicket(),cur_open_price,cur_open_price,cur_tp_price,0,Red);
+                  if (ret2) {
+                     mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),cur_open_price,cur_tp_price);
+                  } else {
+                     int check=GetLastError(); 
+                     if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
+                  }
+               }
+            }
+         }
+      } else {
+         int check=GetLastError(); 
+         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+      }
+   }
+   return ret2;
+}
 int delAllObj()
 {
    int obj_total=ObjectsTotal();
@@ -1501,7 +1552,7 @@ string covDateString(string arg_date_str,string arg_pat)
 //+------------------------------------------------------------------+
 //| Time Period function
 //| arg_period: 
-//| arg_type:0,short;1,middle;2,long 
+//| arg_type:0,short;1,middle;2,long;-1,specific period
 //+------------------------------------------------------------------+
 int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0,int arg_period2=0)
 {
@@ -1518,6 +1569,12 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
    int cur_mi=TimeMinute(cur_time);   
    */
    int ret=0;
+   if (arg_type==-1 && arg_period2>0) {
+      //return specific shift
+      arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
+      ret=arg_period2;
+      return ret;
+   }
    switch (curPd) {
       case PERIOD_M1:
          switch (arg_type) {
@@ -1537,9 +1594,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_D1;
                break;
             default:
-               //return M5's shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          
@@ -1562,9 +1617,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_D1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1586,9 +1639,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_D1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1610,9 +1661,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_W1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1634,9 +1683,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_W1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1658,9 +1705,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_MN1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1682,9 +1727,7 @@ int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type
                ret=PERIOD_MN1;
                break;
             default:
-               //return specific shift
-               arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-               ret=arg_period2;
+               //unknown
                break;
          }
          break;
@@ -1708,7 +1751,6 @@ void PrintTwoDimArray(double &arg_array[][])
          Print("arg_array[",i,",",j,"]=",arg_array[i][j]);
       }
    }
-
 }
 int getServerGMTOffset(void)
 {

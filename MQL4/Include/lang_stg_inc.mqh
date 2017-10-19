@@ -378,10 +378,10 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=12;
                break;
             case PERIOD_M15:
-               ret=12;
+               ret=36;
                break;
             case PERIOD_M30:
-               ret=12;
+               ret=36;
                break;
             case PERIOD_H1:
                ret=36;
@@ -409,13 +409,13 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=60;
                break;
             case PERIOD_M5:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_M15:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_M30:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_H1:
                ret=60;
@@ -674,13 +674,20 @@ void getNearestHighLowPrice2(double arg_price,int arg_period,int arg_shift,int a
       high_low[arg_length+3][0]=arg_pivot_buf[3];  //high2
       high_low[arg_length+4][0]=arg_pivot_buf[4];  //low2
    }
-    
-   //PrintTwoDimArray(high_low);
 
+   
    ArraySort(high_low,WHOLE_ARRAY,0,MODE_DESCEND);
 
-   //PrintTwoDimArray(high_low);
-
+   /*
+   //debug
+   datetime t=Time[arg_shift];
+   datetime t1=StringToTime("2017.10.13 04:00");
+   if (t==t1) {
+      Print("time=",t);
+      PrintTwoDimArray(high_low);
+   }
+   */
+   
    int n=ArrayBsearch(high_low,cur_price,WHOLE_ARRAY,0,MODE_DESCEND);
 
    /* --memo
@@ -747,8 +754,14 @@ void getNearestHighLowPrice2(double arg_price,int arg_period,int arg_shift,int a
    
    //n>0
    int st=n-1;
+   int length=0;
+   if (arg_add_pivot_value==1) {
+      length=arg_length+5;
+   } else {
+      length=arg_length;
+   }
    for (int i=0;i<4;i++) {
-      if (st<arg_length && high_low[st][0]>0) {
+      if (st<length && high_low[st][0]>0) {
          arg_high_low[i][0]=high_low[st][0];
          arg_high_low[i][1]=high_low[st][1];
       } else {
@@ -812,87 +825,6 @@ int isTrendStgClose(int arg_shift,int arg_period=PERIOD_CURRENT)
    return 0;
 }
 //+------------------------------------------------------------------+
-//| Hit break and rebound (use lang_zig_zag)
-//| date: 2017/09/11
-//| arg_shift: bar shift
-//| arg_thpt:threahold point
-//| return value: rebound(up),+1;rebound(down),-1;0:n/a
-//+------------------------------------------------------------------+
-int isBreak_Rebound_Open(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],
-                        double &arg_pivot_buf[],int arg_pivot_shift,
-                        double &arg_sup_value)
-{
-   
-   bool hit_high_rebound=false;
-   bool hit_low_rebound=false;
-   int  n=0;
-   
-   int bar_shift=arg_shift+1;
-   double last_price=Close[bar_shift];
-   
-   //getNearestHighLowPrice(last_price,PERIOD_CURRENT,bar_shift,arg_lengh,arg_zig_buf,arg_high_low,1);
-   getNearestHighLowPrice2(last_price,PERIOD_CURRENT,bar_shift,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,1,1);
-   //Print("1.zigBuf=");
-   //PrintTwoDimArray(arg_zig_buf);
-   //Print("1.cur_price=",last_price);
-   //Print("1.high_low=");
-   //PrintTwoDimArray(arg_high_low);
-   
-   double range_high,range_low;
-   double range_high2,range_low2;
-   range_high=range_low=range_high2=range_low2=0;
-   if (arg_high_low[1][0]>0) {       //nearest high
-      range_high=arg_high_low[1][0];
-   }
-   if (arg_high_low[2][0]>0) {       //nearest low
-      range_low=arg_high_low[2][0];
-   }
-   if (arg_high_low[0][0]>0) {       //second nearest high
-      range_high2=arg_high_low[0][0];
-   }
-   if (arg_high_low[3][0]>0) {       //second nearest low
-      range_low2=arg_high_low[3][0];
-   }
-   
-   double break_offset=arg_thpt*Point;
-   
-   if (range_high>0 && High[arg_shift]>(range_high+break_offset)) {     //hit high
-      if ((Open[arg_shift]>(Close[arg_shift]+break_offset)) && Close[arg_shift]<(range_high-break_offset)) {   //rebound(down)
-         hit_high_rebound=true;
-         n--;
-      }
-   }
-   if (range_high2>0 && High[arg_shift]>(range_high2+break_offset)) {   //hit high2
-      if ((Open[arg_shift]>(Close[arg_shift]+break_offset)) && Close[arg_shift]<(range_high2-break_offset)) {  //rebound(down)
-         hit_high_rebound=true;
-         n--;
-      }
-   }
-   if (range_low>0 && Low[arg_shift]<(range_low-break_offset)) {        //hit low
-      if ((Open[arg_shift]<(Close[arg_shift]-break_offset)) && Close[arg_shift]>(range_low+break_offset)) {    //rebound(up)
-         hit_low_rebound=true;
-         n++;
-      }
-   }
-   if (range_low2>0 && Low[arg_shift]<(range_low2-break_offset)) {      //hit low2
-      if ((Open[arg_shift]<(Close[arg_shift]-break_offset)) && Close[arg_shift]>(range_low2+break_offset)) {   //rebound(up)
-         hit_low_rebound=true;
-         n++;
-      }
-   }
-   
-   if (hit_high_rebound && !hit_low_rebound) {
-      arg_sup_value=High[arg_shift];
-      return -1;
-   } else if (hit_low_rebound && !hit_high_rebound) {
-      arg_sup_value=Low[arg_shift];
-      return 1;
-   } else {
-      arg_sup_value=0;
-      return 0;
-   }
-}
-//+------------------------------------------------------------------+
 //| get pivot value
 //| date: 2017/10/10
 //| arg_period: time period
@@ -921,4 +853,293 @@ void getPivotValue(int arg_period,int arg_shift,double &arg_pivot[],int &arg_lar
    arg_pivot[3]=p+(h-l);
    arg_pivot[4]=p-(h-l);
    arg_larger_shift=larger_sht;
+}
+//+------------------------------------------------------------------+
+//| get touch high low status(use lang_zig_zag)
+//| date: 2017/10/18
+//| arg_shift: bar shift
+//| arg_thpt:threahold point
+//| arg_touch_status[4]:touch each range point:range_high(3/2/1),range_sub_high(3/2/1),range_sub_low(3/2/1),range_low(3/2/1)
+//| plus for positive bar,minus for nagative bar.
+//| ->see below
+//| <<range_high,range_sub_high>>
+//|     (above) 0
+//|  |  (high)  1
+//| [ ] (open)  2
+//| [ ] (close) 2
+//|  |  (low)   3
+//|     (below) 0
+//| <<range_low,range_sub_low>>
+//|     (above) 0
+//|  |  (high)  3
+//| [ ] (open)  2
+//| [ ] (close) 2
+//|  |  (low)   1
+//|     (below) 0
+//| return value: touch high,+1;touch low,-1;0:n/a
+//+------------------------------------------------------------------+
+int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],
+                                 double &arg_pivot_buf[],int &arg_pivot_shift,int &arg_larger_shift,int &arg_touch_status[],
+                                 double &arg_high_gap,double &arg_low_gap,double &arg_high_low_gap,int arg_expand=0,
+                                 int arg_long=1,int arg_pivot=1)
+{
+   int bar_shift;
+   bar_shift=arg_shift+1;
+   ArrayInitialize(arg_touch_status,0);
+   double last_close=Close[bar_shift];
+   double current_close=Close[arg_shift];
+   double current_open=Open[arg_shift];
+   double current_high=High[arg_shift];
+   double current_low=Low[arg_shift];
+   double current_gap=NormalizeDouble(current_high-current_low,Digits);
+   int    current_bar_status=0;
+   double current_sub_high=current_open;
+   double current_sub_low=current_close;
+   double current_sub_gap=NormalizeDouble(current_sub_high-current_sub_low,Digits);
+   if (current_open<current_close) {
+      current_sub_high=current_close;
+      current_sub_low=current_open;
+      current_bar_status=1;
+   }
+   if (current_open>current_close) {
+      current_sub_high=current_open;
+      current_sub_low=current_close;
+      current_bar_status=-1;
+   }
+   
+   if (arg_expand==0) {
+      getNearestHighLowPrice2(last_close,PERIOD_CURRENT,bar_shift,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,arg_long,arg_pivot);
+   } else {
+      int larger_pd,larger_shift;
+      larger_pd=expandPeriod(PERIOD_CURRENT,bar_shift,larger_shift,arg_expand);
+      if (arg_larger_shift>0 && arg_larger_shift==larger_shift) {     //
+         getNearestHighLowPrice2(last_close,larger_pd,larger_shift,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,arg_long,arg_pivot,true);
+      } else {
+         getNearestHighLowPrice2(last_close,larger_pd,larger_shift,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,arg_long,arg_pivot);
+         arg_larger_shift=larger_shift;
+      }
+   }
+   //Print("1.zigBuf=");
+   //PrintTwoDimArray(arg_zig_buf);
+   //Print("1.cur_price=",last_price);
+   //Print("1.high_low=");
+   //PrintTwoDimArray(arg_high_low);
+   
+   double range_sub_high,range_sub_low;
+   double range_high,range_low;
+   range_sub_high=range_sub_low=range_high=range_low=0;
+   double range_gap,range_sub_gap;
+   range_gap=range_sub_gap=0;
+   if (arg_high_low[1][0]>0) {       //nearest high
+      range_sub_high=arg_high_low[1][0];
+   }
+   if (arg_high_low[2][0]>0) {       //nearest low
+      range_sub_low=arg_high_low[2][0];
+   }
+   if (arg_high_low[0][0]>0) {       //second nearest high
+      range_high=arg_high_low[0][0];
+   }
+   if (arg_high_low[3][0]>0) {       //second nearest low
+      range_low=arg_high_low[3][0];
+   }
+   if (range_high>0 && range_low>0) {
+      range_gap=NormalizeDouble(range_high-range_low,Digits);
+   }
+   if (range_sub_high>0 && range_sub_low>0) {
+      range_sub_gap=NormalizeDouble(range_sub_high-range_sub_low,Digits);
+   }
+
+   if (range_sub_high>0 && range_high>0) {
+      arg_high_gap=NormalizeDouble(range_high-range_sub_high,Digits);
+   } else {
+      arg_high_gap=0;
+   }
+   if (range_sub_low>0 && range_low>0) {
+      arg_low_gap=NormalizeDouble(range_sub_low-range_low,Digits);
+   } else {
+      arg_low_gap=0;
+   }
+   if (range_sub_high>0 && range_sub_low>0) {
+      arg_high_low_gap=NormalizeDouble(range_sub_high-range_sub_low,Digits);
+   } else {
+      arg_high_low_gap=0;
+   }
+   
+   if (range_sub_gap==0) return 0;
+   
+   double break_offset=arg_thpt*Point;
+   double target_price;
+   
+   target_price=range_high+break_offset;
+   if          (target_price>current_high) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+   } else if   (target_price>current_sub_high) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+   } else if   (target_price>current_sub_low) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
+   } else if   (target_price>current_low) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
+   } else {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+   }
+   if (break_offset>0) {
+      target_price=range_high-break_offset;
+      if          (target_price>current_high) {
+         //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+      } else if   (target_price>current_sub_high) {
+         if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+      } else if   (target_price>current_sub_low) {
+         //if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
+      } else if   (target_price>current_low) {
+         //if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
+      } else {
+         //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+      }
+   }
+   
+   target_price=range_sub_high+break_offset;
+   if          (target_price>current_high) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+   } else if   (target_price>current_sub_high) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;
+   } else if   (target_price>current_sub_low) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
+   } else if   (target_price>current_low) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
+   } else {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+   }
+   if (break_offset>0) {
+      target_price=range_sub_high-break_offset;
+      if          (target_price>current_high) {
+         //if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+      } else if   (target_price>current_sub_high) {
+         if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;
+      } else if   (target_price>current_sub_low) {
+         //if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
+      } else if   (target_price>current_low) {
+         //if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
+      } else {
+         //if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+      }
+   }
+   
+   target_price=range_sub_low-break_offset;
+   if          (target_price>current_high) {
+      if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+   } else if   (target_price>current_sub_high) {
+      if (arg_touch_status[2]==0) arg_touch_status[2]=3*current_bar_status;
+   } else if   (target_price>current_sub_low) {
+      if (arg_touch_status[2]==0) arg_touch_status[2]=2*current_bar_status;
+   } else if   (target_price>current_low) {
+      if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;
+   } else {
+      if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+   }
+   if (break_offset>0) {
+      target_price=range_sub_low+break_offset;
+      if          (target_price>current_high) {
+         //if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+      } else if   (target_price>current_sub_high) {
+         //if (arg_touch_status[2]==0) arg_touch_status[2]=3*current_bar_status;
+      } else if   (target_price>current_sub_low) {
+         //if (arg_touch_status[2]==0) arg_touch_status[2]=2*current_bar_status;
+      } else if   (target_price>current_low) {
+         if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;
+      } else {
+         //if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+      }
+   }
+
+   target_price=range_low-break_offset;
+   if          (target_price>current_high) {
+      if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+   } else if   (target_price>current_sub_high) {
+      if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
+   } else if   (target_price>current_sub_low) {
+      if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
+   } else if   (target_price>current_low) {
+      if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
+   } else {
+      if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+   }
+   if (break_offset>0) {
+      target_price=range_low+break_offset;
+      if          (target_price>current_high) {
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+      } else if   (target_price>current_sub_high) {
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
+      } else if   (target_price>current_sub_low) {
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
+      } else if   (target_price>current_low) {
+         if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
+      } else {
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+      }
+   }
+   
+   if (MathAbs(arg_touch_status[1])>0 && MathAbs(arg_touch_status[2])>0) return 0;
+   if (MathAbs(arg_touch_status[1])>0) {   //hit high
+      return 1;
+   }
+   if (MathAbs(arg_touch_status[2])>0) {   //hit low
+      return -1;
+   }
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Hit point break or rebound
+//| date: 2017/10/19
+//| arg_shift: bar shift
+//| arg_thpt:threahold point
+//| return value: break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
+//+------------------------------------------------------------------+
+int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],
+                                 double &arg_pivot_buf[],int &arg_pivot_shift,int &arg_larger_shift,int &arg_touch_status[],
+                                 double &arg_high_gap,double &arg_low_gap,double &arg_high_low_gap,
+                                 int arg_expand=0,int arg_long=1,int arg_pivot=1)
+{
+   int ret=0;
+   ret=getHighLowTouchStatus(arg_shift,arg_thpt,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,
+                                 arg_larger_shift,arg_touch_status,arg_high_gap,arg_low_gap,arg_high_low_gap,
+                                 arg_expand,arg_long,arg_pivot);
+   
+   if (ret==0) return 0;
+   
+   int touch_high,touch_sub_high,touch_low,touch_sub_low,bar_status;
+   touch_high=touch_sub_high=touch_low=touch_sub_low=bar_status=0;
+   if (ret>0) {   //hit high
+      touch_sub_high=MathAbs(arg_touch_status[1]);
+      if (arg_touch_status[1]>0) bar_status=1;
+      else bar_status=-1;
+   }
+   if (ret<0) {   //hit low
+      touch_sub_low=MathAbs(arg_touch_status[2]);
+      if (arg_touch_status[2]>0) bar_status=1;
+      else bar_status=-1;
+   }
+   touch_high=MathAbs(arg_touch_status[0]);
+   touch_low=MathAbs(arg_touch_status[3]);
+   
+   if (touch_sub_high>0 && touch_high>0) {   //hit sub_high and high both
+      return 2;   //break(up)
+   }
+   if (touch_sub_low>0 && touch_low>0) {     //hit sub_low and low both
+      return -2;   //break(down)
+   }
+   if (touch_sub_high>1 && bar_status>0) {   //hit sub_high only,body touch sub_high,positive bar
+      return 2;   //break(up)
+   }
+   if (touch_sub_low>1 && bar_status<0) {    //hit sub_low only,body touch sub_low,negative bar
+      return -2;  //break(down)
+   }
+   if (touch_sub_high==1) {   //hit sub_high only
+      return -1;  //rebound(down)
+   }
+   if (touch_sub_low==1) {    //hit sub_low only
+      return 1;  //rebound(up)
+   }
+   
+   //unknown
+   return 0;
 }
