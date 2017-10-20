@@ -987,7 +987,7 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
       if          (target_price>current_high) {
          //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
       } else if   (target_price>current_sub_high) {
-         if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+         //if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
       } else if   (target_price>current_sub_low) {
          //if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
       } else if   (target_price>current_low) {
@@ -1072,7 +1072,7 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
       } else if   (target_price>current_sub_low) {
          //if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
       } else if   (target_price>current_low) {
-         if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
       } else {
          //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
       }
@@ -1097,7 +1097,7 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
 int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],
                                  double &arg_pivot_buf[],int &arg_pivot_shift,int &arg_larger_shift,int &arg_touch_status[],
                                  double &arg_high_gap,double &arg_low_gap,double &arg_high_low_gap,
-                                 int arg_expand=0,int arg_long=1,int arg_pivot=1)
+                                 int arg_expand=0,int arg_thpt2=0,int arg_long=1,int arg_pivot=1)
 {
    int ret=0;
    ret=getHighLowTouchStatus(arg_shift,arg_thpt,arg_lengh,arg_zig_buf,arg_high_low,arg_pivot_buf,arg_pivot_shift,
@@ -1121,16 +1121,22 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
    touch_high=MathAbs(arg_touch_status[0]);
    touch_low=MathAbs(arg_touch_status[3]);
    
+   //int ma_status=getMAStatus(PERIOD_CURRENT,arg_shift);
+   
+   double threhold_gap=arg_thpt2*Point;
+   
+   if(arg_high_low_gap<=(2*threhold_gap)) return 0;   //filter too small high_low_gap
+   
    if (touch_sub_high>0 && touch_high>0) {   //hit sub_high and high both
       return 2;   //break(up)
    }
    if (touch_sub_low>0 && touch_low>0) {     //hit sub_low and low both
       return -2;   //break(down)
    }
-   if (touch_sub_high>1 && bar_status>0) {   //hit sub_high only,body touch sub_high,positive bar
+   if (touch_sub_high>1 && bar_status>0 && arg_high_gap>threhold_gap) {   //hit sub_high only,body touch sub_high,positive bar
       return 2;   //break(up)
    }
-   if (touch_sub_low>1 && bar_status<0) {    //hit sub_low only,body touch sub_low,negative bar
+   if (touch_sub_low>1 && bar_status<0 && arg_low_gap>threhold_gap) {    //hit sub_low only,body touch sub_low,negative bar
       return -2;  //break(down)
    }
    if (touch_sub_high==1) {   //hit sub_high only
@@ -1141,5 +1147,121 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
    }
    
    //unknown
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Get MA status (base on 3 continous values)
+//| date: 2017/10/20
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value: short>mid,same direction,up,5;
+//|               short>mid,different direction(short down,mid up),4;
+//|               short>mid,different direction(short up,mid down),3;
+//|               short>mid,same direction(short down,mid down),2;
+//|               short>mid,no direction(short down,mid down),1;
+//| return value: short<mid,same direction,down,-5;
+//|               short<mid,different direction(short up,mid down),-4;
+//|               short<mid,different direction(short down,mid up),-3;
+//|               short<mid,same direction(short up,mid up),-2;
+//|               short<mid,no direction(short down,mid down),-1;
+//|               n/a:0
+//| return value: short break mid,up(within last 2 bars):+10  
+//|               short break mid,down(within last 2 bars):-10  
+//+------------------------------------------------------------------+
+int getMAStatus(int arg_period,int arg_shift)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+
+   int short_tm=getMAPeriod(arg_period,0);  //short
+   if (short_tm==0) {
+      return 0;
+   }
+   int middle_tm=getMAPeriod(arg_period,1);  //middle
+   if (middle_tm==0) {
+      return 0;
+   }
+
+   double current_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
+   double current_high,current_low;
+   if (Open[arg_shift]>Close[arg_shift]) {
+      current_high=Open[arg_shift];
+      current_low=Close[arg_shift];
+   } else {
+      current_high=Close[arg_shift];
+      current_low=Open[arg_shift];
+   }
+   if (current_short_ma<=current_high && current_short_ma>=current_low)    //filter current bar's body through short ma
+      return 0;
+      
+   double last_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
+   double last_high,last_low;
+   if (Open[arg_shift+1]>Close[arg_shift+1]) {
+      last_high=Open[arg_shift+1];
+      last_low=Close[arg_shift+1];
+   } else {
+      last_high=Close[arg_shift+1];
+      last_low=Open[arg_shift+1];
+   }
+   if (last_short_ma<=last_high && last_short_ma>=last_low)                //filter last bar's body through short ma
+      return 0;
+
+   double last_short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
+   double current_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
+   double last_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
+   double last_middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
+
+   int ret=0;
+   int short_direction=0;
+   int middle_direction=0;
+   if (last_short_ma2<last_short_ma && last_short_ma<current_short_ma) short_direction=1;          //short is up
+   if (last_short_ma2>last_short_ma && last_short_ma>current_short_ma) short_direction=-1;         //short is down
+   if (last_middle_ma2<last_middle_ma && last_middle_ma<current_middle_ma) middle_direction=1;     //middle is up
+   if (last_middle_ma2>last_middle_ma && last_middle_ma>current_middle_ma) middle_direction=-1;    //middle is down
+   int break_status=0;
+   
+   if          (current_short_ma>current_middle_ma && last_short_ma<last_middle_ma) {  //short break mid(last), up
+      break_status=10;
+   } else if   (current_short_ma>current_middle_ma && last_short_ma>last_middle_ma 
+               && last_short_ma2<last_middle_ma2) {                                    //short break mid(last2), up
+      break_status=10;
+   } else if   (current_short_ma<current_middle_ma && last_short_ma>last_middle_ma) {  //short break mid(last), down
+      break_status=-10;
+   } else if   (current_short_ma<current_middle_ma && last_short_ma<last_middle_ma 
+               && last_short_ma2>last_middle_ma2) {                                    //short break mid(last2), down
+      break_status=-10;
+   }
+      
+   if (current_short_ma>current_middle_ma) {             //short>mid
+
+      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
+         return (break_status+5);
+
+      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
+         return (break_status+2);
+
+      if (short_direction==-1 && middle_direction==1)   //short is down, mid is up
+         return (break_status+4);
+
+      if (short_direction==1 && middle_direction==-1)   //short is up, mid is down
+         return (break_status+3);
+
+      return (break_status+1);
+   }
+   if (current_short_ma<current_middle_ma) {    //short<mid
+      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
+         return (break_status-2);
+
+      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
+         return (break_status-5);
+
+      if (short_direction==-1 && middle_direction==1)   //short is down, mid is up
+         return (break_status-3);
+
+      if (short_direction==1 && middle_direction==-1)   //short is up, mid is down
+         return (break_status-4);
+
+      return (break_status-1);
+   }
+   
    return 0;
 }

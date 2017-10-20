@@ -38,6 +38,7 @@ double g_pivotBuf[5];
 int    g_pivot_sht=0;
 int    g_touch_highlow[4];
 int    g_larger_shift=0;
+int    g_threhold_gap=50;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -98,7 +99,7 @@ int OnCalculate(const int rates_total,
    double high_gap,low_gap,high_low_gap;
    for(int i=st-1;i>0;i--) {
       //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
-      signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand);
+      signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
 
       /*
       //debug
