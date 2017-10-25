@@ -879,9 +879,9 @@ void getPivotValue(int arg_period,int arg_shift,double &arg_pivot[],int &arg_lar
 //| return value: touch high,+1;touch low,-1;0:n/a
 //+------------------------------------------------------------------+
 int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf[][],double &arg_high_low[][],
-                                 double &arg_pivot_buf[],int &arg_pivot_shift,int &arg_larger_shift,int &arg_touch_status[],
-                                 double &arg_high_gap,double &arg_low_gap,double &arg_high_low_gap,int arg_expand=0,
-                                 int arg_long=1,int arg_pivot=1)
+                           double &arg_pivot_buf[],int &arg_pivot_shift,int &arg_larger_shift,int &arg_touch_status[],
+                           double &arg_high_gap,double &arg_low_gap,double &arg_high_low_gap,int arg_expand=0,
+                           int arg_long=1,int arg_pivot=1)
 {
    int bar_shift;
    bar_shift=arg_shift+1;
@@ -1121,7 +1121,8 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
    touch_high=MathAbs(arg_touch_status[0]);
    touch_low=MathAbs(arg_touch_status[3]);
    
-   //int ma_status=getMAStatus(PERIOD_CURRENT,arg_shift);
+   int ma_status=getMAStatus(PERIOD_CURRENT,arg_shift);
+   if (ma_status==0) return 0;
    
    double threhold_gap=arg_thpt2*Point;
    
@@ -1202,9 +1203,12 @@ int getMAStatus(int arg_period,int arg_shift)
       last_high=Close[arg_shift+1];
       last_low=Open[arg_shift+1];
    }
+   
+   /*
    if (last_short_ma<=last_high && last_short_ma>=last_low)                //filter last bar's body through short ma
       return 0;
-
+   */
+   
    double last_short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
    double current_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
    double last_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);

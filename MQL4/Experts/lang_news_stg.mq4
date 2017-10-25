@@ -41,7 +41,7 @@ int OnInit()
    }
    
    news_read();
-      
+
 //---
    return(INIT_SUCCEEDED);
 }

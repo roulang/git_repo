@@ -87,6 +87,7 @@ struct s_Order
 const string   g_LockFileName="#Lock#";
 const string   g_OrderHisFileName="lang_history_orders.csv";            //history order data file
 const string   g_OrderHisFileName_all="lang_history_orders_all.csv";    //history order data file(all)
+const string   g_OrderSendFileName="lang_send_orders.csv";              //order data file
 const string   g_NewsFileName="lang_news.ex4.csv";
 
 datetime CurrentTimeStamp;
@@ -229,6 +230,17 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    double risk_vol = getVolume(i_equity_percent, ls_pt);
    if (risk_vol > i_max_lots) risk_vol = i_max_lots;
    
+   s_Order order;
+   order.sym=Symbol();
+   order.type=cmd;
+   order.lots=risk_vol;
+   order.open_p=price;
+   order.open_t=0;
+   order.sl_p=ls_price;
+   order.tp_p=ps_price;
+   order.com="OrderBuy2";
+   order.mag=argMag;
+
    //<<<<debug
    if (i_debug) {
       Print("<<<<debug");
@@ -259,6 +271,8 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);
+      order.tic=ret;
+      writeOrderCmdToFile(order);
       return true;
    }
    else return false;
@@ -395,6 +409,17 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    double risk_vol = getVolume(i_equity_percent, ls_pt);
    if (risk_vol > i_max_lots) risk_vol = i_max_lots;
 
+   s_Order order;
+   order.sym=Symbol();
+   order.type=cmd;
+   order.lots=risk_vol;
+   order.open_p=price;
+   order.open_t=0;
+   order.sl_p=ls_price;
+   order.tp_p=ps_price;
+   order.com="OrderSell2";
+   order.mag=argMag;
+
    //<<<<debug
    if (i_debug) {
       Print("<<<<debug");
@@ -425,6 +450,8 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);   
+      order.tic=ret;
+      writeOrderCmdToFile(order);
       return true;
    }
    else return false;
@@ -477,6 +504,28 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    double risk_vol = getVolume(i_equity_percent, argLsPt);
    if (risk_vol > i_max_lots) risk_vol = i_max_lots;
 
+   s_Order order;
+   order.sym=Symbol();
+   order.type=cmd1;
+   order.lots=risk_vol;
+   order.open_p=price1;
+   order.open_t=0;
+   order.sl_p=ls_price1;
+   order.tp_p=ps_price1;
+   order.com="OrderOO";
+   order.mag=argMag;
+
+   s_Order order2;
+   order2.sym=Symbol();
+   order2.type=cmd2;
+   order2.lots=risk_vol;
+   order2.open_p=price2;
+   order2.open_t=0;
+   order2.sl_p=ls_price2;
+   order2.tp_p=ps_price2;
+   order2.com="OrderOO";
+   order2.mag=argMag;
+
    //<<<<debug
    if (i_debug) {
       Print("<<<<debug");
@@ -504,6 +553,8 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
+      order.tic=ret;
+      writeOrderCmdToFile(order);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -516,6 +567,8 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
+      order2.tic=ret;
+      writeOrderCmdToFile(order2);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -573,6 +626,28 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    double risk_vol=getVolume(i_equity_percent, ls_pt);
    if (risk_vol>i_max_lots) risk_vol=i_max_lots;
 
+   s_Order order;
+   order.sym=Symbol();
+   order.type=cmd1;
+   order.lots=risk_vol;
+   order.open_p=price1;
+   order.open_t=0;
+   order.sl_p=ls_price1;
+   order.tp_p=ps_price1;
+   order.com="OrderOO2";
+   order.mag=argMag;
+
+   s_Order order2;
+   order2.sym=Symbol();
+   order2.type=cmd2;
+   order2.lots=risk_vol;
+   order2.open_p=price2;
+   order2.open_t=0;
+   order2.sl_p=ls_price2;
+   order2.tp_p=ps_price2;
+   order2.com="OrderOO2";
+   order2.mag=argMag;
+
    //<<<<debug
    if (i_debug) {
       Print("<<<<debug");
@@ -599,6 +674,8 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
+      order.tic=ret;
+      writeOrderCmdToFile(order);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -611,6 +688,8 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    }
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
+      order2.tic=ret;
+      writeOrderCmdToFile(order2);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -662,6 +741,28 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    double risk_vol = getVolume(i_equity_percent, argLsPt);
    if (risk_vol > i_max_lots) risk_vol = i_max_lots;
 
+   s_Order order;
+   order.sym=Symbol();
+   order.type=cmd1;
+   order.lots=risk_vol;
+   order.open_p=price1;
+   order.open_t=0;
+   order.sl_p=ls_price1;
+   order.tp_p=ps_price1;
+   order.com="OrderOO3";
+   order.mag=argMag;
+
+   s_Order order2;
+   order2.sym=Symbol();
+   order2.type=cmd2;
+   order2.lots=risk_vol;
+   order2.open_p=price2;
+   order2.open_t=0;
+   order2.sl_p=ls_price2;
+   order2.tp_p=ps_price2;
+   order2.com="OrderOO3";
+   order2.mag=argMag;
+
    //<<<<debug
    if (i_debug) {
       Print("<<<<debug");
@@ -690,6 +791,8 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
+      order.tic=ret;
+      writeOrderCmdToFile(order);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -702,6 +805,8 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    
    if (ret > 0) {
       mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
+      order2.tic=ret;
+      writeOrderCmdToFile(order2);
    } else {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
@@ -1144,6 +1249,44 @@ string dToStr(string arg_sym,double arg_value,int arg_digits=0)
    
    int vdigits = (int)MarketInfo(cur,MODE_DIGITS);
    return DoubleToStr(arg_value,vdigits);
+}
+
+void writeOrderCmdToFile(s_Order &arg_order)
+{
+   if (i_for_test) return;
+   
+   string file_name=g_OrderSendFileName;
+
+   Print("write order command to file");
+   ResetLastError();
+   int h=FileOpen(file_name,FILE_READ|FILE_WRITE|FILE_CSV,',');
+   if(h==INVALID_HANDLE) {
+      Print("Operation FileOpen failed, error: ",GetLastError());
+      return;
+   }
+
+   ResetLastError();
+   //move to file end to add order record
+   if (!FileSeek(h,0,SEEK_END)) {
+      Print("Operation FileSeek failed, error: ",GetLastError());
+      FileClose(h);
+      return;
+   }
+   
+   arg_order.profit=0;
+   arg_order.close_p=0;
+   arg_order.close_t=-1;
+
+   ResetLastError();
+   //write file
+   if (!wrtOneOrderToFile(h,0,arg_order)) {
+      Print("Operation FileWrite failed, error: ",GetLastError());
+      FileClose(h);
+      return;
+   }
+
+   FileClose(h);
+
 }
 
 int writeOrderHistoryToFile(int arg_wrt_all=0)
