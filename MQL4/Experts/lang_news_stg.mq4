@@ -8,10 +8,9 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_ea_inc.mqh>
 
 //--- input
-input int      i_SL=100;         //take lose point
 input int      i_rate_SL=100;    //take lose point(rate control)
 input int      i_OPT=150;        //oo offset
 input bool     i_skiptd=false;   //skip trend control
@@ -29,7 +28,7 @@ datetime orderdt;
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   if (i_debug) {
+   if (g_debug) {
       Print("OnInit()");
    }
    ea_init();
@@ -50,7 +49,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
-   if (i_debug) {
+   if (g_debug) {
       Print("OnDeinit()");
    }
 
@@ -153,7 +152,7 @@ void OnTick()
 void OnTimer()
 {
 //---
-   if(i_debug) Print("OnTimer()");
+   if(g_debug) Print("OnTimer()");
    if (!i_for_test) {
       news_read();
    }

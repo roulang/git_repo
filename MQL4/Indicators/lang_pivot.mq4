@@ -8,7 +8,7 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 #property indicator_chart_window
 //#property indicator_separate_window
@@ -67,6 +67,9 @@ double         pivot_Buffer[];
 //input
 
 //global
+bool           g_debug=false;
+bool           g_for_test=false;
+
 int            g_last_shift=0;
 double         g_pivot_buf[5];
 
@@ -77,7 +80,7 @@ int OnInit()
 {
 //--- indicator buffers mapping
 
-   if (!i_for_test) {
+   if (!g_for_test) {
       //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
 
@@ -124,7 +127,7 @@ int OnCalculate(const int rates_total,
    //1:
    int st=uncal_bars+1;
    if (st>limit) st=limit;
-   if(i_debug) {
+   if(g_debug) {
       Print("1:st=",st);
    }
 
@@ -162,6 +165,6 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(i_debug) Print("OnTimer()");
+   if(g_debug) Print("OnTimer()");
 
 }

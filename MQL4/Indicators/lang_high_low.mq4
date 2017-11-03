@@ -10,7 +10,7 @@
 #property strict
 #property indicator_chart_window
 
-#include <lang_stg_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 #property indicator_chart_window
 //#property indicator_separate_window
@@ -78,13 +78,14 @@ double         range_low2_sht_Buffer[];
 double         range_high2_sht_Buffer[];
 
 //input
-input int      i_range=10;
+input int      i_range=20;
 input int      i_long=1;
 input int      i_thredhold_pt=0;
 input int      i_expand=0;          //0:not expand,1:expand one level,2:expand two level
-input int      i_add_pivot=0;       //0:not add pivot value,1:add pivot value
+input int      i_add_pivot=1;       //0:not add pivot value,1:add pivot value
 
 //global
+
 double         g_zigBuf[][3];
 double         g_high_low[4][2];
 int            g_larger_shift=0;
@@ -156,7 +157,7 @@ int OnCalculate(const int rates_total,
    //1:
    int st=uncal_bars+1;
    if (st>limit) st=limit;
-   if(i_debug) {
+   if(g_debug) {
       Print("1:st=",st);
    }
 
@@ -175,10 +176,12 @@ int OnCalculate(const int rates_total,
          //break
          //Print("here to set breakpoint");
       }
+      
       if (High[i]<(High[i+1]+i_thredhold_pt*Point) && Low[i]>(Low[i+1]-i_thredhold_pt*Point)) {     //filter inner bar
          copyToNextValue(i);
          continue;
       }
+      
       int larger_shift=0;
       int larger_pd=0;
       if (i_expand==0) {         //not expand
@@ -223,7 +226,7 @@ int OnCalculate(const int rates_total,
       /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.13 04:00");
+      datetime t1=StringToTime("2017.10.25 16:58");
       if (t==t1) {
          Print("time=",t);
          Print("shift=",i);
@@ -293,6 +296,6 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(i_debug) Print("OnTimer()");
+   if(g_debug) Print("OnTimer()");
 
 }

@@ -25,20 +25,10 @@
 #define SLASH  "/"
 #define DOT    "."
 
-#define MAX_INT 2147483647
-
 //datetime
 #define SEC_H1 3600
 
-//input
-input bool     i_debug=false;
-input int      i_equity_percent=1;
-input bool     i_sendmail=false;
-input bool     i_for_test=false;
-input double   i_max_lots=0.01;
-input int      i_slippage=5;
-input bool     i_skip_jpychf_usd_relate=true;
-input int      i_server_timezone_offset=3;
+#define MAX_INT 2147483647
 
 #define SEC_D1 86400
 
@@ -83,6 +73,13 @@ struct s_Order
    int      mag;        //magic number
 };
 
+//input
+input bool     i_for_test=false;
+
+//global
+bool           g_debug=false;
+bool           g_sendmail=false;
+
 //global
 const string   g_LockFileName="#Lock#";
 const string   g_OrderHisFileName="lang_history_orders.csv";            //history order data file
@@ -98,840 +95,8 @@ int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
 int      g_srv_tz_offset=24;
+int      g_server_timezone_offset=3;
 
-//+------------------------------------------------------------------+
-// OrderBuy (auto set risk volume) deprecated
-// p: Price (0 for not set, buy current)
-// ls_value: Loss Stop Value (0 for not set, use LossStopPt)
-// ps_value: Profit Stop Value (0 use ProfitStopPt, -1 not set profit stop)
-// comment: Comment
-// magic: Magic
-//+------------------------------------------------------------------+
-/*
-int OrderBuy(double p, double ls_value, double ps_value, string comment, int magic)
-{
-   int ret = 0;
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   double price = Ask;
-   int cmd = OP_BUY;
-   if (p != 0) {
-	   if (p > price) {
-		   cmd = OP_BUYSTOP;
-	   } else {
-		   cmd = OP_BUYLIMIT;
-	   }
-      price = p + g;
-   }
-
-   double ls_price;
-   double ps_price;
-   double ls_pt;
-   double ps_pt;
-   if (ls_value == 0) {
-      ls_price = NormalizeDouble(price - LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
-   } else {
-      ls_price = ls_value;
-      ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
-   }
-   
-   if (ps_value == 0) {
-      ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
-   } else if (ps_value == -1) {
-      ps_price = 0;
-      ps_pt = 0;
-   } else {
-      ps_price = ps_value;
-      ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
-   }
-
-   double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Vol) risk_vol = Vol;
-   
-   //<<<<debug
-   if (debug) {
-      Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   if (!debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Green);
-   }
-   
-   if (ret != 0)
-   {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-   }
-   return ret;
-}
-*/
-
-//+------------------------------------------------------------------+
-// OrderBuy2 (auto set risk volume)
-// argPrice: Price (0 for not set, buy current)
-// argLsPrice: Loss Stop Value (0 for not set, use LossStopPt)
-// argPsPrice: Profit Stop Value (0 use ProfitStopPt, -1 not set profit stop)
-// argCom: Comment
-// argMag: Magic
-//+------------------------------------------------------------------+
-bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
-{
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   double price = Ask;
-   int cmd = OP_BUY;
-   if (argPrice != 0) {
-	   if (argPrice > price) {
-		   cmd = OP_BUYSTOP;
-	   } else {
-		   cmd = OP_BUYLIMIT;
-	   }
-      price = argPrice + g;
-   }
-
-   double ls_price;
-   double ps_price;
-   double ls_pt;
-   double ps_pt;
-   if (argLsPrice == 0) {
-      ls_price = NormalizeDouble(price - LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
-   } else {
-      ls_price = argLsPrice;
-      ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
-   }
-   
-   if (argPsPrice == 0) {
-      ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
-   } else if (argPsPrice == -1) {
-      ps_price = 0;
-      ps_pt = 0;
-   } else {
-      ps_price = argPsPrice;
-      ps_pt = NormalizeDouble((ps_price - price) / pt, 0);
-   }
-
-   double risk_vol = getVolume(i_equity_percent, ls_pt);
-   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
-   
-   s_Order order;
-   order.sym=Symbol();
-   order.type=cmd;
-   order.lots=risk_vol;
-   order.open_p=price;
-   order.open_t=0;
-   order.sl_p=ls_price;
-   order.tp_p=ps_price;
-   order.com="OrderBuy2";
-   order.mag=argMag;
-
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   int ret = 0;
-   int slippage=getSlippage(NULL,i_slippage);
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Green);
-   }
-   
-   if (ret <0 )
-   {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);
-      order.tic=ret;
-      writeOrderCmdToFile(order);
-      return true;
-   }
-   else return false;
-}
-
-//+------------------------------------------------------------------+
-// OrderSell (auto set risk volume) deprecated
-// p: Price (0 for not set, sell current)
-// ls_value: Loss Stop Value (0 for not set, use LossStopPt)
-// ps_value: Profit Stop Value (0 use ProfitStopPt, -1 not set profit stop)
-// comment: Comment
-// magic: Magic
-//+------------------------------------------------------------------+
-/*
-int OrderSell(double p, double ls_value, double ps_value, string comment, int magic)
-{
-   int ret = 0;
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   double price = Bid;
-   int cmd = OP_SELL;
-   if (p != 0) {
-	   if (p > price) {
-		   cmd = OP_SELLLIMIT;
-	   } else {
-		   cmd = OP_SELLSTOP;
-	   }
-      price = p;
-   }
-
-   double ls_price;
-   double ps_price;
-   double ls_pt;
-   double ps_pt;
-   if (ls_value == 0) {
-      ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
-   } else {
-      ls_price = ls_value + g;
-      ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
-   }
-   
-   if (ps_value == 0) {
-      ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
-   } else if (ps_value == -1) {
-      ps_price = 0;
-      ps_pt = 0;
-   } else {
-      ps_price = ps_value + g;
-      ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
-   }
-
-   double risk_vol = getVolume(EquityPercent, ls_pt);
-   if (risk_vol > Vol) risk_vol = Vol;
-
-   //<<<<debug
-   if (debug) {
-      Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   if (!debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, 0, ls_price, ps_price, comment, magic, 0, Red);
-   }
-   
-   if (ret != 0)
-   {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-   }
-   return ret;
-}
-*/
-
-//+------------------------------------------------------------------+
-// OrderSell2 (auto set risk volume)
-// argPrice: Price (0 for not set, sell current)
-// argLsPrice: Loss Stop Value (0 for not set, use LossStopPt)
-// argPsPrice: Profit Stop Value (0 use ProfitStopPt, -1 not set profit stop)
-// argCom: Comment
-// argMag: Magic
-//+------------------------------------------------------------------+
-bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
-{
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   double price = Bid;
-   int cmd = OP_SELL;
-   if (argPrice != 0) {
-	   if (argPrice > price) {
-		   cmd = OP_SELLLIMIT;
-	   } else {
-		   cmd = OP_SELLSTOP;
-	   }
-      price = argPrice;
-   }
-
-   double ls_price;
-   double ps_price;
-   double ls_pt;
-   double ps_pt;
-   if (argLsPrice == 0) {
-      ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
-   } else {
-      ls_price = argLsPrice + g;
-      ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
-   }
-   
-   if (argPsPrice == 0) {
-      ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
-   } else if (argPsPrice == -1) {
-      ps_price = 0;
-      ps_pt = 0;
-   } else {
-      ps_price = argPsPrice + g;
-      ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
-   }
-
-   double risk_vol = getVolume(i_equity_percent, ls_pt);
-   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
-
-   s_Order order;
-   order.sym=Symbol();
-   order.type=cmd;
-   order.lots=risk_vol;
-   order.open_p=price;
-   order.open_t=0;
-   order.sl_p=ls_price;
-   order.tp_p=ps_price;
-   order.com="OrderSell2";
-   order.mag=argMag;
-
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   int ret = 0;
-   int slippage=getSlippage(NULL,i_slippage);
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Red);
-   }
-   
-   if (ret < 0)
-   {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd,risk_vol,price,ls_price,ps_price,"",argMag);   
-      order.tic=ret;
-      writeOrderCmdToFile(order);
-      return true;
-   }
-   else return false;
-
-}
-
-//+------------------------------------------------------------------+
-// OrderOO (buy stop and sell stop at two directions,auto set risk volume)
-// argOPt: offset point
-// argLsPt: Loss Stop Point (0 for not set, use LossStopPt)
-// argPsPt: Profit Stop Point (0 use ProfitStopPt, -1 not set profit stop)
-// argCom: Comment
-// argMag: Magic
-//+------------------------------------------------------------------+
-bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
-{
-   int ret = 0;
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   if (argOPt == 0) argOPt = OOPt;
-   double price1 = Bid;
-   price1 = NormalizeDouble(price1 - argOPt * pt, Digits);  //sell price
-   double price2 = Ask;
-   price2 = NormalizeDouble(price2 + argOPt * pt, Digits);  //buy price
-   int cmd1 = OP_SELLSTOP;
-   int cmd2 = OP_BUYSTOP;
-
-   if (argLsPt == 0) argLsPt = LossStopPt;
-   if (argPsPt == 0) argPsPt = ProfitStopPt;
-   
-   double ls_price1; //sell's lose stop
-   double ps_price1; //sell's profit stop
-   ls_price1 = NormalizeDouble(price1 + argLsPt * pt, Digits);
-   if (argPsPt == -1) {
-      ps_price1 = 0;
-   } else {
-      ps_price1 = NormalizeDouble(price1 - argPsPt * pt, Digits);
-   }
-
-   double ls_price2; //buy's lose stop
-   double ps_price2; //buy's profit stop
-   ls_price2 = NormalizeDouble(price2 - argLsPt * pt, Digits);
-   if (argPsPt == -1) {
-      ps_price2 = 0;
-   } else {
-      ps_price2 = NormalizeDouble(price2 + argPsPt * pt, Digits);
-   }
-
-   double risk_vol = getVolume(i_equity_percent, argLsPt);
-   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
-
-   s_Order order;
-   order.sym=Symbol();
-   order.type=cmd1;
-   order.lots=risk_vol;
-   order.open_p=price1;
-   order.open_t=0;
-   order.sl_p=ls_price1;
-   order.tp_p=ps_price1;
-   order.com="OrderOO";
-   order.mag=argMag;
-
-   s_Order order2;
-   order2.sym=Symbol();
-   order2.type=cmd2;
-   order2.lots=risk_vol;
-   order2.open_p=price2;
-   order2.open_t=0;
-   order2.sl_p=ls_price2;
-   order2.tp_p=ps_price2;
-   order2.com="OrderOO";
-   order2.mag=argMag;
-
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("command1=%d", cmd1);
-      printf("command2=%d", cmd2);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price1=%.5f", price1);
-      printf("price2=%.5f", price2);
-      printf("loss stop point=%.5f", argLsPt);
-      printf("profit stop point=%.5f", argPsPt);
-      printf("loss stop price1=%.5f", ls_price1);
-      printf("profit stop price1=%.5f", ps_price1);
-      printf("loss stop price2=%.5f", ls_price2);
-      printf("profit stop price2=%.5f", ps_price2);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   int slippage=getSlippage(NULL,i_slippage);
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
-      order.tic=ret;
-      writeOrderCmdToFile(order);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-   
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
-      order2.tic=ret;
-      writeOrderCmdToFile(order2);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-
-   return true;
-
-}
-
-//+------------------------------------------------------------------+
-// OrderOO (buy stop and sell stop at two directions,auto set risk volume)
-// argPrice1: sell stop price
-// argPrice2: buy stop price
-// argLs1: loss stop price for sell stop (0 for not set, use LossStopPt)
-// argPs1: profit stop price for sell stop (0 use ProfitStopPt, -1 not set profit stop)
-// argLs2: loss stop price for buy stop (0 for not set, use LossStopPt)
-// argPs2: profit stop price for buy stop (0 use ProfitStopPt, -1 not set profit stop)
-// argCom: Comment
-// argMag: Magic
-//+------------------------------------------------------------------+
-bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, double argPs1=0, double argLs2=0, double argPs2=0)
-{
-   
-   if (argPrice1>=argPrice2 || argPrice1>=Bid || argPrice2<=Ask ) return false;
-
-   double pt=Point;
-   double g=Ask-Bid;
-   double gap=NormalizeDouble(g / pt, 0);
-   
-   double price1=argPrice1;       //sell stop price
-   double price2=argPrice2;       //buy stop price
-   int cmd1=OP_SELLSTOP;
-   int cmd2=OP_BUYSTOP;
-   
-   double ls_price1; //lose stop price for sell stop
-   double ps_price1; //profit stop price for sell stop
-   if (argLs1==0) ls_price1=NormalizeDouble(price1+LossStopPt*pt,Digits);
-   else ls_price1=argLs1;
-   if (argPs1==0) ps_price1=NormalizeDouble(price1-ProfitStopPt*pt,Digits);
-   else if(argPs1==-1) ps_price1=0;
-   else ps_price1=argPs1;
-
-   double ls_price2; //lose stop price for buy stop
-   double ps_price2; //profit stop price for buy stop
-   if (argLs2==0) ls_price2=NormalizeDouble(price1-LossStopPt*pt,Digits);
-   else ls_price2=argLs2;
-   if (argPs2==0) ps_price2=NormalizeDouble(price1+ProfitStopPt*pt,Digits);
-   else if(argPs2==-1) ps_price2=0;
-   else ps_price2=argPs2;
-
-   double ls_pt1=(ls_price1-price1)/pt;
-   double ls_pt2=(price2-ls_price2)/pt;
-   double ls_pt=MathMax(ls_pt1,ls_pt2);
-   double risk_vol=getVolume(i_equity_percent, ls_pt);
-   if (risk_vol>i_max_lots) risk_vol=i_max_lots;
-
-   s_Order order;
-   order.sym=Symbol();
-   order.type=cmd1;
-   order.lots=risk_vol;
-   order.open_p=price1;
-   order.open_t=0;
-   order.sl_p=ls_price1;
-   order.tp_p=ps_price1;
-   order.com="OrderOO2";
-   order.mag=argMag;
-
-   s_Order order2;
-   order2.sym=Symbol();
-   order2.type=cmd2;
-   order2.lots=risk_vol;
-   order2.open_p=price2;
-   order2.open_t=0;
-   order2.sl_p=ls_price2;
-   order2.tp_p=ps_price2;
-   order2.com="OrderOO2";
-   order2.mag=argMag;
-
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("command1=%d", cmd1);
-      printf("command2=%d", cmd2);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price1=%.5f", price1);
-      printf("price2=%.5f", price2);
-      printf("loss stop price1=%.5f", ls_price1);
-      printf("profit stop price1=%.5f", ps_price1);
-      printf("loss stop price2=%.5f", ls_price2);
-      printf("profit stop price2=%.5f", ps_price2);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   int slippage=getSlippage(NULL,i_slippage);
-
-   int ret=0;
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell stop order
-   }
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
-      order.tic=ret;
-      writeOrderCmdToFile(order);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-
-   ret=0;
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy stop order
-   }
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
-      order2.tic=ret;
-      writeOrderCmdToFile(order2);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-
-   return true;
-
-}
-//+------------------------------------------------------------------+
-// OrderOO (buy direct and sell direct at two directions,auto set risk volume)
-// argLsPt: Loss Stop Point (0 for not set, use LossStopPt)
-// argPsPt: Profit Stop Point (0 use ProfitStopPt, -1 not set profit stop)
-// argCom: Comment
-// argMag: Magic
-//+------------------------------------------------------------------+
-bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
-{
-   int ret = 0;
-   double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
-   double price1 = Bid;
-   double price2 = Ask;
-   int cmd1 = OP_SELL;
-   int cmd2 = OP_BUY;
-
-   if (argLsPt == 0) argLsPt = LossStopPt;
-   if (argPsPt == 0) argPsPt = ProfitStopPt;
-   
-   double ls_price1; //sell's lose stop
-   double ps_price1; //sell's profit stop
-   ls_price1 = NormalizeDouble(price1 + argLsPt * pt, Digits);
-   if (argPsPt == -1) {
-      ps_price1 = 0;
-   } else {
-      ps_price1 = NormalizeDouble(price1 - argPsPt * pt, Digits);
-   }
-
-   double ls_price2; //buy's lose stop
-   double ps_price2; //buy's profit stop
-   ls_price2 = NormalizeDouble(price2 - argLsPt * pt, Digits);
-   if (argPsPt == -1) {
-      ps_price2 = 0;
-   } else {
-      ps_price2 = NormalizeDouble(price2 + argPsPt * pt, Digits);
-   }
-
-   double risk_vol = getVolume(i_equity_percent, argLsPt);
-   if (risk_vol > i_max_lots) risk_vol = i_max_lots;
-
-   s_Order order;
-   order.sym=Symbol();
-   order.type=cmd1;
-   order.lots=risk_vol;
-   order.open_p=price1;
-   order.open_t=0;
-   order.sl_p=ls_price1;
-   order.tp_p=ps_price1;
-   order.com="OrderOO3";
-   order.mag=argMag;
-
-   s_Order order2;
-   order2.sym=Symbol();
-   order2.type=cmd2;
-   order2.lots=risk_vol;
-   order2.open_p=price2;
-   order2.open_t=0;
-   order2.sl_p=ls_price2;
-   order2.tp_p=ps_price2;
-   order2.com="OrderOO3";
-   order2.mag=argMag;
-
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("command1=%d", cmd1);
-      printf("command2=%d", cmd2);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price1=%.5f", price1);
-      printf("price2=%.5f", price2);
-      printf("loss stop point=%.5f", argLsPt);
-      printf("profit stop point=%.5f", argPsPt);
-      printf("loss stop price1=%.5f", ls_price1);
-      printf("profit stop price1=%.5f", ps_price1);
-      printf("loss stop price2=%.5f", ls_price2);
-      printf("profit stop price2=%.5f", ps_price2);
-      printf("gap=%.0f", gap);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-
-   int slippage=getSlippage(NULL,i_slippage);
-
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd1, risk_vol, price1, slippage, ls_price1, ps_price1, "", argMag, 0, Red);  //sell order
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd1,risk_vol,price1,ls_price1,ps_price1,"",argMag);   
-      order.tic=ret;
-      writeOrderCmdToFile(order);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-   
-   if (!i_debug) {
-      ret = OrderSend(Symbol(), cmd2, risk_vol, price2, slippage, ls_price2, ps_price2, "", argMag, 0, Green); //buy order
-   }
-   
-   if (ret > 0) {
-      mailNoticeOrderOpen(ret,Symbol(),cmd2,risk_vol,price2,ls_price2,ps_price2,"",argMag);   
-      order2.tic=ret;
-      writeOrderCmdToFile(order2);
-   } else {
-      int check=GetLastError(); 
-      if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
-      return false;
-   }
-
-   return true;
-
-}
-// type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
-int OrderCloseA(string symbol, int type, int magic)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-
-   //Print("1=",symbol,",2=",type,",3=",comment,",4=",magic);
-   int t=OrdersTotal();
-   //Print("t=",t);
-   int cnt=0;
-   for(int i=t-1;i>=0;i--) {
-      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
-      //Print("ret=",ret);
-      if (ret==true) {
-         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
-         {
-            if(OrderType()==OP_BUY) {
-               //Print("send close buy order command");
-               ret=OrderClose(OrderTicket(),OrderLots(),Bid,0,Green);
-            }
-            if(OrderType()==OP_SELL) {
-               //Print("send close sell order command");
-               ret=OrderClose(OrderTicket(),OrderLots(),Ask,0,Red);
-            }
-            if(OrderType()==OP_BUYSTOP) {
-               //Print("send delete order command");
-               ret=OrderDelete(OrderTicket(),Green);
-            }
-            if(OrderType()==OP_SELLSTOP) {
-               //Print("send delete order command");
-               ret=OrderDelete(OrderTicket(),Red);
-            }
-            
-            if (ret!=true) {
-               int check=GetLastError(); 
-               if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-            } else {
-               cnt++;
-            }
-         }
-      } else {
-         int check=GetLastError(); 
-         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-      }
-   }
-   return cnt;
-}
-
-// type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
-bool FindOrderA(string symbol, int type, int magic)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-
-   int t=OrdersTotal();
-   for(int i=t-1;i>=0;i--) {
-      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
-      if (ret==true) {
-         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
-         {
-            return true;
-         }
-      } else {
-         int check=GetLastError(); 
-         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-      }
-   }
-   return false;
-}
-
-//+------------------------------------------------------------------+
-// getVolume: get risk volume
-// ep: equity percent. ex,1=1%,2=2% (0 for not set, use )
-// ls_point: Loss Stop Point
-//+------------------------------------------------------------------+
-double getVolume(int ep, double ls_point)
-{
-   double risk_amount = AccountEquity() * ep / 100;
-   double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
-   if (tick_value == 0) return 1;
-   double volume = risk_amount / (ls_point * tick_value);
-   volume = NormalizeDouble(volume, 2);
-   
-   //<<<<debug
-   if (i_debug) {
-      Print("<<<<debug");
-      printf("risk amount=%.5f", risk_amount);
-      printf("tick value=%.5f", tick_value);
-      printf("volume=%.5f", volume);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-   return volume;
-   
-}
-
-//+------------------------------------------------------------------+
-// ea_init: ea init
-//+------------------------------------------------------------------+
-void ea_init()
-{
-   CurrentTimeStamp = Time[0];
-   getClientServerOffset();
-}
 //+------------------------------------------------------------------+
 // isNewBar: check new bar
 // ret:  0, no new bar
@@ -947,180 +112,6 @@ int isNewBar()
    }
 }
 
-//+------------------------------------------------------------------+
-//| moving stop function
-//| type:1 buy,-1 sell
-//| spt:stop point
-//+------------------------------------------------------------------+
-bool movingStop(string symbol, int type, int magic, int shift, int spt)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-
-   bool ret2=false;
-   int t=OrdersTotal();
-   for(int i=t-1;i>=0;i--) {
-      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
-      if (ret==true) {
-         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
-         {
-            //buy order
-            //double cur_price=Bid;
-            double cur_price=Close[shift];
-            double max_lose_stop_price=NormalizeDouble(cur_price-spt*Point,Digits);
-            double cur_lose_stop_price=NormalizeDouble(OrderStopLoss(),Digits);
-            if (max_lose_stop_price>cur_lose_stop_price) {
-               ret2=OrderModify(OrderTicket(),OrderOpenPrice(),max_lose_stop_price,OrderTakeProfit(),0,Green);
-               if (ret2) {
-                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),max_lose_stop_price,OrderTakeProfit());
-               } else {
-                  int check=GetLastError(); 
-                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-               }
-            }
-         }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
-         {
-            //sell order
-            //double cur_price=Ask;
-            double cur_price=Close[shift];
-            double max_lose_stop_price=NormalizeDouble(cur_price+spt*Point,Digits);
-            double cur_lose_stop_price=NormalizeDouble(OrderStopLoss(),Digits);
-            if (max_lose_stop_price<cur_lose_stop_price || cur_lose_stop_price==0) {
-               ret2=OrderModify(OrderTicket(),OrderOpenPrice(),max_lose_stop_price,OrderTakeProfit(),0,Red);
-               if (!ret2) {
-                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),max_lose_stop_price,OrderTakeProfit());
-               } else {
-                  int check=GetLastError(); 
-                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-               }
-            }
-         }
-         
-      } else {
-         int check=GetLastError(); 
-         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-      }
-   }
-   return ret2;
-}
-
-//+------------------------------------------------------------------+
-//| moving stop function (set to min profit point)
-//| type:1 buy,-1 sell
-//| tpt:threhold point
-//| ppt:profit point
-//+------------------------------------------------------------------+
-bool movingStop2(string symbol, int type, int magic, int shift, int tpt, int ppt)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-
-   bool ret2=false;
-   int t=OrdersTotal();
-   for(int i=t-1;i>=0;i--) {
-      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
-      if (ret==true) {
-         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
-         {
-            //buy order
-            //double cur_price=Bid;
-            double cur_price=Close[shift];
-            double threhold_price=NormalizeDouble(OrderOpenPrice()+tpt*Point,Digits);
-            double cur_lose_stop_price=NormalizeDouble(OrderStopLoss(),Digits);
-            double min_profit_price=NormalizeDouble(OrderOpenPrice()+ppt,Digits);
-            if (cur_price>threhold_price && cur_lose_stop_price<min_profit_price) {
-               ret2=OrderModify(OrderTicket(),OrderOpenPrice(),min_profit_price,OrderTakeProfit(),0,Green);
-               if (ret2) {
-                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),min_profit_price,OrderTakeProfit());
-               } else {
-                  int check=GetLastError(); 
-                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-               }
-            }
-         }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
-         {
-            //sell order
-            //double cur_price=Ask;
-            double cur_price=Close[shift];
-            double threhold_price=NormalizeDouble(OrderOpenPrice()-tpt*Point,Digits);
-            double cur_lose_stop_price=NormalizeDouble(OrderStopLoss(),Digits);
-            double min_profit_price=NormalizeDouble(OrderOpenPrice()-ppt,Digits);
-            if (cur_price<threhold_price && cur_lose_stop_price>min_profit_price) {
-               ret2=OrderModify(OrderTicket(),OrderOpenPrice(),min_profit_price,OrderTakeProfit(),0,Red);
-               if (ret2) {
-                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),min_profit_price,OrderTakeProfit());
-               } else {
-                  int check=GetLastError(); 
-                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-               }
-            }
-         }
-         
-      } else {
-         int check=GetLastError(); 
-         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-      }
-   }
-   return ret2;
-}
-//+------------------------------------------------------------------+
-//| moving stop function 
-//| if (open_price!=ls_price && price>open_price+(open_price-ls_price)) set ls_price=open_price
-//+------------------------------------------------------------------+
-bool movingStop3(string arg_sym, int arg_mag, int arg_sht)
-{
-   string cur;
-   if (arg_sym==NULL) cur=Symbol();
-   else cur=arg_sym;
-
-   bool ret2=false;
-   int t=OrdersTotal();
-   for(int i=t-1;i>=0;i--) {
-      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
-      if (ret==true) {
-         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==arg_mag)) {
-            double cur_price=Close[arg_sht];
-            double cur_open_price=NormalizeDouble(OrderOpenPrice(),Digits);
-            double cur_ls_price=NormalizeDouble(OrderStopLoss(),Digits);
-            double cur_tp_price=NormalizeDouble(OrderTakeProfit(),Digits);
-            double cur_open_ls_gap=MathAbs(cur_open_price-cur_ls_price);
-            if (cur_open_ls_gap>0 && OrderType()==OP_BUY) {    //buy order(not yet adjusted)
-               if (cur_price>=(cur_open_price+cur_open_ls_gap)) {
-                  ret2=OrderModify(OrderTicket(),cur_open_price,cur_open_price,cur_tp_price,0,Green);
-                  if (ret2) {
-                     mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),cur_open_price,cur_tp_price);
-                  } else {
-                     int check=GetLastError(); 
-                     if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-                  }
-               }
-            }
-            if (cur_open_ls_gap>0 && OrderType()==OP_SELL) {    //sell order(not yet adjusted)
-               if (cur_price<=(cur_open_price-cur_open_ls_gap)) {
-                  ret2=OrderModify(OrderTicket(),cur_open_price,cur_open_price,cur_tp_price,0,Red);
-                  if (ret2) {
-                     mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),cur_open_price,cur_tp_price);
-                  } else {
-                     int check=GetLastError(); 
-                     if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
-                  }
-               }
-            }
-         }
-      } else {
-         int check=GetLastError(); 
-         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
-      }
-   }
-   return ret2;
-}
 int delAllObj()
 {
    int obj_total=ObjectsTotal();
@@ -1150,7 +141,7 @@ bool mailNoticeOrderOpen(int arg_tic,string arg_sym,int arg_type,double arg_lots
          string co=OrderComment();
          int mg=OrderMagicNumber();
 */
-   if (!i_sendmail) return true;
+   if (!g_sendmail) return true;
    
    string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#)(",arg_lots," lots) placed");
    double sl_pt=0,tp_pt=0;
@@ -1187,7 +178,7 @@ bool mailNoticeOrderMod(int arg_tic,string arg_sym,int arg_type,double arg_p,dou
          string co=OrderComment();
          int mg=OrderMagicNumber();
 */
-   if (!i_sendmail) return true;
+   if (!g_sendmail) return true;
    
    string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#) modified");
    double sl_pt=0,tp_pt=0;
@@ -1249,44 +240,6 @@ string dToStr(string arg_sym,double arg_value,int arg_digits=0)
    
    int vdigits = (int)MarketInfo(cur,MODE_DIGITS);
    return DoubleToStr(arg_value,vdigits);
-}
-
-void writeOrderCmdToFile(s_Order &arg_order)
-{
-   if (i_for_test) return;
-   
-   string file_name=g_OrderSendFileName;
-
-   Print("write order command to file");
-   ResetLastError();
-   int h=FileOpen(file_name,FILE_READ|FILE_WRITE|FILE_CSV,',');
-   if(h==INVALID_HANDLE) {
-      Print("Operation FileOpen failed, error: ",GetLastError());
-      return;
-   }
-
-   ResetLastError();
-   //move to file end to add order record
-   if (!FileSeek(h,0,SEEK_END)) {
-      Print("Operation FileSeek failed, error: ",GetLastError());
-      FileClose(h);
-      return;
-   }
-   
-   arg_order.profit=0;
-   arg_order.close_p=0;
-   arg_order.close_t=-1;
-
-   ResetLastError();
-   //write file
-   if (!wrtOneOrderToFile(h,0,arg_order)) {
-      Print("Operation FileWrite failed, error: ",GetLastError());
-      FileClose(h);
-      return;
-   }
-
-   FileClose(h);
-
 }
 
 int writeOrderHistoryToFile(int arg_wrt_all=0)
@@ -1554,13 +507,13 @@ int news_read()
       while(!FileIsEnding(h)) {
          string s;
          s=FileReadString(h);    //1
-         if(i_debug) Print(s);
+         if(g_debug) Print(s);
          s=FileReadString(h);    //2
-         if(i_debug) Print(s);
+         if(g_debug) Print(s);
          s=FileReadString(h);    //3
-         if(i_debug) Print(s);
+         if(g_debug) Print(s);
          s=FileReadString(h);    //4
-         if(i_debug) Print(s);
+         if(g_debug) Print(s);
          cnt++;
       }
       
@@ -1570,13 +523,13 @@ int news_read()
       if (FileSeek(h,0,SEEK_SET)) {
          while(!FileIsEnding(h)) {
             g_News[cnt].n=FileReadNumber(h);
-            if(i_debug) Print(g_News[cnt].n);
+            if(g_debug) Print(g_News[cnt].n);
             g_News[cnt].cur=FileReadString(h);
-            if(i_debug) Print(g_News[cnt].cur);
+            if(g_debug) Print(g_News[cnt].cur);
             g_News[cnt].dt=FileReadDatetime(h)-time_offset*SEC_H1;
-            if(i_debug) Print(g_News[cnt].dt);
+            if(g_debug) Print(g_News[cnt].dt);
             g_News[cnt].for_rate=FileReadNumber(h);
-            if(i_debug) Print(g_News[cnt].for_rate);
+            if(g_debug) Print(g_News[cnt].for_rate);
             cnt++;
          }
       }
@@ -1596,7 +549,7 @@ int news_read()
 //+------------------------------------------------------------------+
 bool timer_init(int argSec=0)
 {
-   if(i_debug) Print("timer_init");
+   if(g_debug) Print("timer_init");
    if (argSec==0) argSec=g_TimerSecond;
    bool ret=EventSetTimer(argSec);
    return(ret);  
@@ -1607,75 +560,12 @@ bool timer_init(int argSec=0)
 //+------------------------------------------------------------------+
 void timer_deinit()
 {
-   if(i_debug) Print("timer_deinit");
+   if(g_debug) Print("timer_deinit");
    //relase timer
    EventKillTimer();
 }
 
-//+------------------------------------------------------------------+
-//| Time of news function
-//+------------------------------------------------------------------+
-bool isNewsPd(string arg_sym,int arg_shift,int arg_news_bef=0,int arg_news_aft=0)
-{
-   string cur;
-   if (arg_sym==NULL) cur=Symbol();
-   else cur=arg_sym;
-   if (arg_news_bef==0) arg_news_bef=g_news_bef;
-   if (arg_news_aft==0) arg_news_aft=g_news_aft;
-   
-   for (int i=0;i<ArraySize(g_News);i++) {
-      if (isNewsRelated(cur,g_News[i].cur)) {
-         datetime t=Time[arg_shift];
-         datetime t2=g_News[i].dt;
-         if (t>=(t2-arg_news_bef) && t<(t2+arg_news_aft)) {
-            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2);
-            return true;
-         }
-      }
-   }
-   
-   return false;
-}
-//+------------------------------------------------------------------+
-//| Time of news function(for rate control)
-//| return:0,not pd;1,news(not rate),2,news(is rate)
-//+------------------------------------------------------------------+
-int isNewsPd3(string symbol,int shift)
-{
-   string cur;
-   if (symbol==NULL) cur=Symbol();
-   else cur=symbol;
-   
-   for (int i=0;i<ArraySize(g_News);i++) {
-      if (isNewsRelated(cur,g_News[i].cur)) {
-         datetime t=Time[shift];
-         datetime t2=g_News[i].dt;
-         if (t>=(t2-60) && t<t2) {
-            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2,",t2-60=",(t2-60));
-            if (g_News[i].for_rate==0) return 1;
-            if (g_News[i].for_rate==1) return 2;
-         }
-      }
-   }
-   
-   return 0;
-}
-bool isNewsRelated(string arg_symbol,string arg_currency)
-{
-   string cur;
-   if (arg_symbol==NULL) cur=Symbol();
-   else cur=arg_symbol;
-   
-   if(i_skip_jpychf_usd_relate && StringCompare(arg_currency,"USD")==0) {   //USD currency
-      if(StringFind(cur,"JPY")>=0 || StringFind(cur,"CHF")>=0)    //exclude JPY and CHF
-         return false;
-      return true;
-   }
-   if(StringFind(cur,arg_currency)>=0 || (StringCompare(arg_currency,"USD")==0 && StringFind(cur,"GOLD")>=0))
-      return true;
-   
-   return false;
-}
+
 //+------------------------------------------------------------------+
 //| Convert Date format string
 //| arg_pat: "." or ","
@@ -1692,201 +582,7 @@ string covDateString(string arg_date_str,string arg_pat)
    }
    return s;
 }
-//+------------------------------------------------------------------+
-//| Time Period function
-//| arg_period: 
-//| arg_type:0,short;1,middle;2,long;-1,specific period
-//+------------------------------------------------------------------+
-int expandPeriod(int arg_period,int arg_shift,int &arg_larger_shift,int arg_type=0,int arg_period2=0)
-{
-   int curPd;
-   if (arg_period==PERIOD_CURRENT) {
-      curPd=Period();
-   } else {
-      curPd=arg_period;
-   }
-   datetime cur_time=Time[arg_shift];
-   /*
-   int cur_d=TimeDayOfWeek(cur_time);
-   int cur_h=TimeHour(cur_time);
-   int cur_mi=TimeMinute(cur_time);   
-   */
-   int ret=0;
-   if (arg_type==-1 && arg_period2>0) {
-      //return specific shift
-      arg_larger_shift=iBarShift(NULL,arg_period2,cur_time);
-      ret=arg_period2;
-      return ret;
-   }
-   switch (curPd) {
-      case PERIOD_M1:
-         switch (arg_type) {
-            case 0:
-               //return M5's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_M5,cur_time);
-               ret=PERIOD_M5;
-               break;
-            case 1:
-               //return H1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
-               ret=PERIOD_H1;
-               break;
-            case 2:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         
-         break;
-      case PERIOD_M5:
-         switch (arg_type) {
-            case 0:
-               //return M30's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_M30,cur_time);
-               ret=PERIOD_M30;
-               break;
-            case 1:
-               //return H1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
-               ret=PERIOD_H1;
-               break;
-            case 2:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      case PERIOD_M15:
-         switch (arg_type) {
-            case 0:
-               //return H1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H1,cur_time);
-               ret=PERIOD_H1;
-               break;
-            case 1:
-               //return H4's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-               ret=PERIOD_H4;
-               break;
-            case 2:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      case PERIOD_M30:
-         switch (arg_type) {
-            case 0:
-               //return H4's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-               ret=PERIOD_H4;
-               break;
-            case 1:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            case 2:
-               //return W1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-               ret=PERIOD_W1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      case PERIOD_H1:
-         switch (arg_type) {
-            case 0:
-               //return H4's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_H4,cur_time);
-               ret=PERIOD_H4;
-               break;
-            case 1:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            case 2:
-               //return W1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-               ret=PERIOD_W1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      case PERIOD_H4:
-         switch (arg_type) {
-            case 0:
-               //return D1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_D1,cur_time);
-               ret=PERIOD_D1;
-               break;
-            case 1:
-               //return W1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-               ret=PERIOD_W1;
-               break;
-            case 2:
-               //return MN1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
-               ret=PERIOD_MN1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      case PERIOD_D1:
-         switch (arg_type) {
-            case 0:
-               //return W1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_W1,cur_time);
-               ret=PERIOD_W1;
-               break;
-            case 1:
-               //return MN1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
-               ret=PERIOD_MN1;
-               break;
-            case 2:
-               //return MN1's shift
-               arg_larger_shift=iBarShift(NULL,PERIOD_MN1,cur_time);
-               ret=PERIOD_MN1;
-               break;
-            default:
-               //unknown
-               break;
-         }
-         break;
-      default:
-         //unknown
-         break;
-   }
-   
-   return ret;
-}
-int shrinkPeriod(int arg_larger_period,int arg_shift)
-{
-   datetime cur_time=Time[arg_shift];
-   int larger_shift=iBarShift(NULL,arg_larger_period,cur_time);
-   return larger_shift;
-}
+
 void PrintTwoDimArray(double &arg_array[][])
 {
    for (int i=0;i<ArrayRange(arg_array,0);i++) {
@@ -1922,8 +618,8 @@ int getServerGMTOffset(void)
 }
 int getClientServerOffset(void)
 {
-   if (MathAbs(i_server_timezone_offset)<24) {
-      g_srv_tz_offset=i_server_timezone_offset;
+   if (MathAbs(g_server_timezone_offset)<24) {
+      g_srv_tz_offset=g_server_timezone_offset;
    }
    int clt_offset=-TimeGMTOffset()/SEC_H1;
    //Print("clt_offset=",clt_offset);
@@ -1943,7 +639,7 @@ bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
 
    int pd=TimepdValue(arg_shift,arg_bef,arg_aft);
    
-   if (i_debug) {
+   if (g_debug) {
       printf("symbo=%s,pd=%d",cur,pd);
    }
    int pd2=pd & AMA_PD;
@@ -1951,38 +647,38 @@ bool isCurPd(string arg_symbol,int arg_shift,int arg_bef=0,int arg_aft=0)
     
    if          (StringFind(cur,EURUSD)>=0) {
       pd2=pd & EUR_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
    } else if   (StringFind(cur,USDJPY)>=0) {
       pd2= pd & ASIA_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,AUDUSD)>=0) {
       pd2= pd & ASIA_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,NZDUSD)>=0) {
       pd2= pd & ASIA_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==ASIA_PD) return true;
    } else if   (StringFind(cur,USDCAD)>=0) {
    } else if   (StringFind(cur,GBPUSD)>=0) {
       pd2=pd & EUR_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;
    } else if   (StringFind(cur,USDCHF)>=0) {
       pd2=pd & EUR_PD;
-      if (i_debug) {
+      if (g_debug) {
          printf("pd2=%d",pd2);
       }
       if (pd2==EUR_PD) return true;

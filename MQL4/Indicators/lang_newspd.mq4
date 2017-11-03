@@ -8,7 +8,8 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 #property indicator_separate_window
 #property indicator_minimum 0

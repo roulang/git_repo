@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                           lang_break_rebound.mq4 |
+//|                                           lang_highlow_touch.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -8,12 +8,12 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -5
-#property indicator_maximum 5
+#property indicator_minimum -3
+#property indicator_maximum 3
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -32,6 +32,8 @@ input int      i_range=20;
 input int      i_thredhold_pt=0;
 input int      i_expand=1;
 
+input int      i_nearest=1;
+
 //global
 double g_zigBuf[][3];
 double g_high_low[4][2];
@@ -39,7 +41,6 @@ double g_pivotBuf[5];
 int    g_pivot_sht=0;
 int    g_touch_highlow[4];
 int    g_larger_shift=0;
-int    g_threhold_gap=50;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -98,22 +99,41 @@ int OnCalculate(const int rates_total,
    }
    double ls_price=0;
    double high_gap,low_gap,high_low_gap;
+   int ret;
    for(int i=st-1;i>0;i--) {
-      //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
-      signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
-
+      ret=getHighLowTouchStatus(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,
+                                 g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand);
+      if (ret>0) {
+         if (i_nearest==1) {
+            signalBuffer[i]=MathAbs(g_touch_highlow[1]);
+         } else {
+            signalBuffer[i]=MathAbs(g_touch_highlow[0]);
+         }
+      } else if (ret<0) {
+         if (i_nearest==1) {
+            signalBuffer[i]=-MathAbs(g_touch_highlow[2]);
+         } else {
+            signalBuffer[i]=-MathAbs(g_touch_highlow[3]);
+         }
+      } else {
+         signalBuffer[i]=0;
+      }
+      
       /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.18 19:00");
-      if (t==t1) {
+      datetime t1=StringToTime("2017.11.03 07:30");
+      if (t==t1 && i_nearest==1) {
          Print("time=",t);
          Print("shift=",i);
+         Print("ret=",ret);
          Print("g_high_low=");
          PrintTwoDimArray(g_high_low);
          for (int j=0;j<ArraySize(g_touch_highlow);j++) {
             Print("g_touch_highlow[",j,"]=",g_touch_highlow[j]);
          }
+         Print("high=",High[i]);
+         Print("low=",Low[i]);
       }
       */
       

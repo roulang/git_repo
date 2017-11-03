@@ -11,7 +11,8 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 #property indicator_separate_window
 #property indicator_minimum 0
@@ -62,7 +63,7 @@ int OnCalculate(const int rates_total,
    for(int i=st;i>=0;i--) {
       //if (i==st) printf("loop");
       //tmBuffer[i]=TimepdValue(i);
-      tmBuffer[i]=TimepdValue2(i);
+      tmBuffer[i]=TimepdValue(i);
       //if (isCurPd(NULL,i)) tmBuffer[i]=1;
       //else tmBuffer[i]=0;
    }
