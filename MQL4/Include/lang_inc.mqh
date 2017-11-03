@@ -90,7 +90,6 @@ const string   g_NewsFileName="lang_news.ex4.csv";
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
 s_News   g_News[];
-//int      g_TimeZoneOffset=SEC_H1*5;
 int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
@@ -778,4 +777,83 @@ int getSlippage(string arg_symbol,int arg_slip_pips)
       calc_slip_pips=arg_slip_pips*10;
    }
    return calc_slip_pips;
+}
+
+//+------------------------------------------------------------------+
+//| Time of news function
+//+------------------------------------------------------------------+
+bool isNewsPd(string arg_sym,int arg_shift,int arg_news_bef=0,int arg_news_aft=0)
+{
+   string cur;
+   if (arg_sym==NULL) cur=Symbol();
+   else cur=arg_sym;
+   if (arg_news_bef==0) arg_news_bef=g_news_bef;
+   if (arg_news_aft==0) arg_news_aft=g_news_aft;
+   
+   for (int i=0;i<ArraySize(g_News);i++) {
+      if (isNewsRelated(cur,g_News[i].cur)) {
+         datetime t=Time[arg_shift];
+         datetime t2=g_News[i].dt;
+         if (t>=(t2-arg_news_bef) && t<(t2+arg_news_aft)) {
+            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2);
+            return true;
+         }
+      }
+   }
+   
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| Time of news function(for rate control)
+//| return:0,not pd;1,news(not rate),2,news(is rate)
+//+------------------------------------------------------------------+
+int isNewsPd3(string symbol,int shift)
+{
+   string cur;
+   if (symbol==NULL) cur=Symbol();
+   else cur=symbol;
+   
+   for (int i=0;i<ArraySize(g_News);i++) {
+      if (isNewsRelated(cur,g_News[i].cur)) {
+         datetime t=Time[shift];
+         datetime t2=g_News[i].dt;
+         if (t>=(t2-60) && t<t2) {
+            //Print("g_News[i].cur=",g_News[i].cur,",t=",t,",t2=",t2,",t2-60=",(t2-60));
+            if (g_News[i].for_rate==0) return 1;
+            if (g_News[i].for_rate==1) return 2;
+         }
+      }
+   }
+   
+   return 0;
+}
+
+bool isNewsRelated(string arg_symbol,string arg_currency)
+{
+   string cur;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
+   
+   /*
+   if(i_skip_jpychf_usd_relate && StringCompare(arg_currency,"USD")==0) {   //USD currency
+      if(StringFind(cur,"JPY")>=0 || StringFind(cur,"CHF")>=0)    //exclude JPY and CHF
+         return false;
+      return true;
+   }
+   */
+   
+   if(StringFind(cur,arg_currency)>=0 || (StringCompare(arg_currency,"USD")==0 && StringFind(cur,"GOLD")>=0))
+      return true;
+   
+   return false;
+}
+
+//+------------------------------------------------------------------+
+// ea_init: ea init
+//+------------------------------------------------------------------+
+void ea_init()
+{
+   CurrentTimeStamp = Time[0];
+   getClientServerOffset();
 }

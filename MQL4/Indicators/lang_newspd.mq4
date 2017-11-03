@@ -8,7 +8,6 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_inc.mqh>
 #include <lang_ind_inc.mqh>
 
 #property indicator_separate_window
@@ -35,6 +34,7 @@ input datetime i_tt_start=D'07:30:00';       //english tea(GMT)
 input datetime i_tt2_start=D'00:00:00';      //english japan(GMT)
 input int      i_timeoffset=SEC_H1*4.25;     //from 6:15 to 10:15,4.25H
 input int      i_timeoffset2=SEC_H1*3;       //from 0:00 to 03:00,3H
+
 //global
 string      g_myname="lang_newspd";
 int         g_obj_cnt=0;
@@ -72,7 +72,7 @@ int OnInit()
 void OnDeinit(const int reason)
 {
 //---
-   if (i_debug) {
+   if (g_debug) {
       Print("OnDeinit()");
    }
 
@@ -129,7 +129,7 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(i_debug) Print("OnTimer()");
+   if(g_debug) Print("OnTimer()");
      
    if (!i_for_test) {
       if (i_update_news) news_read();
