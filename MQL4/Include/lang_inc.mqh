@@ -94,7 +94,7 @@ int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
 int      g_srv_tz_offset=24;
-int      g_server_timezone_offset=3;
+int      g_server_timezone_offset=2;   //summer time(5-10)=3,not summer time(11-4)=2
 
 //+------------------------------------------------------------------+
 // isNewBar: check new bar
