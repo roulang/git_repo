@@ -849,11 +849,3 @@ bool isNewsRelated(string arg_symbol,string arg_currency)
    return false;
 }
 
-//+------------------------------------------------------------------+
-// ea_init: ea init
-//+------------------------------------------------------------------+
-void ea_init()
-{
-   CurrentTimeStamp = Time[0];
-   getClientServerOffset();
-}

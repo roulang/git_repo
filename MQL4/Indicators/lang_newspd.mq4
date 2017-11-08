@@ -58,7 +58,7 @@ int OnInit()
       if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
    
-   ea_init();
+   ind_init();
    
    news_read();
    

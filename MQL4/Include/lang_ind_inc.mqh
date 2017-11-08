@@ -10,6 +10,15 @@
 #include <lang_inc.mqh>
 
 //+------------------------------------------------------------------+
+// ind_init: indicator init
+//+------------------------------------------------------------------+
+void ind_init()
+{
+   CurrentTimeStamp = Time[0];
+   getClientServerOffset();
+}
+
+//+------------------------------------------------------------------+
 //| get Moving Average period
 //| arg_timeperiod:M1,M5,M15,M30,H1,H4,D1,W1,WN1
 //| arg_type:0,short;1,middle;2,long

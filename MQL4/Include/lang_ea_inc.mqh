@@ -10,6 +10,7 @@
 #include <lang_stg_inc.mqh>
 
 //input
+input bool     i_sendmail=true;
 input int      i_equity_percent=1;
 input double   i_max_lots=0.01;
 input int      i_slippage=5;
@@ -900,4 +901,13 @@ void writeOrderCmdToFile(s_Order &arg_order)
 
    FileClose(h);
 
+}
+//+------------------------------------------------------------------+
+// ea_init: ea init
+//+------------------------------------------------------------------+
+void ea_init()
+{
+   CurrentTimeStamp = Time[0];
+   getClientServerOffset();
+   g_sendmail=i_sendmail;
 }
