@@ -266,7 +266,7 @@ int OnCalculate(const int rates_total,
          range_high_low_gap_Buffer[i]=0;
       }
       
-      
+      /*
       //debug
       datetime t=Time[i];
       datetime t1=StringToTime("2017.11.07 03:30");
@@ -282,7 +282,7 @@ int OnCalculate(const int rates_total,
          Print("g_high_low=");
          PrintTwoDimArray(g_high_low);
       }
-      
+      */
    }
    
 //--- return value of prev_calculated for next call
