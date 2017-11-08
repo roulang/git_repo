@@ -16,8 +16,8 @@
 //#property indicator_separate_window
 //#property indicator_minimum -5
 //#property indicator_maximum 5
-#property indicator_buffers 8
-#property indicator_plots   8
+#property indicator_buffers 11
+#property indicator_plots   11
 //--- plot signal
 #property indicator_label1  "range_low"
 //#property indicator_type1   DRAW_ARROW
@@ -66,6 +66,18 @@
 #property indicator_label8  "range_high2_shift"
 #property indicator_type8   DRAW_ARROW
 #property indicator_color8  clrBlack
+//--- plot high gap point
+#property indicator_label9  "range_high_gap"
+#property indicator_type9   DRAW_ARROW
+#property indicator_color9  clrBlack
+//--- plot low gap point
+#property indicator_label10  "range_low_gap"
+#property indicator_type10   DRAW_ARROW
+#property indicator_color10  clrBlack
+//--- plot high low gap point
+#property indicator_label11  "range_high_low_gap"
+#property indicator_type11   DRAW_ARROW
+#property indicator_color11  clrBlack
 
 //--- indicator buffers
 double         range_low_Buffer[];
@@ -76,12 +88,15 @@ double         range_low_sht_Buffer[];
 double         range_high_sht_Buffer[];
 double         range_low2_sht_Buffer[];
 double         range_high2_sht_Buffer[];
+double         range_high_gap_Buffer[];
+double         range_low_gap_Buffer[];
+double         range_high_low_gap_Buffer[];
 
 //input
 input int      i_range=20;
 input int      i_long=1;
 input int      i_thredhold_pt=0;
-input int      i_expand=0;          //0:not expand,1:expand one level,2:expand two level
+input int      i_expand=1;          //0:not expand,1:expand one level,2:expand two level
 input int      i_add_pivot=1;       //0:not add pivot value,1:add pivot value
 
 //global
@@ -117,12 +132,18 @@ int OnInit()
    SetIndexBuffer(5,range_high_sht_Buffer);
    SetIndexBuffer(6,range_low2_sht_Buffer);
    SetIndexBuffer(7,range_high2_sht_Buffer);
+   SetIndexBuffer(8,range_high_gap_Buffer);
+   SetIndexBuffer(9,range_low_gap_Buffer);
+   SetIndexBuffer(10,range_high_low_gap_Buffer);
    
    //SetIndexArrow(0,SYMBOL_ARROWUP);
    SetIndexArrow(4,SYMBOL_CHECKSIGN);
    SetIndexArrow(5,SYMBOL_CHECKSIGN);
    SetIndexArrow(6,SYMBOL_CHECKSIGN);
    SetIndexArrow(7,SYMBOL_CHECKSIGN);
+   SetIndexArrow(8,SYMBOL_CHECKSIGN);
+   SetIndexArrow(9,SYMBOL_CHECKSIGN);
+   SetIndexArrow(10,SYMBOL_CHECKSIGN);
    
 //---
    return(INIT_SUCCEEDED);
@@ -171,6 +192,10 @@ int OnCalculate(const int rates_total,
       //if (range_dw2>0) mid_dw2_Buffer[i]=range_dw2;
 
       double cur_price=Close[i];
+      int bar_status=0;
+      if (Open[i]>Close[i]) {    //negative bar
+         bar_status=1;
+      }
       
       if (i==st-1) {
          //break
@@ -186,15 +211,18 @@ int OnCalculate(const int rates_total,
       int larger_pd=0;
       if (i_expand==0) {         //not expand
          //getNearestHighLowPrice(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,i_long);
-         getNearestHighLowPrice2(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
+         //getNearestHighLowPrice2(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
+         getNearestHighLowPrice3(cur_price,PERIOD_CURRENT,i,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,false,bar_status);
       } else if (i_expand==1 || i_expand==2) {  //expand to larger period
          larger_pd=expandPeriod(PERIOD_CURRENT,i,larger_shift,i_expand);
          if (g_larger_shift>0 && g_larger_shift==larger_shift) {     //
             //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long,true);
-            getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,true);
+            //getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,true);
+            getNearestHighLowPrice3(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,true,bar_status);
          } else {
             //getNearestHighLowPrice(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,i_long);
-            getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
+            //getNearestHighLowPrice2(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot);
+            getNearestHighLowPrice3(cur_price,larger_pd,g_larger_shift,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,i_long,i_add_pivot,false,bar_status);
             g_larger_shift=larger_shift;
          }
       }
@@ -222,12 +250,29 @@ int OnCalculate(const int rates_total,
       } else {
          //Print("Time3[",i,"]=",Time[i]);
       }
+      if (g_high_low[0][0]>0 && g_high_low[1][0]>0) {     //second nearest high>0 and nearest high>0
+         range_high_gap_Buffer[i]=NormalizeDouble((g_high_low[0][0]-g_high_low[1][0])/Point,0);
+      } else {
+         range_high_gap_Buffer[i]=0;
+      }
+      if (g_high_low[2][0]>0 && g_high_low[3][0]>0) {     //nearest low>0 and second nearest low>0
+         range_low_gap_Buffer[i]=NormalizeDouble((g_high_low[2][0]-g_high_low[3][0])/Point,0);
+      } else {
+         range_low_gap_Buffer[i]=0;
+      }
+      if (g_high_low[1][0]>0 && g_high_low[2][0]>0) {     //nearest high>0 and nearest low>0
+         range_high_low_gap_Buffer[i]=NormalizeDouble((g_high_low[1][0]-g_high_low[2][0])/Point,0);
+      } else {
+         range_high_low_gap_Buffer[i]=0;
+      }
       
-      /*
+      
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.25 16:58");
-      if (t==t1) {
+      datetime t1=StringToTime("2017.11.07 03:30");
+      int      p=Period();
+      int      p1=PERIOD_M15;
+      if (t==t1 && p==p1) {
          Print("time=",t);
          Print("shift=",i);
          Print("larger_pd=",larger_pd);
@@ -237,7 +282,7 @@ int OnCalculate(const int rates_total,
          Print("g_high_low=");
          PrintTwoDimArray(g_high_low);
       }
-      */
+      
    }
    
 //--- return value of prev_calculated for next call
@@ -287,6 +332,9 @@ int InitializeAll()
    ArrayInitialize(range_high_sht_Buffer,0.0);
    ArrayInitialize(range_low2_sht_Buffer,0.0);
    ArrayInitialize(range_high2_sht_Buffer,0.0);
+   ArrayInitialize(range_high_gap_Buffer,0.0);
+   ArrayInitialize(range_low_gap_Buffer,0.0);
+   ArrayInitialize(range_high_low_gap_Buffer,0.0);
 
 //--- first counting position
    return(Bars-1);

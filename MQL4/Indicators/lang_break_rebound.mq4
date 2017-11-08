@@ -12,8 +12,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -5
-#property indicator_maximum 5
+#property indicator_minimum -2
+#property indicator_maximum 2
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -28,18 +28,18 @@
 double         signalBuffer[];
 
 //input
-input int      i_range=20;
-input int      i_thredhold_pt=0;
-input int      i_expand=1;
+//input int      i_range=20;
+//input int      i_thredhold_pt=0;
+//input int      i_expand=1;
 
 //global
-double g_zigBuf[][3];
-double g_high_low[4][2];
-double g_pivotBuf[5];
-int    g_pivot_sht=0;
-int    g_touch_highlow[4];
-int    g_larger_shift=0;
-int    g_threhold_gap=50;
+//double g_zigBuf[][3];
+//double g_high_low[4][2];
+//double g_pivotBuf[5];
+//int    g_pivot_sht=0;
+//int    g_touch_highlow[4];
+//int    g_larger_shift=0;
+//int    g_threhold_gap=50;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -56,10 +56,10 @@ int OnInit()
    
    //SetIndexArrow(0,SYMBOL_ARROWUP);
 
-   ArrayResize(g_zigBuf,i_range);
-   ArrayInitialize(g_zigBuf,0);
-   ArrayInitialize(g_pivotBuf,0);
-   ArrayInitialize(g_high_low,0);
+//   ArrayResize(g_zigBuf,i_range);
+//   ArrayInitialize(g_zigBuf,0);
+//   ArrayInitialize(g_pivotBuf,0);
+//   ArrayInitialize(g_high_low,0);
    
 //---
    return(INIT_SUCCEEDED);
@@ -96,12 +96,12 @@ int OnCalculate(const int rates_total,
    if(g_debug) {
       Print("1:st=",st);
    }
-   double ls_price=0;
-   double high_gap,low_gap,high_low_gap;
+   //double ls_price=0;
+   //double high_gap,low_gap,high_low_gap;
    for(int i=st-1;i>0;i--) {
       //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
-      signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
-
+      //signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
+      signalBuffer[i]=isBreak_Rebound2(i);
       /*
       //debug
       datetime t=Time[i];

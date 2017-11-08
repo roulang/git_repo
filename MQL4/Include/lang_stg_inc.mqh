@@ -326,154 +326,6 @@ int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_d
 }
 
 //+------------------------------------------------------------------+
-//| get nearest high and low price (use lang_zig_zag indicator)
-//| arg_shift: bar shift
-//| &arg_zig_buf[][]: to store high and low zig value.[0]:time,[1]:value,[2]:shift
-//| &arg_high_low[][]: to store last two high and low zig value.four items,
-//| 0:second nearest high price,1:nearest high price,2:nearest low price,3:second nearest low price
-//| [0]:price,[1]:shift
-//+------------------------------------------------------------------+
-void getNearestHighLowPrice(double arg_price,int arg_period,int arg_shift,int arg_length,
-                              double &arg_zig_buf[][],double &arg_high_low[][],
-                              int arg_long=0,bool arg_sort_only=false)
-{
-
-   //PrintTwoDimArray(arg_zig_buf);
-
-   //double cur_price=Close[arg_shift];
-   double cur_price=arg_price;
-
-   int zig_shift_idx;
-   int zig_value_idx;
-   if (arg_long==0) {
-      zig_value_idx=14;
-      zig_shift_idx=15;
-   } else {
-      zig_value_idx=16;
-      zig_shift_idx=17;
-   }
-   int zigShfit=0;
-   int bar_shift=arg_shift;
-   double zigPrice=0;
-   datetime zigTime=0;
-   double high_low[][2];   //[0]:price,[1]:shift
-   ArrayResize(high_low,arg_length);
-   for (int i=0;i<arg_length;i++) {
-      zigShfit=(int)iCustom(NULL,arg_period,"lang_zigzag",false,0,0,0,0,zig_shift_idx,bar_shift);
-      if (zigShfit==0) break;
-      bar_shift+=MathAbs(zigShfit);
-      zigTime=Time[bar_shift];
-      if (i==0) {
-         datetime bufTime=(datetime)arg_zig_buf[0][0];
-         if (zigTime==bufTime || arg_sort_only) {
-            for (int j=0;j<arg_length;j++) {
-               high_low[j][0]=arg_zig_buf[j][1];
-               bufTime=(datetime)arg_zig_buf[j][0];
-               high_low[j][1]=iBarShift(NULL,arg_period,bufTime,true);
-            }
-            break;
-         }
-      }
-      zigPrice=iCustom(NULL,arg_period,"lang_zigzag",false,0,0,0,0,zig_value_idx,bar_shift);
-      arg_zig_buf[i][0]=(double)zigTime;
-      arg_zig_buf[i][1]=zigPrice;
-      high_low[i][0]=zigPrice;
-      if (zigShfit>0) {
-         high_low[i][1]=bar_shift;
-      } else {
-         high_low[i][1]=-bar_shift;
-      }
-      arg_zig_buf[i][2]=high_low[i][1];
-   }
-
-   //PrintTwoDimArray(arg_zig_buf);
-   
-   //PrintTwoDimArray(high_low);
-   
-   ArraySort(high_low,WHOLE_ARRAY,0,MODE_DESCEND);
-
-   //PrintTwoDimArray(high_low);
-
-   int n=ArrayBsearch(high_low,cur_price,WHOLE_ARRAY,0,MODE_DESCEND);
-
-   /* --memo
-   double a[10][2]={{0.5,1},{0.2,2},{0.4,3},{0.7,4},{0.9,5},{1.0,6},{0.51,7},{1.1,8},{0.1,9},{0.05,10}};
-   ArraySort(a,WHOLE_ARRAY,0,MODE_DESCEND);
-   //(1.1|1.0|0.9|0.7|0.51|0.5|0.4|0.2|0.1|0.05)
-   PrintTwoDimArray(a);
-   //Print("0.51 is in a[",ArrayBsearch(a,0.51,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 4 
-   //Print("0.52 is in a[",ArrayBsearch(a,0.52,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 3
-   //Print("0.69 is in a[",ArrayBsearch(a,0.69,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 3
-   //Print("1.2 is in a[",ArrayBsearch(a,1.2,WHOLE_ARRAY,0,MODE_DESCEND),"]");     //return 0
-   //Print("1.05 is in a[",ArrayBsearch(a,1.05,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 0
-   //Print("0.04 is in a[",ArrayBsearch(a,0.04,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 9
-   //Print("0.06 is in a[",ArrayBsearch(a,0.06,WHOLE_ARRAY,0,MODE_DESCEND),"]");   //return 8
-   */
-   
-   if (n==0) {
-      if (high_low[0][0]<cur_price) {
-         arg_high_low[0][0]=0;                  //second nearest high price
-         arg_high_low[0][1]=0;                  //second nearest high price's shift
-         arg_high_low[1][0]=0;                  //nearest high price
-         arg_high_low[1][1]=0;                  //nearest high price's shift
-         if (high_low[0][0]>0) {
-            arg_high_low[2][0]=high_low[0][0];  //nearest low price
-            arg_high_low[2][1]=high_low[0][1];  //nearest low price's shift
-         } else {
-            arg_high_low[2][0]=0;
-            arg_high_low[2][1]=0;
-         }
-         if (high_low[1][0]>0) {
-            arg_high_low[3][0]=high_low[1][0];  //second nearest low price
-            arg_high_low[3][1]=high_low[1][1];  //second nearest low price's shift
-         } else {
-            arg_high_low[3][0]=0;
-            arg_high_low[3][1]=0;
-         }
-      } else {
-         arg_high_low[0][0]=0;                  //second nearest high price
-         arg_high_low[0][1]=0;                  //second nearest high price's shift
-         if (high_low[0][0]>0) {
-            arg_high_low[1][0]=high_low[0][0];  //nearest high price
-            arg_high_low[1][1]=high_low[0][1];  //nearest high price's shift
-         } else {
-            arg_high_low[1][0]=0;
-            arg_high_low[1][1]=0;
-         }
-         if (high_low[1][0]>0) {
-            arg_high_low[2][0]=high_low[1][0];  //nearest low price
-            arg_high_low[2][1]=high_low[1][1];  //nearest low price's shift
-         } else {
-            arg_high_low[2][0]=0;
-            arg_high_low[2][1]=0;
-         }
-         if (high_low[2][0]>0) {
-            arg_high_low[3][0]=high_low[2][0];  //second nearest low price
-            arg_high_low[3][1]=high_low[2][1];  //second nearest low price's shift
-         } else {
-            arg_high_low[3][0]=0;
-            arg_high_low[3][1]=0;
-         }
-      }
-      return;
-   }
-   
-   //n>0
-   int st=n-1;
-   for (int i=0;i<4;i++) {
-      if (st<arg_length && high_low[st][0]>0) {
-         arg_high_low[i][0]=high_low[st][0];
-         arg_high_low[i][1]=high_low[st][1];
-      } else {
-         arg_high_low[i][0]=0;
-         arg_high_low[i][1]=0;
-      }
-      st++;
-   }
-
-}
-
-//+------------------------------------------------------------------+
 //| Trend strategy Open (use ma)
 //| date: 2017/08/31
 //| arg_shift: bar shift
@@ -587,5 +439,97 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
    }
    
    //unknown
+   return 0;
+}
+
+//+------------------------------------------------------------------+
+//| Hit point break or rebound
+//| date: 2017/11/6
+//| arg_shift: bar shift
+//| arg_thpt:threahold point
+//| return value: break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
+//+------------------------------------------------------------------+
+int isBreak_Rebound2(int arg_shift,int arg_oc_gap_pt=10,int arg_high_low_gap_pt=200,int arg_high_low_gap_pt2=50)
+{
+   double oc_gap=Open[arg_shift]-Close[arg_shift];
+   int oc_gap_pt=(int)NormalizeDouble(MathAbs(oc_gap)/Point,0);
+   
+   if (oc_gap_pt<=arg_oc_gap_pt) return 0;  //open close gap is too narrow
+   
+   int bar_status=0;
+   if (oc_gap>0) bar_status=1;   //1 for negative bar(open>close)
+   
+   int touch_idx=0;
+   int cur_high_low_touch=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,1,touch_idx,arg_shift);       //nearest
+   int cur_high_low_touch2=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,0,touch_idx,arg_shift);      //second nearest
+   int last_bar_shift=arg_shift+1;
+   int lst_high_low_touch=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,1,touch_idx,last_bar_shift);  //nearest
+   int lst_high_low_touch2=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,0,touch_idx,last_bar_shift); //second nearest
+   
+   if (lst_high_low_touch==0 && cur_high_low_touch==0) return 0;  //no signal
+   
+   int low_idx=0;
+   int high_idx=1;
+   int low2_idx=2;
+   int high2_idx=3;
+   int high_gap_idx=8;
+   int low_gap_idx=9;
+   int high_low_gap_idx=10;
+   double last_range_high=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_idx,last_bar_shift);
+   double last_range_high2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high2_idx,last_bar_shift);
+   double last_range_low=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low_idx,last_bar_shift);
+   double last_range_low2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low2_idx,last_bar_shift);
+   int last_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_gap_idx,last_bar_shift);
+   int last_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low_gap_idx,last_bar_shift);
+   int last_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_low_gap_idx,last_bar_shift);
+   
+   if (last_high_low_gap_pt<arg_high_low_gap_pt) return 0;      //high low gap is too narrow
+   
+   if (lst_high_low_touch==0 && cur_high_low_touch==1) {    //hit high,turn down
+      return -1;
+   }
+   if (lst_high_low_touch==1 && cur_high_low_touch==0) {    //hit high,turn down,more strong
+      return -1;
+   }
+   if (lst_high_low_touch==0 && cur_high_low_touch==-1) {   //hit low,turn up
+      return 1;
+   }
+   if (lst_high_low_touch==-1 && cur_high_low_touch==0) {   //hit low,turn up,more strong
+      return 1;
+   }
+   if (cur_high_low_touch>1) {      //break high,up
+      if (last_high_gap_pt>=arg_high_low_gap_pt2) {
+         return 2;
+      }
+      if (cur_high_low_touch2>1) {  //break second high
+         return 2;
+      }
+   }
+   if (lst_high_low_touch>1 && cur_high_low_touch>1) {      //break high(two bars),up
+      if (last_high_gap_pt>=arg_high_low_gap_pt2) {
+         return 2;
+      }
+      if (cur_high_low_touch2>1) {  //break second high
+         return 2;
+      }
+   }
+
+   if (cur_high_low_touch<-1) {     //break low,down
+      if (last_high_gap_pt>=arg_high_low_gap_pt2) {
+         return -2;
+      }
+      if (cur_high_low_touch2<-1) {  //break second low
+         return -2;
+      }
+   }
+   if (lst_high_low_touch<-1 && cur_high_low_touch<-1) {      //break low(two bars),up
+      if (last_high_gap_pt>=arg_high_low_gap_pt) {
+         return -2;
+      }
+      if (cur_high_low_touch2<-1) {  //break second low
+         return -2;
+      }
+   }
+   
    return 0;
 }

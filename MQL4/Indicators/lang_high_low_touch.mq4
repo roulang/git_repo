@@ -28,11 +28,11 @@
 double         signalBuffer[];
 
 //input
+input int      i_nearest=1;
+
 input int      i_range=20;
 input int      i_thredhold_pt=0;
 input int      i_expand=1;
-
-input int      i_nearest=1;
 
 //global
 double g_zigBuf[][3];
