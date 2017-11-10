@@ -890,6 +890,7 @@ void writeOrderCmdToFile(s_Order &arg_order)
    arg_order.profit=0;
    arg_order.close_p=0;
    arg_order.close_t=-1;
+   arg_order.ped=Period();
 
    ResetLastError();
    //write file

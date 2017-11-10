@@ -812,9 +812,9 @@ void getNearestHighLowPrice3(double arg_price,int arg_period,int arg_shift,int a
 //| [ ] (open)  2
 //| [ ] (close) 2
 //|  |  (low)   3
-//|     (below) 0
+//|     (below) 4
 //| <<range_low,range_sub_low>>
-//|     (above) 0
+//|     (above) 4
 //|  |  (high)  3
 //| [ ] (open)  2
 //| [ ] (close) 2
@@ -932,114 +932,170 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
    double break_offset=arg_thpt*Point;
    double target_price;
    
-   target_price=range_high+break_offset;
-   if          (target_price>current_high) {
-      if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
-   } else if   (target_price>current_sub_high) {
-      if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
-   } else if   (target_price>current_sub_low) {
-      if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
-   } else if   (target_price>current_low) {
-      if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
-   } else {
-      if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
-   }
-   if (break_offset>0) {
-      target_price=range_high-break_offset;
-      if          (target_price>current_high) {
+   if (range_high>0) {
+      target_price=range_high+break_offset;
+      if (target_price>current_high) {
+         if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+      } else 
+      if (target_price>current_sub_high) {
+         if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+      } else
+      if (target_price>current_sub_low) {
+         if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
+      } else
+      if (target_price>current_low) {
+         if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
+      } else
+      //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+      if (arg_touch_status[0]==0) {
+         arg_touch_status[0]=4*current_bar_status;
+         datetime t=Time[arg_shift];
+         //Print("1.touch=4,t=",t);
+      }
+   
+      if (break_offset>0) {
+         target_price=range_high-break_offset;
+         /*
+         if (target_price>current_high) {
+            if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+         } else
+         if (target_price>current_sub_high) {
+            if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+         } else
+         if (target_price>current_sub_low) {
+            if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
+         } else
+         if (target_price>current_low) {
+            if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
+         } else
          //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
-      } else if   (target_price>current_sub_high) {
-         //if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
-      } else if   (target_price>current_sub_low) {
-         //if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
-      } else if   (target_price>current_low) {
-         //if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
-      } else {
-         //if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+         if (arg_touch_status[0]==0) arg_touch_status[0]=4*current_bar_status;
+         */
       }
    }
-   
-   target_price=range_sub_high+break_offset;
-   if          (target_price>current_high) {
-      if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
-   } else if   (target_price>current_sub_high) {
-      if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;
-   } else if   (target_price>current_sub_low) {
-      if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
-   } else if   (target_price>current_low) {
-      if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
-   } else {
-      if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
-   }
-   if (break_offset>0) {
-      target_price=range_sub_high-break_offset;
-      if          (target_price>current_high) {
-         //if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
-      } else if   (target_price>current_sub_high) {
+      
+   if (range_sub_high>0) {
+      target_price=range_sub_high+break_offset;
+      if (target_price>current_high) {
+         if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+      } else
+      if (target_price>current_sub_high) {
          if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;
-      } else if   (target_price>current_sub_low) {
-         //if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
-      } else if   (target_price>current_low) {
-         //if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
-      } else {
+      } else
+      if (target_price>current_sub_low) {
+         if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
+      } else
+      if (target_price>current_low) {
+         if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
+      } else
+      //if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+      if (arg_touch_status[1]==0) {
+         arg_touch_status[1]=4*current_bar_status;
+         datetime t=Time[arg_shift];
+         //Print("2.touch=4,t=",t);
+      }
+      
+      if (break_offset>0) {
+         target_price=range_sub_high-break_offset;
+         if (target_price>current_high) {
+            if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+         } else
+         if (target_price>current_sub_high) {
+            if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;   //set to 1
+         } else
+         if (target_price>current_sub_low) {
+            if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;   //set to 1
+         } else
+         if (target_price>current_low) {
+            if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;   //set to 1
+         } else
          //if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+         if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;      //set to 1
       }
    }
-   
-   target_price=range_sub_low-break_offset;
-   if          (target_price>current_high) {
-      if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
-   } else if   (target_price>current_sub_high) {
-      if (arg_touch_status[2]==0) arg_touch_status[2]=3*current_bar_status;
-   } else if   (target_price>current_sub_low) {
-      if (arg_touch_status[2]==0) arg_touch_status[2]=2*current_bar_status;
-   } else if   (target_price>current_low) {
-      if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;
-   } else {
-      if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
-   }
-   if (break_offset>0) {
-      target_price=range_sub_low+break_offset;
-      if          (target_price>current_high) {
+      
+   if (range_sub_low>0) {
+      target_price=range_sub_low-break_offset;
+      if (target_price>current_high) {
          //if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
-      } else if   (target_price>current_sub_high) {
-         //if (arg_touch_status[2]==0) arg_touch_status[2]=3*current_bar_status;
-      } else if   (target_price>current_sub_low) {
-         //if (arg_touch_status[2]==0) arg_touch_status[2]=2*current_bar_status;
-      } else if   (target_price>current_low) {
+         if (arg_touch_status[2]==0) {
+            arg_touch_status[2]=4*current_bar_status;
+            datetime t=Time[arg_shift];
+            //Print("3.touch=4,t=",t);
+         }
+      } else
+      if (target_price>current_sub_high) {
+         if (arg_touch_status[2]==0) arg_touch_status[2]=3*current_bar_status;
+      } else
+      if (target_price>current_sub_low) {
+         if (arg_touch_status[2]==0) arg_touch_status[2]=2*current_bar_status;
+      } else
+      if (target_price>current_low) {
          if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;
-      } else {
-         //if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
-      }
-   }
-
-   target_price=range_low-break_offset;
-   if          (target_price>current_high) {
-      if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
-   } else if   (target_price>current_sub_high) {
-      if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
-   } else if   (target_price>current_sub_low) {
-      if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
-   } else if   (target_price>current_low) {
-      if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
-   } else {
-      if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
-   }
-   if (break_offset>0) {
-      target_price=range_low+break_offset;
-      if          (target_price>current_high) {
-         //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
-      } else if   (target_price>current_sub_high) {
-         //if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
-      } else if   (target_price>current_sub_low) {
-         //if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
-      } else if   (target_price>current_low) {
-         //if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
-      } else {
-         //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+      } else
+      if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+      
+      if (break_offset>0) {
+         target_price=range_sub_low+break_offset;
+         if (target_price>current_high) {
+            //if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
+            if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;
+         } else
+         if (target_price>current_sub_high) {
+            if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;   //set to 1
+         } else
+         if (target_price>current_sub_low) {
+            if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;   //set to 1
+         } else
+         if (target_price>current_low) {
+            if (arg_touch_status[2]==0) arg_touch_status[2]=1*current_bar_status;   //set to 1
+         } else
+         if (arg_touch_status[2]==0) arg_touch_status[2]=0*current_bar_status;
       }
    }
    
+   if (range_low>0) {
+      target_price=range_low-break_offset;
+      if (target_price>current_high) {
+         //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+         if (arg_touch_status[3]==0) {
+            arg_touch_status[3]=4*current_bar_status;
+            datetime t=Time[arg_shift];
+            //Print("4.touch=4,t=",t);
+         }
+      } else
+      if (target_price>current_sub_high) {
+         if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
+      } else
+      if (target_price>current_sub_low) {
+         if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
+      } else
+      if (target_price>current_low) {
+         if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
+      } else
+      if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+      
+      if (break_offset>0) {
+         target_price=range_low+break_offset;
+         /*
+         if (target_price>current_high) {
+            //if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+            if (arg_touch_status[3]==0) arg_touch_status[3]=4*current_bar_status;
+         } else
+         if (target_price>current_sub_high) {
+            if (arg_touch_status[3]==0) arg_touch_status[3]=3*current_bar_status;
+         } else
+         if (target_price>current_sub_low) {
+            if (arg_touch_status[3]==0) arg_touch_status[3]=2*current_bar_status;
+         } else
+         if (target_price>current_low) {
+            if (arg_touch_status[3]==0) arg_touch_status[3]=1*current_bar_status;
+         } else
+         if (arg_touch_status[3]==0) arg_touch_status[3]=0*current_bar_status;
+         */
+      }
+   }
+      
    if (MathAbs(arg_touch_status[1])>0 && MathAbs(arg_touch_status[2])>0) return 0;
    if (MathAbs(arg_touch_status[1])>0) {   //hit high
       return 1;
@@ -1091,9 +1147,10 @@ int getMAStatus(int arg_period,int arg_shift)
       current_high=Close[arg_shift];
       current_low=Open[arg_shift];
    }
+   
    if (current_short_ma<=current_high && current_short_ma>=current_low)    //filter current bar's body through short ma
       return 0;
-      
+   
    double last_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
    double last_high,last_low;
    if (Open[arg_shift+1]>Close[arg_shift+1]) {
@@ -1113,7 +1170,16 @@ int getMAStatus(int arg_period,int arg_shift)
    double current_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
    double last_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
    double last_middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
-
+   
+   /*
+   //filter
+   if (current_short_ma<=current_high && current_short_ma>=current_low) {        //current bar's body through short ma
+      if (current_middle_ma<=current_high && current_middle_ma>=current_low) {   //current bar's body through middle ma
+         return 0;
+      }
+   }
+   */
+   
    int ret=0;
    int short_direction=0;
    int middle_direction=0;

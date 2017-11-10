@@ -71,6 +71,7 @@ struct s_Order
    datetime close_t;    //close time
    string   com;        //comment   
    int      mag;        //magic number
+   int      ped;        //period   
 };
 
 //input
@@ -227,7 +228,32 @@ string getOrderTp(int arg_type)
    }
    
 }
-
+string getPeriodTp(int arg_period=PERIOD_CURRENT)
+{
+   if (arg_period==PERIOD_CURRENT) {
+      arg_period=Period();
+   }
+   switch (arg_period) {
+      case PERIOD_W1:
+         return "W1";
+      case PERIOD_D1:
+         return "D1";
+      case PERIOD_H4:
+         return "H4";
+      case PERIOD_H1:
+         return "H1";
+      case PERIOD_M30:
+         return "M30";
+      case PERIOD_M15:
+         return "M15";
+      case PERIOD_M5:
+         return "M5";
+      case PERIOD_M1:
+         return "M1";
+      default:
+         return "N/A";
+   }   
+}
 string dToStr(string arg_sym,double arg_value,int arg_digits=0)
 {
    if (arg_value==0) return "0";
@@ -348,6 +374,7 @@ int writeOrderHistoryToFile(int arg_wrt_all=0)
          order.profit=OrderProfit();
          order.com=OrderComment();
          order.mag=OrderMagicNumber();
+         order.ped=1;   //N/A
          
          ResetLastError();
          //write file
@@ -380,13 +407,14 @@ bool wrtOneOrderToFile(int h, int n, s_Order &order)
    string lots=dToStr(NULL,order.lots,2);
    string o_t=covDateString(TimeToString(order.open_t),SLASH);
    string c_t=covDateString(TimeToString(order.close_t),SLASH);
+   string ped=getPeriodTp(order.ped);
    //Print("1=",tic,",2=",tm1,",3=",tp,",4=",lots,",5=",sym);
    //Print("6=",p1,",7=",sl_p,",8=",tp_p,",9=",tm2,",10=",p2);
    //Print("11=",pt,",12=",co,",13=",mg);
    
    //"0","order","open time","type#","type","size","symbol","open price","S/L","T/P","close time","close price","profit","comment","magic"
    //uint ret=FileWrite(h,n,order.tic,order.open_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,order.close_t,p2,order.profit,order.com,order.mag);
-   uint ret=FileWrite(h,n,order.tic,o_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,c_t,p2,order.profit,order.com,order.mag);
+   uint ret=FileWrite(h,n,order.tic,o_t,order.type,tp,lots,order.sym,p1,sl_p,tp_p,c_t,p2,order.profit,order.com,order.mag,ped);
    
    if (ret>0) return true;
    else return false; 

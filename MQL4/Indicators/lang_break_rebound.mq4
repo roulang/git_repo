@@ -12,8 +12,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -2
-#property indicator_maximum 2
+#property indicator_minimum -3
+#property indicator_maximum 3
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -28,9 +28,9 @@
 double         signalBuffer[];
 
 //input
-//input int      i_range=20;
-//input int      i_thredhold_pt=0;
-//input int      i_expand=1;
+input int      i_range=20;
+input int      i_thredhold_pt=0;
+input int      i_expand=1;
 
 //global
 //double g_zigBuf[][3];
@@ -97,11 +97,19 @@ int OnCalculate(const int rates_total,
       Print("1:st=",st);
    }
    //double ls_price=0;
-   //double high_gap,low_gap,high_low_gap;
+   double range_high,range_low;
+   int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
+   int ret=0;
    for(int i=st-1;i>0;i--) {
       //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
       //signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
-      signalBuffer[i]=isBreak_Rebound2(i);
+      ret=isBreak_Rebound2(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
+      if (MathAbs(ret)>=1) {
+         //send mail
+      }
+      if (MathAbs(ret)>1) {
+         signalBuffer[i]=ret;
+      }
       /*
       //debug
       datetime t=Time[i];
@@ -116,7 +124,6 @@ int OnCalculate(const int rates_total,
          }
       }
       */
-      
    }
 
 //--- return value of prev_calculated for next call
