@@ -31,6 +31,7 @@ double         signalBuffer[];
 input int      i_range=20;
 input int      i_thredhold_pt=0;
 input int      i_expand=1;
+input bool     i_sendmail=false;
 
 //global
 //double g_zigBuf[][3];
@@ -49,8 +50,9 @@ int OnInit()
 
    if (!i_for_test) {
       //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
+      g_sendmail=i_sendmail;
    }
-
+   
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    
@@ -100,12 +102,20 @@ int OnCalculate(const int rates_total,
    double range_high,range_low;
    int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
    int ret=0;
+   string sym=Symbol();
+   string ped=getPeriodTp(Period());
+   string s=StringConcatenate("[",sym,"(",ped,")]");
    for(int i=st-1;i>0;i--) {
       //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
       //signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
       ret=isBreak_Rebound2(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
       if (MathAbs(ret)>=1) {
-         //send mail
+         //string t1=TimeToStr(Time[i],TIME_DATE);
+         string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));
+         string t2=TimeToStr(Time[i],TIME_MINUTES);
+         string t=StringConcatenate("[",t1," ",t2,"]");
+         string mail_title=StringConcatenate(s," ",t," hit high low (",ret,")");
+         mailNotice(mail_title,"");
       }
       if (MathAbs(ret)>1) {
          signalBuffer[i]=ret;

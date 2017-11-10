@@ -199,6 +199,23 @@ bool mailNoticeOrderMod(int arg_tic,string arg_sym,int arg_type,double arg_p,dou
 
 }
 
+bool mailNotice(string arg_sub,string arg_body)
+{
+   if (!g_sendmail) return true;
+   
+   string EmailSubject=arg_sub;   
+   string EmailBody=arg_body;
+   
+   ResetLastError();
+   if (!SendMail(EmailSubject,EmailBody)) {
+      Print("Operation SendMail failed, error: ",GetLastError());
+      return false;
+   }
+
+   return true;
+
+}
+
 string getOrderTp(int arg_type)
 {
    /*
