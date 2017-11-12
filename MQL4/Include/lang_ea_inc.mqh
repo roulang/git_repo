@@ -887,6 +887,7 @@ void writeOrderCmdToFile(s_Order &arg_order)
       return;
    }
    
+   arg_order.open_t=TimeCurrent();
    arg_order.profit=0;
    arg_order.close_p=0;
    arg_order.close_t=-1;
