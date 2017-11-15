@@ -443,7 +443,7 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
 }
 
 //+------------------------------------------------------------------+
-//| Hit point break or rebound
+//| Hit point break or rebound (use high_low_touch indicator)
 //| date: 2017/11/6
 //| arg_shift: bar shift
 //| arg_thpt:threahold point
@@ -463,11 +463,6 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    
    if (g_debug) {
       Print("oc_gap_pt=",oc_gap_pt);
-   }
-
-   if (oc_gap_pt<=arg_oc_gap_pt) {  //open close gap is too narrow
-      if (g_debug) Print(t,"open close gap is too narrow");
-      return 0;
    }
    
    int bar_status=0;
@@ -531,6 +526,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    if (g_debug) {
       Print("cur_range_high=",cur_range_high,",cur_range_high2=",cur_range_high2);
       Print("cur_range_low=",cur_range_low,",cur_range_low2=",cur_range_low2);
+      Print("cur_high_gap_pt=",cur_high_gap_pt,",cur_low_gap_pt=",cur_low_gap_pt,",cur_high_low_gap_pt=",cur_high_low_gap_pt);
       Print("last_range_high=",last_range_high,",last_range_high2=",last_range_high2);
       Print("last_range_low=",last_range_low,",last_range_low2=",last_range_low2);
       Print("last_high_gap_pt=",last_high_gap_pt,",last_low_gap_pt=",last_low_gap_pt,",last_high_low_gap_pt=",last_high_low_gap_pt);
@@ -543,7 +539,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    }
    
    if (cur_high_low_gap_pt<arg_high_low_gap_pt) {     //high low gap is too narrow
-      if (g_debug) Print(t,"high low gap is too narrow");
+      if (g_debug) Print(t,"high low gap is too narrow(<",arg_high_low_gap_pt,")");
       return 0;
    }
    
@@ -663,18 +659,24 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    }
    */
    if (ret==3) {     //break up
-      if (cur_ma_status<0) {    //ma is down
+      if (cur_ma_status<=0) {    //ma is down
          if (g_debug) Print(t,"break up,but ma is down,0");
          ret=0;
       }
    }
    if (ret==-3) {    //break down
-      if (cur_ma_status>0) {    //ma is up
+      if (cur_ma_status>=0) {    //ma is up
          if (g_debug) Print(t,"break down,but ma is up,0");
          ret=0;
       }
    }
-   
+
+   if (MathAbs(ret)==3) {     //break up or break down
+      if (oc_gap_pt<=arg_oc_gap_pt) {  //open close gap is too narrow
+         if (g_debug) Print(t,"open close gap is too narrow");
+         ret=0;
+      }
+   }
    
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)

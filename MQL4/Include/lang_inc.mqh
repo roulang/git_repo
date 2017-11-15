@@ -33,12 +33,12 @@
 #define SEC_D1 86400
 
 //each time period (GMT)
-const string us1="13:00";  //usa
-const string ue2="21:00";  //usa
+const string us1="12:00";  //usa
+const string ue2="20:00";  //usa
 const string as1="00:00";  //asia
 const string ae2="08:00";  //asia
-const string gs1="07:00";  //europe
-const string ge2="15:00";  //europe
+const string gs1="08:00";  //europe
+const string ge2="16:00";  //europe
 const  int ASIA_PD = 1;
 const  int AMA_PD = 4;
 const  int EUR_PD = 2;
@@ -893,4 +893,31 @@ bool isNewsRelated(string arg_symbol,string arg_currency)
    
    return false;
 }
+//last bar of weekend
+bool isEndOfWeek(int arg_shift)
+{
+   datetime t=Time[arg_shift];
+   int d=TimeDayOfWeek(t);
+   if (d>=1 && d<5) return false;   //from monday to thursday
+   if (d==0 || d==6) return true;    //sunday or sataday
+   int h=TimeHour(t);
+   int m=TimeMinute(t);
 
+   int ped=Period();
+   switch (ped) {
+      case PERIOD_H1:
+         if (h==23) return true;
+      case PERIOD_M30:
+         if (h==23 && m==30) return true;
+      case PERIOD_M15:
+         if (h==23 && m==45) return true;
+      case PERIOD_M5:
+         if (h==23 && m==55) return true;
+      case PERIOD_M1:
+         if (h==23 && m==59) return true;
+      default:
+         return false;
+   }
+
+   return false;
+}
