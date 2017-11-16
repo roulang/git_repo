@@ -53,6 +53,8 @@ int OnInit()
       g_sendmail=i_sendmail;
    }
    
+   //g_debug=true;
+   
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
    

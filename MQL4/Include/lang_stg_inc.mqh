@@ -534,12 +534,12 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    }
 
    if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==0) {   //no signal
-      if (g_debug) Print(t,"no signal");
+      Print(t,"no signal");
       return 0;
    }
    
    if (cur_high_low_gap_pt<arg_high_low_gap_pt) {     //high low gap is too narrow
-      if (g_debug) Print(t,"high low gap is too narrow(<",arg_high_low_gap_pt,")");
+      Print(t,"high low gap is too narrow(<",arg_high_low_gap_pt,")");
       return 0;
    }
    
@@ -601,7 +601,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
             if (g_debug) Print(t,"break high,positive bar,+3");
             ret=3;
          } else {
-            if (g_debug) Print(t,"break high,positive bar,but high_gap is too narrow");
+            Print(t,"break high,positive bar,but high_gap is too narrow");
          }
       }
       /*
@@ -631,7 +631,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
             if (g_debug) Print(t,"break low,negative bar,-3");
             ret=-3;
          } else {
-            if (g_debug) Print(t,"break low,negative bar,but low_gap is too narrow");
+            Print(t,"break low,negative bar,but low_gap is too narrow");
          }
       }
       /*
@@ -660,31 +660,31 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    */
    if (ret==3) {     //break up
       if (cur_ma_status<=0) {    //ma is down
-         if (g_debug) Print(t,"break up,but ma is down,0");
+         Print(t,"break up,but ma is down,0");
          ret=0;
       }
    }
    if (ret==-3) {    //break down
       if (cur_ma_status>=0) {    //ma is up
-         if (g_debug) Print(t,"break down,but ma is up,0");
+         Print(t,"break down,but ma is up,0");
          ret=0;
       }
    }
 
    if (MathAbs(ret)==3) {     //break up or break down
       if (oc_gap_pt<=arg_oc_gap_pt) {  //open close gap is too narrow
-         if (g_debug) Print(t,"open close gap is too narrow");
+         Print(t,"open close gap is too narrow(<=",arg_oc_gap_pt,"pt)");
          ret=0;
       }
    }
    
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)
-         if (g_debug) Print(t,"final,only touch high,+1");
+         Print(t,"final,only touch high,+1");
          ret=1;
       }
       if (cur_high_low_touch<0) {   //only touch low(can notify by email)
-         if (g_debug) Print(t,"final,only touch low,-1");
+         Print(t,"final,only touch low,-1");
          ret=-1;
       }
    }
