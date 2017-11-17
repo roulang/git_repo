@@ -22,7 +22,7 @@ input bool     i_news_skip=true;       // news zone skip
 input int      i_news_bef=SEC_H1/4;    // news before 1/4 hour
 input int      i_news_aft=SEC_H1;      // news after 1 hour
 input int      i_zone_bef=SEC_H1/2;    // time zone before 30 minutes
-input int      i_zone_aft=SEC_H1;      // time zone after 1 hour
+input int      i_zone_aft=0;           // time zone after 1 hour
 input int      i_SL=100;               //take lose point
 
 //+------------------------------------------------------------------+

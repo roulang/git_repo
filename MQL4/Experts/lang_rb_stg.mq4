@@ -125,7 +125,7 @@ void OnTick()
    sign=isBreak_Rebound2(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
    
    //active time zone control
-   bool curPd=isCurPd(NULL,cur_bar_shift,0,0);
+   bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,i_zone_aft);
    if (MathAbs(sign)==3 && i_time_control && !curPd) {      //break
       Print("timezone control:avoid to break in non-active time.");
       return;
