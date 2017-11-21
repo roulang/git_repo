@@ -552,14 +552,16 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    
    if (ret==0) {
       //break(up)
-      if (high_low_change==1 && lst_high_low_touch>=0 && cur_high_low_touch>1) {     //high_low_change up
+      //if (high_low_change==1 && lst_high_low_touch>=0 && cur_high_low_touch>1) {     //high_low_change up
+      if (high_low_change==1 && lst_high_low_touch>=0 && cur_high_low_touch>=-1) {      //high_low_change up
          if (bar_status==0) {       //positive bar
             if (g_debug) Print(t,"high_low_change up,positive bar,+3");
             ret=3;
          }
       }
       //break(down)
-      if (high_low_change==-1 && lst_high_low_touch<=0 && cur_high_low_touch<-1) {    //high_low_change down
+      //if (high_low_change==-1 && lst_high_low_touch<=0 && cur_high_low_touch<-1) {    //high_low_change down
+      if (high_low_change==-1 && lst_high_low_touch<=0 && cur_high_low_touch<=1) {     //high_low_change down
          if (bar_status==1) {       //negative bar
             if (g_debug) Print(t,"high_low_change down,negative bar,-3");
             ret=-3;
