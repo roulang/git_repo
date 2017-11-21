@@ -15,9 +15,6 @@ int    g_adx_level=40; //adx level
 //adx
 double adx_thred=0.5;
 
-//atr
-//double atr_lvl=0.0002;
-
 //+------------------------------------------------------------------+
 //| Shot shoot strategy
 //+------------------------------------------------------------------+
@@ -167,7 +164,7 @@ int TrendStgValue2(int shift)
 //+------------------------------------------------------------------+
 //| Time strategy
 //+------------------------------------------------------------------+
-int ATRValue(int arg_shift,int arg_lvl=5,int arg_range=10)
+int getAtrValue(int arg_shift,double arg_lvl=0.0005,int arg_range=10)
 {
    int ret=0;
    double atr=iATR(NULL,PERIOD_CURRENT,arg_range,arg_shift);
@@ -453,16 +450,16 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
                      int &arg_last_range_high_low_gap_pt,int &arg_last_range_high_gap_pt,int &arg_last_range_low_gap_pt,
                      int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_oc_gap_pt=10,
                      int arg_high_low_gap_pt=200,int arg_high_gap_pt2=50,
-                     int arg_atr_lvl=5,int arg_atr_range=5)
+                     double arg_atr_lvl=0.0005,int arg_atr_range=5)
 {
    string t1=TimeToStr(Time[arg_shift],TIME_DATE);
    string t2=TimeToStr(Time[arg_shift],TIME_MINUTES);
    string t=StringConcatenate("[",t1," ",t2,"]");
    
    //add atr by 20171121
-   int atr=ATRValue(arg_shift,arg_atr_lvl,arg_atr_range);
+   int atr=getAtrValue(arg_shift,arg_atr_lvl,arg_atr_range);
    if (atr==0) {
-      Print(t,"atr too small(<=",arg_atr_lvl,"pt)");
+      Print(t,"atr too small(<=",arg_atr_lvl,")");
       return 0;
    }
 
