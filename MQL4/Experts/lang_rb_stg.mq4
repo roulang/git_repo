@@ -57,6 +57,10 @@ void OnDeinit(const int reason)
       Print("OnDeinit()");
    }
    
+   if (!i_for_test) {
+      timer_deinit();
+   }
+
 }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
