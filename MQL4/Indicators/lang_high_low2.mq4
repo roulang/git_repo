@@ -19,7 +19,7 @@
 #property indicator_buffers 17
 #property indicator_plots   17
 //--- plot signal
-#property indicator_label1  "range_low"
+#property indicator_label1  "r_low"          //range low
 //#property indicator_type1   DRAW_ARROW
 //#property indicator_type1   DRAW_HISTOGRAM
 #property indicator_type1   DRAW_SECTION    //do not set 0 value
@@ -27,7 +27,7 @@
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot signal
-#property indicator_label2  "range_high"
+#property indicator_label2  "r_high"         //range high
 //#property indicator_type2   DRAW_ARROW
 //#property indicator_type2   DRAW_HISTOGRAM
 #property indicator_type2   DRAW_SECTION    //do not set 0 value
@@ -35,7 +35,7 @@
 #property indicator_style2  STYLE_SOLID
 #property indicator_width2  1
 //--- plot signal
-#property indicator_label3  "range_low2"
+#property indicator_label3  "r_low2"         //range low2
 //#property indicator_type3   DRAW_ARROW
 //#property indicator_type3   DRAW_HISTOGRAM
 #property indicator_type3   DRAW_SECTION    //do not set 0 value
@@ -43,7 +43,7 @@
 #property indicator_style3  STYLE_DASH
 #property indicator_width3  1
 //--- plot signal
-#property indicator_label4  "range_high2"
+#property indicator_label4  "r_high2"        //range high2
 //#property indicator_type4   DRAW_ARROW
 //#property indicator_type4   DRAW_HISTOGRAM
 #property indicator_type4   DRAW_SECTION    //do not set 0 value
@@ -51,7 +51,7 @@
 #property indicator_style4  STYLE_DASH
 #property indicator_width4  1
 //--- plot signal
-#property indicator_label5  "range_low3"
+#property indicator_label5  "r_low3"         //range low3
 //#property indicator_type5   DRAW_ARROW
 //#property indicator_type5   DRAW_HISTOGRAM
 #property indicator_type5   DRAW_SECTION    //do not set 0 value
@@ -59,7 +59,7 @@
 #property indicator_style5  STYLE_DASHDOT
 #property indicator_width5  1
 //--- plot signal
-#property indicator_label6  "range_high3"
+#property indicator_label6  "r_high3"        //range high3
 //#property indicator_type6   DRAW_ARROW
 //#property indicator_type6   DRAW_HISTOGRAM
 #property indicator_type6   DRAW_SECTION    //do not set 0 value
@@ -67,47 +67,47 @@
 #property indicator_style6  STYLE_DASHDOT
 #property indicator_width6  1
 //--- plot range low shift
-#property indicator_label7  "range_low_shift"
+#property indicator_label7  "rl_sht"         //range low shift
 #property indicator_type7   DRAW_ARROW
 #property indicator_color7  clrBlack
 //--- plot range high shift
-#property indicator_label8  "range_high_shift"
+#property indicator_label8  "rh_sht"         //range high shift
 #property indicator_type8   DRAW_ARROW
 #property indicator_color8  clrBlack
 //--- plot range low2 shift
-#property indicator_label9  "range_low2_shift"
+#property indicator_label9  "rl2_sht"        //range low2 shift
 #property indicator_type9   DRAW_ARROW
 #property indicator_color9  clrBlack
 //--- plot range high2 shift
-#property indicator_label10  "range_high2_shift"
+#property indicator_label10  "rh2_sht"       //range high2 shift
 #property indicator_type10   DRAW_ARROW
 #property indicator_color10  clrBlack
 //--- plot range low3 shift
-#property indicator_label11  "range_low3_shift"
+#property indicator_label11  "rl3_sht"       //range low3 shift
 #property indicator_type11   DRAW_ARROW
 #property indicator_color11  clrBlack
 //--- plot range high3 shift
-#property indicator_label12  "range_high3_shift"
+#property indicator_label12  "rh3_sht"       //range high3 shift
 #property indicator_type12   DRAW_ARROW
 #property indicator_color12  clrBlack
 //--- plot high gap point
-#property indicator_label13  "range_high_gap"
+#property indicator_label13  "rh_gap"        //range high-high2 gap
 #property indicator_type13   DRAW_ARROW
 #property indicator_color13  clrBlack
 //--- plot low gap point
-#property indicator_label14  "range_low_gap"
+#property indicator_label14  "rl_gap"        //range low-low2 gap
 #property indicator_type14   DRAW_ARROW
 #property indicator_color14  clrBlack
 //--- plot high low gap point
-#property indicator_label15  "range_high_low_gap"
+#property indicator_label15  "rhl_gap"       //range high-low gap
 #property indicator_type15   DRAW_ARROW
 #property indicator_color15  clrBlack
 //--- plot high2 gap point
-#property indicator_label16  "range_high2_gap"
+#property indicator_label16  "rh2_gap"       //range high2-high3 gap
 #property indicator_type16   DRAW_ARROW
 #property indicator_color16  clrBlack
 //--- plot low2 gap point
-#property indicator_label17  "range_low2_gap"
+#property indicator_label17  "rl2_gap"       //range low2-low3 gap
 #property indicator_type17   DRAW_ARROW
 #property indicator_color17  clrBlack
 

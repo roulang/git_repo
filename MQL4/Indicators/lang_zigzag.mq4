@@ -14,103 +14,103 @@
 #property indicator_buffers 18
 #property indicator_plots   18
 //--- plot up
-#property indicator_label1  "up"
+#property indicator_label1  "s_low"    //short low
 #property indicator_type1   DRAW_ARROW
 #property indicator_color1  clrSpringGreen
 //#property indicator_color1  clrBlack
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot down
-#property indicator_label2  "down"
+#property indicator_label2  "s_high"   //short high
 #property indicator_type2   DRAW_ARROW
 #property indicator_color2  clrRed
 //#property indicator_color2  clrBlack
 #property indicator_style2  STYLE_SOLID
 #property indicator_width2  1
 //--- plot inner
-#property indicator_label3  "inner"
+#property indicator_label3  "inner"    //inner
 #property indicator_type3   DRAW_ARROW
 //#property indicator_color3  clrYellow
 #property indicator_color3  clrBlack
 #property indicator_style3  STYLE_SOLID
 #property indicator_width3  1
 //--- plot outter
-#property indicator_label4  "outter"
+#property indicator_label4  "outter"   //outter
 #property indicator_type4   DRAW_ARROW
 //#property indicator_color4  clrYellow
 #property indicator_color4  clrBlack
 #property indicator_style4  STYLE_SOLID
 #property indicator_width4  1
 //--- plot midup
-#property indicator_label5  "midup"
+#property indicator_label5  "m_low"    //mid low
 #property indicator_type5   DRAW_ARROW
 #property indicator_color5  clrSpringGreen
 //#property indicator_color5  clrBlack
 #property indicator_style5  STYLE_SOLID
 #property indicator_width5  1
 //--- plot middown
-#property indicator_label6  "middown"
+#property indicator_label6  "m_high"   //mid high
 #property indicator_type6   DRAW_ARROW
 #property indicator_color6  clrRed
 //#property indicator_color6  clrBlack
 #property indicator_style6  STYLE_SOLID
 #property indicator_width6  1
 //--- plot longup
-#property indicator_label7  "longup"
+#property indicator_label7  "l_low"    //long low
 #property indicator_type7   DRAW_ARROW
 #property indicator_color7  clrSpringGreen
 //#property indicator_color7  clrBlack
 #property indicator_style7  STYLE_SOLID
 #property indicator_width7  1
 //--- plot longdown
-#property indicator_label8  "longdown"
+#property indicator_label8  "l_high"   //long high
 #property indicator_type8   DRAW_ARROW
 #property indicator_color8  clrRed
 //#property indicator_color8  clrBlack
 #property indicator_style8  STYLE_SOLID
 #property indicator_width8  1
 //--- plot last up idx
-#property indicator_label9  "lastupi"
+#property indicator_label9  "lstsl_sht"   //last short low shift
 #property indicator_type9   DRAW_ARROW
 #property indicator_color9  clrBlack
 //--- plot last dw idx
-#property indicator_label10  "lastdwi"
+#property indicator_label10  "lstsh_sht"  //last short high shift
 #property indicator_type10   DRAW_ARROW
 #property indicator_color10  clrBlack
 //--- plot last midup idx
-#property indicator_label11  "lastmupi"
+#property indicator_label11  "lstml_sht"  //last mid low shift
 #property indicator_type11   DRAW_ARROW
 #property indicator_color11  clrBlack
 //--- plot last longdw idx
-#property indicator_label12  "lastmdwi"
+#property indicator_label12  "lstmh_sht"  //last mid high shift
 #property indicator_type12   DRAW_ARROW
 #property indicator_color12  clrBlack
 //--- plot last longup idx
-#property indicator_label13  "lastlupi"
+#property indicator_label13  "lstll_sht"  //last long low shift
 #property indicator_type13   DRAW_ARROW
 #property indicator_color13  clrBlack
 //--- plot last longdw idx
-#property indicator_label14  "lastldwi"
+#property indicator_label14  "lstlh_sht"  //last long high shift
 #property indicator_type14   DRAW_ARROW
 #property indicator_color14  clrBlack
 //--- plot zig
-#property indicator_label15  "zig"
+#property indicator_label15  "zig"        //zigzag (link mid high low point)
 #property indicator_type15   DRAW_SECTION    //do not set 0 value
 #property indicator_color15  clrRed
 #property indicator_style15  STYLE_SOLID
 #property indicator_width15  1
 //--- plot last zig idx
-#property indicator_label16  "lastzigi"
+#property indicator_label16  "lstz_sht"   //last zig shift
 #property indicator_type16   DRAW_ARROW
 #property indicator_color16  clrBlack
 //--- plot longzig
-#property indicator_label17  "longzig"
+#property indicator_label17  "l_zig"      //last long zigzag (link long high low point)
 #property indicator_type17   DRAW_SECTION    //do not set 0 value
 #property indicator_color17  clrYellow
 #property indicator_style17  STYLE_DASH
 #property indicator_width17  1
 //--- plot last longzig idx
-#property indicator_label18  "lastlongzigi"
+#property indicator_label18  "lstlz_sht"  //last long zig shift
 #property indicator_type18   DRAW_ARROW
 #property indicator_color18  clrBlack
 

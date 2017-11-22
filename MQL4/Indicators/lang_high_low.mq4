@@ -19,7 +19,7 @@
 #property indicator_buffers 11
 #property indicator_plots   11
 //--- plot signal
-#property indicator_label1  "range_low"
+#property indicator_label1  "r_low"       //range low
 //#property indicator_type1   DRAW_ARROW
 //#property indicator_type1   DRAW_HISTOGRAM
 #property indicator_type1   DRAW_SECTION    //do not set 0 value
@@ -27,7 +27,7 @@
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot signal
-#property indicator_label2  "range_high"
+#property indicator_label2  "r_high"      //range high
 //#property indicator_type2   DRAW_ARROW
 //#property indicator_type2   DRAW_HISTOGRAM
 #property indicator_type2   DRAW_SECTION    //do not set 0 value
@@ -35,7 +35,7 @@
 #property indicator_style2  STYLE_SOLID
 #property indicator_width2  1
 //--- plot signal
-#property indicator_label3  "range_low2"
+#property indicator_label3  "r_low2"      //range low2
 //#property indicator_type3   DRAW_ARROW
 //#property indicator_type3   DRAW_HISTOGRAM
 #property indicator_type3   DRAW_SECTION    //do not set 0 value
@@ -43,7 +43,7 @@
 #property indicator_style3  STYLE_DASH
 #property indicator_width3  1
 //--- plot signal
-#property indicator_label4  "range_high2"
+#property indicator_label4  "r_high2"     //range high2
 //#property indicator_type4   DRAW_ARROW
 //#property indicator_type4   DRAW_HISTOGRAM
 #property indicator_type4   DRAW_SECTION    //do not set 0 value
@@ -51,31 +51,31 @@
 #property indicator_style4  STYLE_DASH
 #property indicator_width4  1
 //--- plot range low shift
-#property indicator_label5  "range_low_shift"
+#property indicator_label5  "rl_sht"      //range low shift
 #property indicator_type5   DRAW_ARROW
 #property indicator_color5  clrBlack
 //--- plot range high shift
-#property indicator_label6  "range_high_shift"
+#property indicator_label6  "rh_sht"      //range high shift
 #property indicator_type6   DRAW_ARROW
 #property indicator_color6  clrBlack
 //--- plot range low2 shift
-#property indicator_label7  "range_low2_shift"
+#property indicator_label7  "rl2_sht"     //range low2 shift
 #property indicator_type7   DRAW_ARROW
 #property indicator_color7  clrBlack
 //--- plot range high2 shift
-#property indicator_label8  "range_high2_shift"
+#property indicator_label8  "rh2_sht"     //range high2 shift
 #property indicator_type8   DRAW_ARROW
 #property indicator_color8  clrBlack
 //--- plot high gap point
-#property indicator_label9  "range_high_gap"
+#property indicator_label9  "rh_gap"      //range high-high2 gap pt
 #property indicator_type9   DRAW_ARROW
 #property indicator_color9  clrBlack
 //--- plot low gap point
-#property indicator_label10  "range_low_gap"
+#property indicator_label10  "rl_gap"     //range low-low2 gap pt
 #property indicator_type10   DRAW_ARROW
 #property indicator_color10  clrBlack
 //--- plot high low gap point
-#property indicator_label11  "range_high_low_gap"
+#property indicator_label11  "rhl_gap"    //range high-low gap pt
 #property indicator_type11   DRAW_ARROW
 #property indicator_color11  clrBlack
 
