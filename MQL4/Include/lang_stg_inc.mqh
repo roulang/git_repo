@@ -611,7 +611,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
       
    if (ret==0) {
       //break(up)
-      if (high_low_change==0 && lst_high_low_touch==1 && cur_high_low_touch>1 && cur_bar_status==0) {      //break high,positive bar,up
+      if (high_low_change==0 && lst_high_low_touch>=0 && cur_high_low_touch>1 && cur_bar_status==0) {      //break high,positive bar,up
          if (cur_high_low_touch2>1) {  //break second high
             if (g_debug) Print(t,"break high,positive bar,break second high,+3");
             ret=3;
@@ -641,7 +641,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    
    if (ret==0) {
       //break(down)
-      if (high_low_change==0 && lst_high_low_touch==-1 && cur_high_low_touch<-1 && cur_bar_status==1) {     //break low,negative bar,down
+      if (high_low_change==0 && lst_high_low_touch<=0 && cur_high_low_touch<-1 && cur_bar_status==1) {     //break low,negative bar,down
          if (cur_high_low_touch2<-1) {  //break second low
             if (g_debug) Print(t,"break low,negative bar,break second low,-3");
             ret=-3;
@@ -851,7 +851,7 @@ int isBreak(int arg_shift,double &arg_last_range_high,double &arg_last_range_low
    }
    if (ret==0) {
       //break(up)
-      if (high_low_change==0 && lst_high_low_touch==1 && cur_high_low_touch>1 && cur_bar_status==0) { //break high,positive bar,up
+      if (high_low_change==0 && lst_high_low_touch>=0 && cur_high_low_touch>1 && cur_bar_status==0) { //break high,positive bar,up
          if (cur_high_low_touch2>1) {  //break second high
             if (g_debug) Print(t,"break high,positive bar,break second high,+1");
             ret=1;
@@ -864,11 +864,11 @@ int isBreak(int arg_shift,double &arg_last_range_high,double &arg_last_range_low
          }
       }
       //break(down)
-      if (high_low_change==0 && lst_high_low_touch==-1 && cur_high_low_touch<-1 && cur_bar_status==1) {    //break low,negative bar,down
+      if (high_low_change==0 && lst_high_low_touch<=0 && cur_high_low_touch<-1 && cur_bar_status==1) {    //break low,negative bar,down
          if (cur_high_low_touch2<-1) {  //break second low
             if (g_debug) Print(t,"break low,negative bar,break second low,-1");
             ret=-1;
-         } else 
+         } else
          if (cur_low_gap_pt>=arg_gap_pt2) {
             if (g_debug) Print(t,"break low,negative bar,-1");
             ret=-1;
