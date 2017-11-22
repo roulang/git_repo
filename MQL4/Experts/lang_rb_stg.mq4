@@ -190,8 +190,8 @@ void OnTick()
       } else if (tp_price2>high_price) {
          tp_price2=high_price-g_tp_offset*Point;
          tp_gap2_pt=(int)NormalizeDouble((tp_price2-price)/Point,0);
-         if (tp_gap2_pt<i_SL) {
-            Print("tp_gap2 is too small(<",i_SL,"pt)");
+         if (tp_gap2_pt<2*i_SL) {
+            Print("tp_gap2 is too small(<",2*i_SL,"pt)");
             tp_price2=0;
          }
       }
