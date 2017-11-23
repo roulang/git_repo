@@ -444,6 +444,7 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
 //| date: 2017/11/6
 //| arg_shift: bar shift
 //| arg_thpt:threahold point
+//| arg_cur_last_range_hit_status: 1,hit high;-1,hit low;0,N/A
 //| return value: touch(high),+1;touch(down),-1;break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
 //+------------------------------------------------------------------+
 int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_range_low,
@@ -458,14 +459,14 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
 
    int cur_bar_shift=arg_shift;
    int last_bar_shift=arg_shift+1;
-   
+
    //add atr by 20171121
    int atr=getAtrValue(cur_bar_shift,arg_atr_lvl,arg_atr_range);
    if (atr==0) {
       Print(t,"atr too small(<=",arg_atr_lvl,")");
       return 0;
    }
-
+   
    double oc_gap=Open[cur_bar_shift]-Close[cur_bar_shift];
    int oc_gap_pt=(int)NormalizeDouble(MathAbs(oc_gap)/Point,0);
    
@@ -539,7 +540,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
       Print("last_high_gap_pt=",last_high_gap_pt,",last_low_gap_pt=",last_low_gap_pt,",last_high_low_gap_pt=",last_high_low_gap_pt);
       Print("high_low_change=",high_low_change,",high_low_change2=",high_low_change2);
    }
-
+   
    if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==0) {   //no signal
       Print(t,"no signal");
       return 0;
