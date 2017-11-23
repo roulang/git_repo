@@ -697,7 +697,7 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
          ret=0;
       }
    }
-   
+
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)
          Print(t,"final,only touch high,+1");
@@ -1096,4 +1096,64 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
    arg_tp_price[1]=sell_stop_tp_price;
    arg_ls_price[1]=sell_stop_ls_price;
    
+}
+//+------------------------------------------------------------------+
+//| get quick shoot (use sma and sar indicator)
+//| date: 2017/11/23
+//| arg_shift: bar shift
+//| return value: 1,turn up(buy);-1,turn down(sell);0,N/A
+//+------------------------------------------------------------------+
+int isQuickShoot(int arg_shift)
+{
+   int tm=getMAPeriod(PERIOD_CURRENT);
+   //Print("tm=",tm);
+   if (tm==0) {
+      return 0;
+   }
+   
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   double cur_price=Close[cur_bar_shift];
+   double last_price=Close[lst_bar_shift];
+    
+   int ma_pos=0;        //1 for price above SMA(60),-1 for price below SMA(60)
+   int cur_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
+   int lst_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
+   int sar_break=0;     //-1 for SAR(0.02,0.2) from down to up the price,1 for SAR(0.02,0.2) from up to down the price
+
+   double ma1=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+   if          (cur_price>ma1) {    //price is above sma(60)
+      ma_pos=1;
+   } else if   (cur_price<ma1) {    //price is under sma(60)
+      ma_pos=-1;
+   }
+   
+   double cur_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,cur_bar_shift);
+   double last_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,lst_bar_shift);
+   if          (cur_price>cur_sar) {      //price is above sar
+      cur_sar_pos=1;
+   } else if   (cur_price<cur_sar) {      //price is under sar
+      cur_sar_pos=-1;
+   }
+   if          (last_price>last_sar) {      //price is above sar
+      lst_sar_pos=1;
+   } else if   (last_price<last_sar) {      //price is under sar
+      lst_sar_pos=-1;
+   }
+   if          (lst_sar_pos==-1 && cur_sar_pos==1) {  //last SAR is above price and cur SAR is under price
+      sar_break=1;
+   } else if   (lst_sar_pos==1 && cur_sar_pos==-1) {  //last SAR is under price and cur SAR is above price
+      sar_break=-1;
+   }
+   
+   int ret=0;
+   
+   if (sar_break==1 && ma_pos==1) {
+      return 1;
+   }
+   if (sar_break==-1 && ma_pos==-1) {
+      return -1;
+   }
+
+   return ret;
 }
