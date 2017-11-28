@@ -115,9 +115,9 @@ int OnCalculate(const int rates_total,
          string t=StringConcatenate("[",t1," ",t2,"]");
 
          signalBuffer[i]=2*ret2;  //qs open signal(+2:open buy,-2:open sell
-         Print(t,",ret2=",ret2);
-         Print("buy price=",price[0],",buy_ls_price=",ls_price[0]);
-         Print("sell price=",price[1],",sell_ls_price=",ls_price[1]);
+         //Print(t,",ret2=",ret2);
+         //Print("buy price=",price[0],",buy_ls_price=",ls_price[0]);
+         //Print("sell price=",price[1],",sell_ls_price=",ls_price[1]);
 
          if (i==1) {             //sendmail in future
             string mail_title=StringConcatenate(s," ",t," quick shoot open(",ret2,")");

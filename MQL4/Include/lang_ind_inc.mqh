@@ -1247,12 +1247,12 @@ int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
 //| arg_period: time period
 //| arg_shift: bar shift
 //| return value: 
-//|   1,adx is top(pdi>mdi);-1,adx is top(pdi<mdi);
+//|   2,adx is top(pdi>mdi);-2,adx is top(pdi<mdi);
 //|   1,pdi_mdi_gap is top(pdi>mdi);-1,pdi_mdi_gap is top(pdi<mdi);
-//|   2,1+1
+//|   3,2+1
 //|   0,N/A
 //+------------------------------------------------------------------+
-int getADXStatus(int arg_period,int arg_shift)
+int getADXStatus(int arg_period,int arg_shift,int arg_thrd=40)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
@@ -1295,7 +1295,9 @@ int getADXStatus(int arg_period,int arg_shift)
 
    int adx_top=0;
    if (sec_lst_adx<=lst_adx && lst_adx>=cur_adx) {
-      adx_top=1;
+      if (lst_adx>=arg_thrd) {
+         adx_top=1;
+      }
    }
    
    int pdi_top=0;
@@ -1329,13 +1331,15 @@ int getADXStatus(int arg_period,int arg_shift)
    
    int pdi_mdi_top=0;
    if (pdi_top==1 && mdi_top==1) {
-      pdi_mdi_top=1;
+      if (lst_adx>=arg_thrd || cur_adx>=arg_thrd) {
+         pdi_mdi_top=1;
+      }
    }
       
    int ret=0;
-
+   
    //ret=(adx_top+pdi_mdi_top)*adx_dir;
-   ret=(adx_top+adx_gap_top)*adx_dir;
+   ret=(adx_top*2+adx_gap_top)*adx_dir;
    
    return ret;
 }

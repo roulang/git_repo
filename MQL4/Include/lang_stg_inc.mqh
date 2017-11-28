@@ -1119,7 +1119,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
 //| arg_shift: bar shift
 //| return value: 1,open buy(turn up);-1,open sell(turn down);0,N/A
 //+------------------------------------------------------------------+
-int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_gap_ratio,double &arg_price[],double &arg_ls_price[])
+int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_gap_ratio,double &arg_price[],double &arg_ls_price[],bool arg_cal=false,int arg_thrd_pt=20)
 {
 
    int cur_bar_shift=arg_shift;
@@ -1139,9 +1139,10 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
    //sma   
    int ma_pos=0;        //1 for price above SMA(60),-1 for price below SMA(60)
    double ma1=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
-   if          (cur_price>ma1) {    //price is above sma(60)
+   double offset=arg_thrd_pt*Point;
+   if          (cur_price>(ma1+offset)) {    //price is above sma(60)
       ma_pos=1;
-   } else if   (cur_price<ma1) {    //price is under sma(60)
+   } else if   (cur_price<(ma1-offset)) {    //price is under sma(60)
       ma_pos=-1;
    }
    
@@ -1149,6 +1150,7 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
    int cur_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
    int lst_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
    int sar_break=0;     //-1 for SAR(0.02,0.2) from down to up the price,1 for SAR(0.02,0.2) from up to down the price
+   int sar_two_bar=0;   //1 for two bar's price is above SAR(0.02,0.2),-1 for two bar's price is below SAR(0.02,0.2)
 
    double cur_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,cur_bar_shift);
    double last_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,lst_bar_shift);
@@ -1162,15 +1164,31 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
    } else if   (last_price<last_sar) {      //price is under sar
       lst_sar_pos=-1;
    }
+
    if          (lst_sar_pos==-1 && cur_sar_pos==1) {  //last SAR is above price and cur SAR is under price
       sar_break=1;
    } else if   (lst_sar_pos==1 && cur_sar_pos==-1) {  //last SAR is under price and cur SAR is above price
       sar_break=-1;
    }
    
-   int ret=0;
+   if          (lst_sar_pos==-1 && cur_sar_pos==-1) { //last SAR is above price and cur SAR is above price
+      sar_two_bar=-1;
+   } else if   (lst_sar_pos==1 && cur_sar_pos==1) {   //last SAR is under price and cur SAR is under price
+      sar_two_bar=1;
+   }
    
-   if (MathAbs(sar_break)==1 && MathAbs(ma_pos)==1) {
+   int ret=0;
+
+   if (sar_break==1 && ma_pos==1) {    //turn up
+   //if (sar_two_bar==1 && ma_pos==1) {    //turn up
+      ret=1;
+   }
+   if (sar_break==-1 && ma_pos==-1) {   //turn down
+   //if (sar_two_bar==-1 && ma_pos==-1) {   //turn down
+      ret=-1;
+   }
+   
+   if (MathAbs(ret)==1 && arg_cal) {
       int ls_ratio=1;      //take lose ratio
       arg_price[0]=Ask;    //buy price
       arg_price[1]=Bid;    //sell price
@@ -1193,7 +1211,6 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
       int cur_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_gap_idx,cur_bar_shift);
       int cur_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low_gap_idx,cur_bar_shift);
       int cur_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_low_gap_idx,cur_bar_shift);
-      
       if (cur_high_low_gap_pt<arg_hl_gap_pt) {
          Print(t,"cur_high_low_gap is too narrow(<",arg_hl_gap_pt,"pt)");
          return 0;
@@ -1205,30 +1222,34 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
          Print(t,"cur_price_high_gap_pt is minus or cur_price_low_gap_pt is minus");
          return 0;
       }
-      double cur_hl_gap_ratio=NormalizeDouble((double)cur_price_high_gap_pt/cur_price_low_gap_pt,2);    //ratio is between 0 and 1
-      double cur_lh_gap_ratio=NormalizeDouble((double)cur_price_low_gap_pt/cur_price_high_gap_pt,2);    //ratio is between 0 and 1
+      //double cur_hl_gap_ratio=NormalizeDouble((double)cur_price_high_gap_pt/cur_price_low_gap_pt,2);    //ratio is between 0 and 1
+      //double cur_lh_gap_ratio=NormalizeDouble((double)cur_price_low_gap_pt/cur_price_high_gap_pt,2);    //ratio is between 0 and 1
+      //Print(t,"cur_price_high_gap_pt=",cur_price_high_gap_pt,",cur_price_low_gap_pt=",cur_price_low_gap_pt);
+      //Print(t,"cur_hl_gap_ratio=",cur_hl_gap_ratio,",cur_lh_gap_ratio=",cur_lh_gap_ratio);
       
-      if (sar_break==1 && ma_pos==1) {    //turn up
+      if (ret==1) {    //turn up
+         /*
          if (cur_hl_gap_ratio<arg_hl_gap_ratio) {     //cur price is near range high,avoid to open buy
             Print(t,"cur price is near high, cur_hl_gap_ratio(<",arg_hl_gap_ratio,")");
-            return 0;
+            ret=0;
          }
+         */
          if (cur_price_high_gap_pt<arg_lspt) {     //cur price is near range high,avoid to open buy
             Print(t,"cur price is near high, cur_price_high_gap_pt(<",arg_lspt,"pt)");
-            return 0;
+            ret=0;
          }
-         return 1;
       }
-      if (sar_break==-1 && ma_pos==-1) {
+      if (ret==-1) {
+         /*
          if (cur_lh_gap_ratio<arg_hl_gap_ratio) {  //cur price is near range low,avoid to open sell
             Print(t,"cur price is near low, cur_lh_gap_ratio(<",arg_hl_gap_ratio,")");
-            return 0;
+            ret=0;
          }
+         */
          if (cur_price_low_gap_pt<arg_lspt) {      //cur price is near range low,avoid to open sell
             Print(t,"cur price is near low, cur_price_low_gap_pt(<",arg_lspt,")");
-            return 0;
+            ret=0;
          }
-         return -1;
       }
    }
 
@@ -1240,7 +1261,7 @@ int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_
 //| arg_shift: bar shift
 //| return value: 1,close sell(turn up);-1,close buy(turn down);0,N/A
 //+------------------------------------------------------------------+
-int isQuickShootClose(int arg_shift)
+int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 {
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
@@ -1268,9 +1289,11 @@ int isQuickShootClose(int arg_shift)
    int lst_ma_pos=0;                    //1 for price above SMA(60),-1 for price below SMA(60)
    double ma1=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
    double ma2=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,lst_bar_shift);
-   if          (cur_price>ma1) {    //cur price is above sma(60)
+   double offset=arg_thrd_pt*Point;
+   
+   if          (cur_price>(ma1+offset)) {    //cur price is above sma(60)
       cur_ma_pos=1;
-   } else if   (cur_price<ma1) {    //cur price is under sma(60)
+   } else if   (cur_price<(ma1-offset)) {    //cur price is under sma(60)
       cur_ma_pos=-1;
    }
    if          (last_price>ma2) {    //last price is above sma(60)
@@ -1287,27 +1310,26 @@ int isQuickShootClose(int arg_shift)
    }
    
    if (cur_bar_status==0 && ma_break==1) {  //price is above sma(60) and positive bar
+      //Print("up break sma");
       return 1;
    }
 
    if (cur_bar_status==1 && ma_break==-1) {  //price is under sma(60) and negative bar
+      //Print("down break sma");
       return -1;
    }
    
-   if (lst_ma_pos==1 && cur_ma_pos==1) {     //two bar's price is above sma(60)
-      return 1;
-   }
-   if (lst_ma_pos==-1 && cur_ma_pos==-1) {   //two bar's price is under sma(60)
-      return -1;
-   }
-   
+   /*
    //adx
    int adx=getADXStatus(PERIOD_CURRENT,cur_bar_shift);
-   if          (adx==2) {        //adx is top(trend is up),close buy
+   if          (adx>1) {        //adx is top(trend is up),close buy
+      //Print("up trend, adx is top");
       return -1;
-   } else if   (adx==-2) {       //adx is top(trend is down),close sell
+   } else if   (adx<-1) {       //adx is top(trend is down),close sell
+      //Print("down trend, adx is top");
       return 1;
    }
+   */
    
    return 0;
 }
