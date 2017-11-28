@@ -12,8 +12,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -1
-#property indicator_maximum 1
+#property indicator_minimum -2
+#property indicator_maximum 2
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -28,7 +28,7 @@
 double         signalBuffer[];
 
 //input
-input bool     i_sendmail=true;
+input bool     i_sendmail=false;
 
 //global
 
@@ -85,23 +85,47 @@ int OnCalculate(const int rates_total,
    if(g_debug) {
       Print("1:st=",st);
    }
-   int ret=0;
+   int ret1=0;
+   int ret2=0;
    string sym=Symbol();
    string ped=getPeriodTp(Period());
    string s=StringConcatenate("[",sym,"(",ped,")]");
    for(int i=st-1;i>0;i--) {
-      ret=isQuickShoot(i);
-      if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
-         //string t1=TimeToStr(Time[i],TIME_DATE);
+      //ret1=isQuickShootClose(i);
+      if (MathAbs(ret1)==1) {
+         //signalBuffer[i]=1*ret1;  //qs close signal(+1:close sell,-1:close buy
+         /*
+         if (i==1) {             //sendmail in future
+            //string t1=TimeToStr(Time[i],TIME_DATE);
+            string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));
+            string t2=TimeToStr(Time[i],TIME_MINUTES);
+            string t=StringConcatenate("[",t1," ",t2,"]");
+            string mail_title=StringConcatenate(s," ",t," quick shoot open(",ret1,")");
+            mailNotice(mail_title,"");
+         }
+         */
+         continue;
+      }
+      
+      double price[2],ls_price[2];
+      ret2=isQuickShootOpen(i,50,150,0.25,price,ls_price);
+      if (MathAbs(ret2)==1) {
          string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));
          string t2=TimeToStr(Time[i],TIME_MINUTES);
          string t=StringConcatenate("[",t1," ",t2,"]");
-         string mail_title=StringConcatenate(s," ",t," quick shoot (",ret,")");
-         mailNotice(mail_title,"");
+
+         signalBuffer[i]=2*ret2;  //qs open signal(+2:open buy,-2:open sell
+         Print(t,",ret2=",ret2);
+         Print("buy price=",price[0],",buy_ls_price=",ls_price[0]);
+         Print("sell price=",price[1],",sell_ls_price=",ls_price[1]);
+
+         if (i==1) {             //sendmail in future
+            string mail_title=StringConcatenate(s," ",t," quick shoot open(",ret2,")");
+            mailNotice(mail_title,"");
+         }
+         continue;
       }
-      if (MathAbs(ret)>1) {
-         signalBuffer[i]=ret;
-      }
+      
       /*
       //debug
       datetime t=Time[i];

@@ -827,12 +827,12 @@ int getSlippage(string arg_symbol,int arg_slip_pips)
 //+------------------------------------------------------------------+
 //| Time of news function
 //+------------------------------------------------------------------+
-bool isNewsPd(string arg_sym,int arg_shift,int arg_news_bef=0,int arg_news_aft=0)
+bool isNewsPd(string arg_sym,int arg_shift,int arg_news_bef,int arg_news_aft=0)
 {
    string cur;
    if (arg_sym==NULL) cur=Symbol();
    else cur=arg_sym;
-   if (arg_news_bef==0) arg_news_bef=g_news_bef;
+   //if (arg_news_bef==0) arg_news_bef=g_news_bef;
    if (arg_news_aft==0) arg_news_aft=g_news_aft;
    
    for (int i=0;i<ArraySize(g_News);i++) {

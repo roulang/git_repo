@@ -408,8 +408,8 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
    }
    touch_high=MathAbs(arg_touch_status[0]);
    touch_low=MathAbs(arg_touch_status[3]);
-   
-   int ma_status=getMAStatus(PERIOD_CURRENT,arg_shift);
+   double short_ma;
+   int ma_status=getMAStatus(PERIOD_CURRENT,arg_shift,short_ma);
    if (ma_status==0) return 0;
    
    double threhold_gap=arg_thpt2*Point;
@@ -671,13 +671,29 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    }
 
    //add ma condition
-   int cur_ma_status=getMAStatus(PERIOD_CURRENT,cur_bar_shift);
+   double short_ma=0;
+   int cur_ma_status=getMAStatus(PERIOD_CURRENT,cur_bar_shift,short_ma);
+   
    /*  
    if (cur_ma_status==0) {    //ma status is 0
       Print(t,"ma status is 0,0");
       return 0;
    }
    */
+   
+   if (ret==2) {     //rebound up
+      if (cur_ma_status<0) {    //ma is down
+         Print(t,"rebound up,but ma is down,0");
+         ret=0;
+      }
+   }
+   if (ret==-2) {    //rebound down
+      if (cur_ma_status>0) {    //ma is up
+         Print(t,"rebound down,but ma is up,0");
+         ret=0;
+      }
+   }
+
    if (ret==3) {     //break up
       if (cur_ma_status<=0) {    //ma is down
          Print(t,"break up,but ma is down,0");
@@ -1098,36 +1114,42 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
    
 }
 //+------------------------------------------------------------------+
-//| get quick shoot (use sma and sar indicator)
+//| quick shoot stg open(use sma and sar and high_low indicator)
 //| date: 2017/11/23
 //| arg_shift: bar shift
-//| return value: 1,turn up(buy);-1,turn down(sell);0,N/A
+//| return value: 1,open buy(turn up);-1,open sell(turn down);0,N/A
 //+------------------------------------------------------------------+
-int isQuickShoot(int arg_shift)
+int isQuickShootOpen(int arg_shift,int arg_lspt,int arg_hl_gap_pt,double arg_hl_gap_ratio,double &arg_price[],double &arg_ls_price[])
 {
-   int tm=getMAPeriod(PERIOD_CURRENT);
-   //Print("tm=",tm);
-   if (tm==0) {
-      return 0;
-   }
-   
+
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
    double cur_price=Close[cur_bar_shift];
    double last_price=Close[lst_bar_shift];
+   string t1=StringConcatenate(TimeMonth(Time[cur_bar_shift]),"/",TimeDay(Time[cur_bar_shift]));
+   string t2=TimeToStr(Time[cur_bar_shift],TIME_MINUTES);
+   string t=StringConcatenate("[",t1," ",t2,"]");
     
+   int ma_ped=getMAPeriod(PERIOD_CURRENT);
+   //Print("ma_ped=",ma_ped);
+   if (ma_ped==0) {
+      return 0;
+   }
+   
+   //sma   
    int ma_pos=0;        //1 for price above SMA(60),-1 for price below SMA(60)
-   int cur_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
-   int lst_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
-   int sar_break=0;     //-1 for SAR(0.02,0.2) from down to up the price,1 for SAR(0.02,0.2) from up to down the price
-
-   double ma1=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+   double ma1=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
    if          (cur_price>ma1) {    //price is above sma(60)
       ma_pos=1;
    } else if   (cur_price<ma1) {    //price is under sma(60)
       ma_pos=-1;
    }
    
+   //sar
+   int cur_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
+   int lst_sar_pos=0;   //1 for price above SAR(0.02,0.2),-1 for price below SAR(0.02,0.2)
+   int sar_break=0;     //-1 for SAR(0.02,0.2) from down to up the price,1 for SAR(0.02,0.2) from up to down the price
+
    double cur_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,cur_bar_shift);
    double last_sar=iSAR(NULL,PERIOD_CURRENT,0.02,0.2,lst_bar_shift);
    if          (cur_price>cur_sar) {      //price is above sar
@@ -1148,12 +1170,144 @@ int isQuickShoot(int arg_shift)
    
    int ret=0;
    
-   if (sar_break==1 && ma_pos==1) {
-      return 1;
-   }
-   if (sar_break==-1 && ma_pos==-1) {
-      return -1;
+   if (MathAbs(sar_break)==1 && MathAbs(ma_pos)==1) {
+      int ls_ratio=1;      //take lose ratio
+      arg_price[0]=Ask;    //buy price
+      arg_price[1]=Bid;    //sell price
+      arg_ls_price[0]=NormalizeDouble(Low[cur_bar_shift]-ls_ratio*arg_lspt*Point,Digits);       //buy ls price
+      arg_ls_price[1]=NormalizeDouble(High[cur_bar_shift]+ls_ratio*arg_lspt*Point,Digits);      //sell ls price
+      
+      //high_low
+      int low_idx=0;
+      int high_idx=1;
+      int low2_idx=2;
+      int high2_idx=3;
+      int high_gap_idx=8;
+      int low_gap_idx=9;
+      int high_low_gap_idx=10;
+      
+      double cur_range_high=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_idx,cur_bar_shift);
+      double cur_range_high2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high2_idx,cur_bar_shift);
+      double cur_range_low=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low_idx,cur_bar_shift);
+      double cur_range_low2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low2_idx,cur_bar_shift);
+      int cur_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_gap_idx,cur_bar_shift);
+      int cur_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",low_gap_idx,cur_bar_shift);
+      int cur_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low",high_low_gap_idx,cur_bar_shift);
+      
+      if (cur_high_low_gap_pt<arg_hl_gap_pt) {
+         Print(t,"cur_high_low_gap is too narrow(<",arg_hl_gap_pt,"pt)");
+         return 0;
+      }
+      
+      int cur_price_high_gap_pt=(int)NormalizeDouble((cur_range_high-cur_price)/Point,0);    //maybe minus,breaking high
+      int cur_price_low_gap_pt=(int)NormalizeDouble((cur_price-cur_range_low)/Point,0);      //maybe minus,breaking low
+      if (cur_price_high_gap_pt<=0 || cur_price_low_gap_pt<=0) {
+         Print(t,"cur_price_high_gap_pt is minus or cur_price_low_gap_pt is minus");
+         return 0;
+      }
+      double cur_hl_gap_ratio=NormalizeDouble((double)cur_price_high_gap_pt/cur_price_low_gap_pt,2);    //ratio is between 0 and 1
+      double cur_lh_gap_ratio=NormalizeDouble((double)cur_price_low_gap_pt/cur_price_high_gap_pt,2);    //ratio is between 0 and 1
+      
+      if (sar_break==1 && ma_pos==1) {    //turn up
+         if (cur_hl_gap_ratio<arg_hl_gap_ratio) {     //cur price is near range high,avoid to open buy
+            Print(t,"cur price is near high, cur_hl_gap_ratio(<",arg_hl_gap_ratio,")");
+            return 0;
+         }
+         if (cur_price_high_gap_pt<arg_lspt) {     //cur price is near range high,avoid to open buy
+            Print(t,"cur price is near high, cur_price_high_gap_pt(<",arg_lspt,"pt)");
+            return 0;
+         }
+         return 1;
+      }
+      if (sar_break==-1 && ma_pos==-1) {
+         if (cur_lh_gap_ratio<arg_hl_gap_ratio) {  //cur price is near range low,avoid to open sell
+            Print(t,"cur price is near low, cur_lh_gap_ratio(<",arg_hl_gap_ratio,")");
+            return 0;
+         }
+         if (cur_price_low_gap_pt<arg_lspt) {      //cur price is near range low,avoid to open sell
+            Print(t,"cur price is near low, cur_price_low_gap_pt(<",arg_lspt,")");
+            return 0;
+         }
+         return -1;
+      }
    }
 
    return ret;
+}
+//+------------------------------------------------------------------+
+//| quick shoot stg close(use sma and adx indicator)
+//| date: 2017/11/24
+//| arg_shift: bar shift
+//| return value: 1,close sell(turn up);-1,close buy(turn down);0,N/A
+//+------------------------------------------------------------------+
+int isQuickShootClose(int arg_shift)
+{
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   double cur_price=Close[cur_bar_shift];
+   double last_price=Close[lst_bar_shift];
+
+   double oc_gap=Open[cur_bar_shift]-Close[cur_bar_shift];
+   int oc_gap_pt=(int)NormalizeDouble(MathAbs(oc_gap)/Point,0);
+   
+   if (g_debug) {
+      Print("oc_gap_pt=",oc_gap_pt);
+   }
+   
+   int cur_bar_status=0;
+   if (oc_gap>0) cur_bar_status=1;  //1 for negative bar(open>close)
+   
+   //sma
+   int ma_ped=getMAPeriod(PERIOD_CURRENT);
+   //Print("ma_ped=",ma_ped);
+   if (ma_ped==0) {
+      return 0;
+   }   
+   
+   int cur_ma_pos=0;                    //1 for price above SMA(60),-1 for price below SMA(60)
+   int lst_ma_pos=0;                    //1 for price above SMA(60),-1 for price below SMA(60)
+   double ma1=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+   double ma2=iMA(NULL,PERIOD_CURRENT,ma_ped,0,MODE_SMA,PRICE_CLOSE,lst_bar_shift);
+   if          (cur_price>ma1) {    //cur price is above sma(60)
+      cur_ma_pos=1;
+   } else if   (cur_price<ma1) {    //cur price is under sma(60)
+      cur_ma_pos=-1;
+   }
+   if          (last_price>ma2) {    //last price is above sma(60)
+      lst_ma_pos=1;
+   } else if   (last_price<ma2) {    //last price is under sma(60)
+      lst_ma_pos=-1;
+   }
+   
+   int ma_break=0;
+   if          (lst_ma_pos<=0 && cur_ma_pos>0) {      //price is up break ma
+      ma_break=1;
+   } else if   (lst_ma_pos>=0 && cur_ma_pos<0) {      //price is down break ma
+      ma_break=-1;
+   }
+   
+   if (cur_bar_status==0 && ma_break==1) {  //price is above sma(60) and positive bar
+      return 1;
+   }
+
+   if (cur_bar_status==1 && ma_break==-1) {  //price is under sma(60) and negative bar
+      return -1;
+   }
+   
+   if (lst_ma_pos==1 && cur_ma_pos==1) {     //two bar's price is above sma(60)
+      return 1;
+   }
+   if (lst_ma_pos==-1 && cur_ma_pos==-1) {   //two bar's price is under sma(60)
+      return -1;
+   }
+   
+   //adx
+   int adx=getADXStatus(PERIOD_CURRENT,cur_bar_shift);
+   if          (adx==2) {        //adx is top(trend is up),close buy
+      return -1;
+   } else if   (adx==-2) {       //adx is top(trend is down),close sell
+      return 1;
+   }
+   
+   return 0;
 }

@@ -1129,7 +1129,7 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
 //| return value: short break mid,up(within last 2 bars):+10  
 //|               short break mid,down(within last 2 bars):-10  
 //+------------------------------------------------------------------+
-int getMAStatus(int arg_period,int arg_shift)
+int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
 
@@ -1143,6 +1143,7 @@ int getMAStatus(int arg_period,int arg_shift)
    }
 
    double current_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
+   arg_short_value=current_short_ma;
    double current_high,current_low;
    if (Open[arg_shift]>Close[arg_shift]) {
       current_high=Open[arg_shift];
@@ -1238,4 +1239,103 @@ int getMAStatus(int arg_period,int arg_shift)
    }
    
    return 0;
+}
+
+//+------------------------------------------------------------------+
+//| Get MA status (base on 3 continous values)
+//| date: 2017/11/23
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value: 
+//|   1,adx is top(pdi>mdi);-1,adx is top(pdi<mdi);
+//|   1,pdi_mdi_gap is top(pdi>mdi);-1,pdi_mdi_gap is top(pdi<mdi);
+//|   2,1+1
+//|   0,N/A
+//+------------------------------------------------------------------+
+int getADXStatus(int arg_period,int arg_shift)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   int sec_lst_bar_shift=arg_shift+2;
+   
+   double cur_adx=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,cur_bar_shift);
+   double cur_adx_pdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_PLUSDI,cur_bar_shift);
+   double cur_adx_mdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MINUSDI,cur_bar_shift);
+   double lst_adx=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,lst_bar_shift);
+   double lst_adx_pdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_PLUSDI,lst_bar_shift);
+   double lst_adx_mdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MINUSDI,lst_bar_shift);
+   double sec_lst_adx=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MAIN,sec_lst_bar_shift);
+   double sec_lst_adx_pdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_PLUSDI,sec_lst_bar_shift);
+   double sec_lst_adx_mdi=iADX(NULL,arg_period,14,PRICE_CLOSE,MODE_MINUSDI,sec_lst_bar_shift);
+   
+   double cur_pdi_mdi_gap=cur_adx_pdi-cur_adx_mdi;
+   double lst_pdi_mdi_gap=lst_adx_pdi-lst_adx_mdi;
+   double sec_lst_pdi_mdi_gap=sec_lst_adx_pdi-sec_lst_adx_mdi;
+
+   double cur_adx_pdi_gap=cur_adx-cur_adx_pdi;
+   double lst_adx_pdi_gap=lst_adx-lst_adx_pdi;
+   double sec_lst_adx_pdi_gap=sec_lst_adx-sec_lst_adx_pdi;
+   double cur_adx_mdi_gap=cur_adx-cur_adx_mdi;
+   double lst_adx_mdi_gap=lst_adx-lst_adx_mdi;
+   double sec_lst_adx_mdi_gap=sec_lst_adx-sec_lst_adx_mdi;
+   
+   int adx_dir=0;
+   if (cur_pdi_mdi_gap>0 && lst_pdi_mdi_gap>0 && sec_lst_pdi_mdi_gap>0) {
+      adx_dir=1;
+   }
+   if (cur_pdi_mdi_gap<0 && lst_pdi_mdi_gap<0 && sec_lst_pdi_mdi_gap<0) {
+      adx_dir=-1;
+   }
+   
+   if (adx_dir==0) {    //no direction
+      return 0;
+   }
+
+   int adx_top=0;
+   if (sec_lst_adx<=lst_adx && lst_adx>=cur_adx) {
+      adx_top=1;
+   }
+   
+   int pdi_top=0;
+   int mdi_top=0;
+   int adx_gap_top=0;
+   if          (adx_dir==1) {    //pdi>mdi
+      if (sec_lst_adx_pdi<=lst_adx_pdi && lst_adx_pdi>=cur_adx_pdi) {
+         pdi_top=1;
+      }
+      if (sec_lst_adx_mdi>=lst_adx_mdi && lst_adx_mdi<=cur_adx_mdi) {
+         mdi_top=1;
+      }
+      if (sec_lst_adx_pdi_gap>0 && lst_adx_pdi_gap>0 && cur_adx_pdi_gap>0) {
+         if (sec_lst_adx_pdi_gap>=lst_adx_pdi_gap && lst_adx_pdi_gap<=cur_adx_pdi_gap) {
+            adx_gap_top=1;
+         }
+      }
+   } else if   (adx_dir==-1) {    //pdi<mdi
+      if (sec_lst_adx_pdi>=lst_adx_pdi && lst_adx_pdi<=cur_adx_pdi) {
+         pdi_top=1;
+      }
+      if (sec_lst_adx_mdi<=lst_adx_mdi && lst_adx_mdi>=cur_adx_mdi) {
+         mdi_top=1;
+      }
+      if (sec_lst_adx_mdi_gap>0 && lst_adx_mdi_gap>0 && cur_adx_mdi_gap>0) {
+         if (sec_lst_adx_mdi_gap>=lst_adx_mdi_gap && lst_adx_mdi_gap<=cur_adx_mdi_gap) {
+            adx_gap_top=1;
+         }
+      }
+   }
+   
+   int pdi_mdi_top=0;
+   if (pdi_top==1 && mdi_top==1) {
+      pdi_mdi_top=1;
+   }
+      
+   int ret=0;
+
+   //ret=(adx_top+pdi_mdi_top)*adx_dir;
+   ret=(adx_top+adx_gap_top)*adx_dir;
+   
+   return ret;
 }
