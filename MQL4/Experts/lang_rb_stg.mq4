@@ -167,8 +167,8 @@ void OnTick()
    double ask_price=Ask;
    double bid_price=Bid;
    double ab_gap=NormalizeDouble(Ask-Bid,Digits);
-   double min_tp_pt=i_SL;
-   double min_tp2_pt=2*i_SL;
+   //double min_tp_pt=2*i_SL;
+   //double min_tp2_pt=4*i_SL;
    double break_ls_ratio=0.6;
 
    //rebound(up)
@@ -182,27 +182,38 @@ void OnTick()
       double tp_price2=price+2*ls_gap;
       int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
       int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
+
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
       if (tp_price>high_price) {
+         /*
          tp_price=high_price-g_tp_offset*Point;
          tp_gap_pt=(int)NormalizeDouble((tp_price-price)/Point,0);
          if (tp_gap_pt<min_tp_pt) {
             Print("tp_gap is too small(<",min_tp_pt,"pt)");
             tp_price=0;
          }
+         */
+         Print("tp_price(",tp_price,") is higher than high_price(",high_price,")");
+         tp_price=0;
          tp_price2=0;
       } else if (tp_price2>high_price) {
+         /*
          tp_price2=high_price-g_tp_offset*Point;
          tp_gap2_pt=(int)NormalizeDouble((tp_price2-price)/Point,0);
          if (tp_gap2_pt<min_tp2_pt) {
             Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
             tp_price2=0;
          }
+         */
+         Print("tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
+         tp_price2=0;
       }
-      Print("Time=",Time[cur_bar_shift]);
-      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
-      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
-      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
-      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+      
       if (!g_debug) {
          bool ret,ret2;
          ret=ret2=0;
@@ -231,27 +242,38 @@ void OnTick()
       double tp_price2=price-2*ls_gap;
       int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
       int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
+
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
       if (tp_price<low_price) {
+         /*
          tp_price=low_price+g_tp_offset*Point;
          tp_gap_pt=(int)NormalizeDouble((price-tp_price)/Point,0);
          if (tp_gap_pt<min_tp_pt) {
             Print("tp_gap is too small(<",min_tp_pt,"pt)");
             tp_price=0;
          }
+         */
+         Print("tp_price(",tp_price,") is lower than low_price(",low_price,")");
+         tp_price=0;
          tp_price2=0;
       } else if (tp_price2<low_price) {
+         /*
          tp_price2=low_price+g_tp_offset*Point;
          tp_gap2_pt=(int)NormalizeDouble((price-tp_price2)/Point,0);
          if (tp_gap2_pt<min_tp2_pt) {
             Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
             tp_price2=0;
          }
+         */
+         Print("tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
+         tp_price2=0;
       }
-      Print("Time=",Time[cur_bar_shift]);
-      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
-      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
-      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
-      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+      
       if (!g_debug) {
          bool ret,ret2;
          ret=ret2=0;
@@ -280,7 +302,15 @@ void OnTick()
       double tp_price2=price+2*ls_gap;
       int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
       int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
+
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
       if (tp_price>higher_price) {
+         /*
          Print("adjust tp_price to higher_price");
          tp_price=higher_price-g_tp_offset*Point;
          tp_gap_pt=(int)NormalizeDouble((tp_price-price)/Point,0);
@@ -288,8 +318,12 @@ void OnTick()
             Print("tp_gap is too small(<",min_tp_pt,"pt)");
             tp_price=0;
          }
+         */
+         Print("tp_price(",tp_price,") is higher than higher_price(",higher_price,")");
+         tp_price=0;
          tp_price2=0;
       } else if (tp_price2>higher_price) {
+         /*
          Print("adjust tp_price2 to higher_price");
          tp_price2=higher_price-g_tp_offset*Point;
          tp_gap2_pt=(int)NormalizeDouble((tp_price2-price)/Point,0);
@@ -297,12 +331,11 @@ void OnTick()
             Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
             tp_price2=0;
          }
+         */
+         Print("tp_price2(",tp_price2,") is higher than higher_price(",higher_price,")");
+         tp_price2=0;
       }
-      Print("Time=",Time[cur_bar_shift]);
-      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
-      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
-      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
-      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+      
       if (!g_debug) {
          bool ret,ret2;
          ret=ret2=0;
@@ -331,7 +364,15 @@ void OnTick()
       double tp_price2=price-2*ls_gap;
       int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
       int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
+
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
       if (tp_price<lower_price) {
+         /*
          Print("adjust tp_price to lower_price");
          tp_price=lower_price+g_tp_offset*Point;
          tp_gap_pt=(int)NormalizeDouble((price-tp_price)/Point,0);
@@ -339,8 +380,12 @@ void OnTick()
             Print("tp_gap is too small(<",min_tp_pt,"pt)");
             tp_price=0;
          }
+         */
+         Print("tp_price(",tp_price,") is lower than lower_price(",lower_price,")");
+         tp_price=0;
          tp_price2=0;
       } else if (tp_price2<lower_price) {
+         /*
          Print("adjust tp_price2 to lower_price");
          tp_price2=lower_price+g_tp_offset*Point;
          tp_gap2_pt=(int)NormalizeDouble((price-tp_price2)/Point,0);
@@ -348,12 +393,11 @@ void OnTick()
             Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
             tp_price2=0;
          }
+         */
+         Print("tp_price2(",tp_price2,") is lower than lower_price(",lower_price,")");
+         tp_price2=0;
       }
-      Print("Time=",Time[cur_bar_shift]);
-      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
-      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
-      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
-      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+      
       if (!g_debug) {
          bool ret,ret2;
          ret=ret2=0;
