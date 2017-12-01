@@ -944,7 +944,8 @@ int isBreak(int arg_shift,double &arg_last_range_high,double &arg_last_range_low
 //| arg_offpt:offset point(high low break offset)
 //| return value: arg_price[2](buy/sell),arg_ls_price[2](buy/sell),arg_tp_price[2](buy/sell)
 //+------------------------------------------------------------------+
-void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,int arg_thpt,int arg_offpt,double &arg_price[],double &arg_ls_price[],double &arg_tp_price[])
+void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,int arg_thpt,int arg_thpt2,int arg_offpt,int arg_maxls_pt,
+                     double &arg_price[],double &arg_ls_price[])
 {
    string t1=TimeToStr(Time[arg_shift],TIME_DATE);
    string t2=TimeToStr(Time[arg_shift],TIME_MINUTES);
@@ -952,7 +953,8 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
 
    int cur_bar_shift=arg_shift;
    int last_bar_shift=arg_shift+1;
-
+   
+   string ind_name="lang_high_low2";
    int low_idx=0;
    int high_idx=1;
    int low2_idx=2;
@@ -969,31 +971,32 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
    double bid_price=Bid;
    int ab_gap_pt=(int)NormalizeDouble((ask_price-bid_price)/Point,0);
    //for test
-   //bid_price=Open[cur_bar_shift];
-   //ask_price=bid_price+ab_gap_pt*Point;
+   if (g_debug) {
+      bid_price=Open[cur_bar_shift];
+      ask_price=bid_price+ab_gap_pt*Point;
+   }
    int exp=arg_expand;
    int range=arg_range;
    int lng=arg_long;
-   double cur_range_high=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high_idx,cur_bar_shift);
-   double cur_range_high2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high2_idx,cur_bar_shift);
-   double cur_range_high3=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high3_idx,cur_bar_shift);
-   double cur_range_low=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,low_idx,cur_bar_shift);
-   double cur_range_low2=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,low2_idx,cur_bar_shift);
-   double cur_range_low3=iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,low3_idx,cur_bar_shift);
-   int cur_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high_gap_idx,cur_bar_shift);
-   int cur_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,low_gap_idx,cur_bar_shift);
-   int cur_high2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high2_gap_idx,cur_bar_shift);
-   int cur_low2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,low2_gap_idx,cur_bar_shift);
-   int cur_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low2",false,range,lng,0,exp,1,high_low_gap_idx,cur_bar_shift);
+   double cur_range_high=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_idx,cur_bar_shift);
+   double cur_range_high2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_idx,cur_bar_shift);
+   double cur_range_high3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high3_idx,cur_bar_shift);
+   double cur_range_low=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_idx,cur_bar_shift);
+   double cur_range_low2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_idx,cur_bar_shift);
+   double cur_range_low3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low3_idx,cur_bar_shift);
+   int cur_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_gap_idx,cur_bar_shift);
+   int cur_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_gap_idx,cur_bar_shift);
+   int cur_high2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_gap_idx,cur_bar_shift);
+   int cur_low2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_gap_idx,cur_bar_shift);
+   int cur_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_low_gap_idx,cur_bar_shift);
    
-   if (g_debug) {
-      Print("cur_range_high=",cur_range_high,",cur_range_low=",cur_range_low);
-      Print("cur_range_high2=",cur_range_high2,",cur_range_low2=",cur_range_low2);
-      Print("cur_range_high3=",cur_range_high3,",cur_range_low3=",cur_range_low3);
-      Print("cur_high_low_gap_pt=",cur_high_low_gap_pt);
-      Print("cur_high_gap_pt=",cur_high_gap_pt,",cur_low_gap_pt=",cur_low_gap_pt);
-      Print("cur_high2_gap_pt=",cur_high2_gap_pt,",cur_low2_gap_pt=",cur_low2_gap_pt);
-   }
+   Print("cur_range_high=",cur_range_high,",cur_range_low=",cur_range_low);
+   Print("cur_range_high2=",cur_range_high2,",cur_range_low2=",cur_range_low2);
+   Print("cur_range_high3=",cur_range_high3,",cur_range_low3=",cur_range_low3);
+   Print("cur_high_low_gap_pt=",cur_high_low_gap_pt);
+   Print("cur_high_gap_pt=",cur_high_gap_pt,",cur_low_gap_pt=",cur_low_gap_pt);
+   Print("cur_high2_gap_pt=",cur_high2_gap_pt,",cur_low2_gap_pt=",cur_low2_gap_pt);
+
    double range_high[3],range_low[3];
    range_high[0]=cur_range_high;
    range_high[1]=cur_range_high2;
@@ -1003,7 +1006,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
    range_low[2]=cur_range_low3;
    
    double tgt_price;
-
+   
    double buy_stop_price=0;
    tgt_price=ask_price;
    for (int i=0;i<3;i++) {
@@ -1011,12 +1014,19 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
       if (gap_pt<arg_thpt) {
          if (g_debug) Print("ask_price=",tgt_price,",range high(",range_high[i],") is not high enough(gap<",arg_thpt,"pt)");
       } else {
-         buy_stop_price=range_high[i]+arg_offpt*Point;
-         if (g_debug) Print("ask_price=",tgt_price,",buy_stop_price=",buy_stop_price);
-         break;
+         if    (i==0 && cur_high_gap_pt<arg_thpt2) {
+            if (g_debug) Print("ask_price=",tgt_price,",cur_high_gap_pt(",cur_high_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
+         } else if (i==1 && cur_high2_gap_pt<arg_thpt2) {
+            if (g_debug) Print("ask_price=",tgt_price,",cur_high2_gap_pt(",cur_high2_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
+         } else {
+            buy_stop_price=range_high[i]+arg_offpt*Point;
+            if (g_debug) Print("ask_price=",tgt_price,",buy_stop_price=",buy_stop_price);
+            break;
+         }
       }
    }
    
+   /*
    double buy_stop_tp_price=0;
    if (buy_stop_price>0) {
       tgt_price=buy_stop_price;
@@ -1031,6 +1041,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
          }
       }
    }
+   */
    
    double buy_stop_ls_price=0;
    if (buy_stop_price>0) {
@@ -1054,12 +1065,19 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
       if (gap_pt<arg_thpt) {
          if (g_debug) Print("bid_price=",tgt_price,",range low(",range_low[i],") is not low enough(gap<",arg_thpt,"pt)");
       } else {
-         sell_stop_price=range_low[i]-arg_offpt*Point;
-         if (g_debug) Print("bid_price=",tgt_price,",sell_stop_price=",sell_stop_price);
-         break;
+         if    (i==0 && cur_low_gap_pt<arg_thpt2) {
+            if (g_debug) Print("bid_price=",tgt_price,",cur_low_gap_pt(",cur_low_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
+         } else if (i==1 && cur_low2_gap_pt<arg_thpt2) {
+            if (g_debug) Print("bid_price=",tgt_price,",cur_low2_gap_pt(",cur_low2_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
+         } else {
+            sell_stop_price=range_low[i]-arg_offpt*Point;
+            if (g_debug) Print("bid_price=",tgt_price,",sell_stop_price=",sell_stop_price);
+            break;
+         }
       }
    }
-
+   
+   /*
    double sell_stop_tp_price=0;
    if (sell_stop_price>0) {
       tgt_price=sell_stop_price;
@@ -1074,6 +1092,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
          }
       }
    }
+   */
    
    double sell_stop_ls_price=0;
    if (sell_stop_price>0) {
@@ -1090,26 +1109,40 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
       }
    }
 
-   if (g_debug) {
-      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap_pt=",ab_gap_pt);
-      int buy_stop_gap_pt,buy_stop_ls_gap_pt,buy_stop_tp_gap_pt;
-      buy_stop_gap_pt=buy_stop_ls_gap_pt=buy_stop_tp_gap_pt=0;
-      if (buy_stop_price>0) buy_stop_gap_pt=(int)NormalizeDouble((buy_stop_price-ask_price)/Point,0);
-      if (buy_stop_tp_price>0) buy_stop_tp_gap_pt=(int)NormalizeDouble((buy_stop_tp_price-buy_stop_price)/Point,0);
-      if (buy_stop_ls_price>0) buy_stop_ls_gap_pt=(int)NormalizeDouble((bid_price-buy_stop_ls_price)/Point,0);
-      Print("buy_stop_price=",buy_stop_price,"(",buy_stop_gap_pt,"),buy_stop_tp_price=",buy_stop_tp_price,"(",buy_stop_tp_gap_pt,"),buy_stop_ls_price=",buy_stop_ls_price,"(",buy_stop_ls_gap_pt,")");
-      int sell_stop_gap_pt,sell_stop_ls_gap_pt,sell_stop_tp_gap_pt;
-      sell_stop_gap_pt=sell_stop_ls_gap_pt=sell_stop_tp_gap_pt=0;
-      if (sell_stop_price>0) sell_stop_gap_pt=(int)NormalizeDouble((bid_price-sell_stop_price)/Point,0);
-      if (sell_stop_tp_price>0) sell_stop_tp_gap_pt=(int)NormalizeDouble((sell_stop_price-sell_stop_tp_price)/Point,0);
-      if (sell_stop_ls_price>0) sell_stop_ls_gap_pt=(int)NormalizeDouble((sell_stop_ls_price-ask_price)/Point,0);
-      Print("sell_stop_price=",sell_stop_price,"(",sell_stop_gap_pt,"),sell_stop_tp_price=",sell_stop_tp_price,"(",sell_stop_tp_gap_pt,"),sell_stop_ls_price=",sell_stop_ls_price,"(",sell_stop_ls_gap_pt,")");
-   }   
+   Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap_pt=",ab_gap_pt);
+   //int buy_stop_gap_pt,buy_stop_ls_gap_pt,buy_stop_tp_gap_pt;
+   int buy_stop_gap_pt,buy_stop_ls_gap_pt;
+   //buy_stop_gap_pt=buy_stop_ls_gap_pt=buy_stop_tp_gap_pt=0;
+   buy_stop_gap_pt=buy_stop_ls_gap_pt=0;
+   if (buy_stop_price>0) buy_stop_gap_pt=(int)NormalizeDouble((buy_stop_price-ask_price)/Point,0);
+   //if (buy_stop_tp_price>0) buy_stop_tp_gap_pt=(int)NormalizeDouble((buy_stop_tp_price-buy_stop_price)/Point,0);
+   if (buy_stop_ls_price>0) buy_stop_ls_gap_pt=(int)NormalizeDouble((buy_stop_price-buy_stop_ls_price)/Point,0);
+   //Print("buy_stop_price=",buy_stop_price,"(",buy_stop_gap_pt,"),buy_stop_tp_price=",buy_stop_tp_price,"(",buy_stop_tp_gap_pt,"),buy_stop_ls_price=",buy_stop_ls_price,"(",buy_stop_ls_gap_pt,")");
+   Print("buy_stop_price=",buy_stop_price,"(",buy_stop_gap_pt,"),buy_stop_ls_price=",buy_stop_ls_price,"(",buy_stop_ls_gap_pt,")");
+   //int sell_stop_gap_pt,sell_stop_ls_gap_pt,sell_stop_tp_gap_pt;
+   int sell_stop_gap_pt,sell_stop_ls_gap_pt;
+   //sell_stop_gap_pt=sell_stop_ls_gap_pt=sell_stop_tp_gap_pt=0;
+   sell_stop_gap_pt=sell_stop_ls_gap_pt=0;
+   if (sell_stop_price>0) sell_stop_gap_pt=(int)NormalizeDouble((bid_price-sell_stop_price)/Point,0);
+   //if (sell_stop_tp_price>0) sell_stop_tp_gap_pt=(int)NormalizeDouble((sell_stop_price-sell_stop_tp_price)/Point,0);
+   if (sell_stop_ls_price>0) sell_stop_ls_gap_pt=(int)NormalizeDouble((sell_stop_ls_price-sell_stop_price)/Point,0);
+   //Print("sell_stop_price=",sell_stop_price,"(",sell_stop_gap_pt,"),sell_stop_tp_price=",sell_stop_tp_price,"(",sell_stop_tp_gap_pt,"),sell_stop_ls_price=",sell_stop_ls_price,"(",sell_stop_ls_gap_pt,")");
+   Print("sell_stop_price=",sell_stop_price,"(",sell_stop_gap_pt,"),sell_stop_ls_price=",sell_stop_ls_price,"(",sell_stop_ls_gap_pt,")");
+
+   if (buy_stop_ls_gap_pt>arg_maxls_pt) {
+      Print("buy_stop_ls_gap_pt is too big(>",arg_maxls_pt,")");
+      buy_stop_ls_price=NormalizeDouble(buy_stop_price-arg_maxls_pt*Point(),Digits);
+   }
+   if (sell_stop_ls_gap_pt>arg_maxls_pt) {
+      Print("sell_stop_ls_gap_pt is too big(>",arg_maxls_pt,")");
+      sell_stop_ls_price=NormalizeDouble(sell_stop_price+arg_maxls_pt*Point(),Digits);
+   }
+   
    arg_price[0]=buy_stop_price;
-   arg_tp_price[0]=buy_stop_tp_price;
+   //arg_tp_price[0]=buy_stop_tp_price;
    arg_ls_price[0]=buy_stop_ls_price;
    arg_price[1]=sell_stop_price;
-   arg_tp_price[1]=sell_stop_tp_price;
+   //arg_tp_price[1]=sell_stop_tp_price;
    arg_ls_price[1]=sell_stop_ls_price;
    
 }
@@ -1296,9 +1329,9 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
    } else if   (cur_price<(ma1-offset)) {    //cur price is under sma(60)
       cur_ma_pos=-1;
    }
-   if          (last_price>ma2) {    //last price is above sma(60)
+   if          (last_price>(ma2+offset)) {            //last price is above sma(60)
       lst_ma_pos=1;
-   } else if   (last_price<ma2) {    //last price is under sma(60)
+   } else if   (last_price<(ma2-offset)) {            //last price is under sma(60)
       lst_ma_pos=-1;
    }
    
@@ -1316,6 +1349,13 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 
    if (cur_bar_status==1 && ma_break==-1) {  //price is under sma(60) and negative bar
       //Print("down break sma");
+      return -1;
+   }
+
+   if (cur_ma_pos==1 && lst_ma_pos==1) {     //two bar's price is above sma(60)
+      return 1;
+   }
+   if (cur_ma_pos==-1 && lst_ma_pos==-1) {     //two bar's price is above sma(60)
       return -1;
    }
    

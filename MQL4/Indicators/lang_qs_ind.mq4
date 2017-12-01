@@ -91,9 +91,9 @@ int OnCalculate(const int rates_total,
    string ped=getPeriodTp(Period());
    string s=StringConcatenate("[",sym,"(",ped,")]");
    for(int i=st-1;i>0;i--) {
-      //ret1=isQuickShootClose(i);
+      ret1=isQuickShootClose(i);
       if (MathAbs(ret1)==1) {
-         //signalBuffer[i]=1*ret1;  //qs close signal(+1:close sell,-1:close buy
+         signalBuffer[i]=1*ret1;  //qs close signal(+1:close sell,-1:close buy
          /*
          if (i==1) {             //sendmail in future
             //string t1=TimeToStr(Time[i],TIME_DATE);
@@ -106,7 +106,7 @@ int OnCalculate(const int rates_total,
          */
          continue;
       }
-      
+      /*
       double price[2],ls_price[2];
       ret2=isQuickShootOpen(i,50,150,0.25,price,ls_price);
       if (MathAbs(ret2)==1) {
@@ -125,7 +125,7 @@ int OnCalculate(const int rates_total,
          }
          continue;
       }
-      
+      */
       /*
       //debug
       datetime t=Time[i];
