@@ -14,7 +14,7 @@
 int      g_magic=1;              //evt(high/low buy/sell stop)
 bool     g_has_order=false;
 datetime g_orderdt;
-int      g_time_ped=SEC_H1;    //30 minutes
+int      g_time_ped=SEC_H1;      //60 minutes
 
 //--------------------------------
 
@@ -89,28 +89,6 @@ void OnTick()
       }
    }
    */
-   
-   if (isPd3>0 && !g_has_order) {
-      double price[2],ls_price[2];
-      
-      getHighLow_Value(cur_bar_shift,g_expand,g_range,g_long,g_thpt,g_thpt2,g_offset_pt,g_max_ls_pt,price,ls_price);
-
-      if (price[0]>0 && ls_price[0]>0) {
-         Print("Open buy stop order,",now);
-         if (OrderBuy2(price[0],ls_price[0],-1,g_magic)) {
-            g_has_order=true;
-            g_orderdt=now;
-         }
-      }
-      if (price[1]>0 && ls_price[1]>0) {
-         Print("Open sell stop order,",now);
-         if (OrderSell2(price[1],ls_price[1],-1,g_magic)) {
-            g_has_order=true;
-            g_orderdt=now;
-         }
-      }
-      return;
-   }
 
    //check if exists any order
    if (g_has_order) {
@@ -150,10 +128,18 @@ void OnTick()
          }
       } else {    //not found buy and sell order
          //Print("not found buy and sell order");
-         if ((now-g_orderdt)>g_time_ped) {  //timeover
+         if (isPd3>0 && now != g_orderdt) {   //another news time start
+            Print("another news time start, close old order and open new")
+            OrderCloseA(NULL,-2,g_magic);    //close sellstop order
+            OrderCloseA(NULL,2,g_magic);     //close buystop order
+            if (!FindOrderA(NULL,0,g_magic)) {
+               g_has_order=false;
+            }
+         } else
+         if ((now-g_orderdt)>g_time_ped) {   //timeover
             Print("over time, close buy stop and sell stop order");
-            OrderCloseA(NULL,-2,g_magic);   //close sellstop order
-            OrderCloseA(NULL,2,g_magic);    //close buystop order
+            OrderCloseA(NULL,-2,g_magic);    //close sellstop order
+            OrderCloseA(NULL,2,g_magic);     //close buystop order
             if (!FindOrderA(NULL,0,g_magic)) {
                g_has_order=false;
             }
@@ -161,6 +147,26 @@ void OnTick()
       }
    }
    
+   if (isPd3>0 && !g_has_order) {
+      double price[2],ls_price[2];
+      
+      getHighLow_Value(cur_bar_shift,g_expand,g_range,g_long,g_thpt,g_thpt2,g_offset_pt,g_max_ls_pt,price,ls_price);
+
+      if (price[0]>0 && ls_price[0]>0) {
+         Print("Open buy stop order,",now);
+         if (OrderBuy2(price[0],ls_price[0],-1,g_magic)) {
+            g_has_order=true;
+            g_orderdt=now;
+         }
+      }
+      if (price[1]>0 && ls_price[1]>0) {
+         Print("Open sell stop order,",now);
+         if (OrderSell2(price[1],ls_price[1],-1,g_magic)) {
+            g_has_order=true;
+            g_orderdt=now;
+         }
+      }
+   }
 
 }
 //arg_status:1,has buy order;-1,has sell order
