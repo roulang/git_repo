@@ -445,10 +445,12 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
 //| arg_shift: bar shift
 //| arg_thpt:threahold point
 //| arg_cur_last_range_hit_status: 1,hit high;-1,hit low;0,N/A
+//| arg_touch_status:touch(high),+1;touch(down),-1;break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
 //| return value: touch(high),+1;touch(down),-1;break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
 //+------------------------------------------------------------------+
 int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_range_low,
                      int &arg_last_range_high_low_gap_pt,int &arg_last_range_high_gap_pt,int &arg_last_range_low_gap_pt,
+                     int &arg_touch_status,
                      int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_oc_gap_pt=10,
                      int arg_high_low_gap_pt=200,int arg_gap_pt2=50,
                      double arg_atr_lvl=0.0005,int arg_atr_range=5)
@@ -670,6 +672,9 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
       */
    }
 
+   //<<< filter conditions
+   arg_touch_status=ret;
+   
    //add ma condition
    double short_ma=0;
    int cur_ma_status=getMAStatus(PERIOD_CURRENT,cur_bar_shift,short_ma);

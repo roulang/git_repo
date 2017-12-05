@@ -125,8 +125,25 @@ void OnTick()
    //double high_gap,low_gap,high_low_gap;
    double range_high,range_low;
    int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
+   int touch_status=0;
    int sign;
-   sign=isBreak_Rebound2(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
+   sign=isBreak_Rebound2(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,touch_status,i_range,i_thredhold_pt,i_expand,5,150,20);
+   
+   if (touch_status==3 && g_has_order) {    //break up,have order
+      //close opposit order
+      if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
+         Print("close opposit(sell) order");
+         g_has_order=false;
+      }
+   }
+
+   if (touch_status==-3 && g_has_order) {   //break down,have order
+      //close opposit order
+      if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
+         Print("close opposit(buy) order");
+         g_has_order=false;
+      }
+   }
    
    //active time zone control
    bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,i_zone_aft);
@@ -141,22 +158,6 @@ void OnTick()
    }
    */
 
-   if (sign==3 && g_has_order) {    //break up,have order
-      //close opposit order
-      if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
-         Print("close opposit(sell) order");
-         g_has_order=false;
-      }
-   }
-
-   if (sign==-3 && g_has_order) {   //break down,have order
-      //close opposit order
-      if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
-         Print("close opposit(buy) order");
-         g_has_order=false;
-      }
-   }
-   
    double higher_price=range_high+range_high_gap_pt*Point();
    double high_price=range_high;
    double low_price=range_low;
