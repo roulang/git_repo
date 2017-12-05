@@ -12,8 +12,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -3
-#property indicator_maximum 3
+#property indicator_minimum -4
+#property indicator_maximum 4
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -102,7 +102,10 @@ int OnCalculate(const int rates_total,
    }
    //double ls_price=0;
    double range_high,range_low;
+   double range_high2,range_low2;
    int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
+   int range_high2_gap_pt,range_low2_gap_pt;
+   int high_low_touch_status=0;
    int ret=0;
    string sym=Symbol();
    string ped=getPeriodTp(Period());
@@ -110,7 +113,10 @@ int OnCalculate(const int rates_total,
    for(int i=st-1;i>0;i--) {
       //signalBuffer[i]=isBreak_Rebound_Open(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,ls_price);
       //signalBuffer[i]=isBreak_Rebound(i,i_thredhold_pt,i_range,g_zigBuf,g_high_low,g_pivotBuf,g_pivot_sht,g_larger_shift,g_touch_highlow,high_gap,low_gap,high_low_gap,i_expand,g_threhold_gap);
-      ret=isBreak_Rebound2(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
+      //ret=isBreak_Rebound2(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,i_range,i_thredhold_pt,i_expand,5,150,20);
+      ret=isBreak_Rebound3(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,
+                           range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,high_low_touch_status,
+                           i_range,i_thredhold_pt,i_expand,5,150,20);
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
          //string t1=TimeToStr(Time[i],TIME_DATE);
          string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));

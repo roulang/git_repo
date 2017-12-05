@@ -445,8 +445,8 @@ int isBreak_Rebound(int arg_shift,int arg_thpt,int arg_lengh,double &arg_zig_buf
 //| arg_shift: bar shift
 //| arg_thpt:threahold point
 //| arg_cur_last_range_hit_status: 1,hit high;-1,hit low;0,N/A
-//| arg_touch_status:touch(high),+1;touch(down),-1;break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
-//| return value: touch(high),+1;touch(down),-1;break(up),+2;break(down),-2;rebound(up),1;rebound(down),-1;0:n/a
+//| arg_touch_status:touch(high),+1;touch(down),-1;break(up),+3;break(down),-3;rebound(up),2;rebound(down),-2;0:n/a
+//| return value: touch(high),+1;touch(down),-1;break(up),+3;break(down),-3;rebound(up),2;rebound(down),-2;0:n/a
 //+------------------------------------------------------------------+
 int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_range_low,
                      int &arg_last_range_high_low_gap_pt,int &arg_last_range_high_gap_pt,int &arg_last_range_low_gap_pt,
@@ -738,6 +738,330 @@ int isBreak_Rebound2(int arg_shift,double &arg_last_range_high,double &arg_last_
    
    return ret;
 }
+//+------------------------------------------------------------------+
+//| Hit point break or rebound (use high_low_touch indicator)
+//| date: 2017/11/6
+//| arg_shift: bar shift
+//| arg_thpt:threahold point
+//| arg_cur_last_range_hit_status: 1,hit high;-1,hit low;0,N/A
+//| arg_touch_status:touch(high),+1;touch(down),-1;break(up/second),+3/4;break(down/second),-3/4;rebound(up),2;rebound(down),-2;0:n/a
+//| return value: touch(high),+1;touch(down),-1;break(up/second),+3/4;break(down/second),-3/4;rebound(up),2;rebound(down),-2;0:n/a
+//+------------------------------------------------------------------+
+int isBreak_Rebound3(int arg_shift,double &arg_last_range_high,double &arg_last_range_low,
+                     int &arg_last_range_high_low_gap_pt,int &arg_last_range_high_gap_pt,int &arg_last_range_low_gap_pt,
+                     double &arg_last_range_high2,double &arg_last_range_low2,
+                     int &arg_last_range_high2_gap_pt,int &arg_last_range_low2_gap_pt,
+                     int &arg_touch_status,
+                     int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_oc_gap_pt=10,
+                     int arg_high_low_gap_pt=200,int arg_gap_pt2=50,
+                     double arg_atr_lvl=0.0005,int arg_atr_range=5)
+{
+   string t1=TimeToStr(Time[arg_shift],TIME_DATE);
+   string t2=TimeToStr(Time[arg_shift],TIME_MINUTES);
+   string t=StringConcatenate("[",t1," ",t2,"]");
+
+   int cur_bar_shift=arg_shift;
+   int last_bar_shift=arg_shift+1;
+
+   //add atr by 20171121
+   int atr=getAtrValue(cur_bar_shift,arg_atr_lvl,arg_atr_range);
+   if (atr==0) {
+      Print(t,"atr too small(<=",arg_atr_lvl,")");
+      return 0;
+   }
+   
+   double oc_gap=Open[cur_bar_shift]-Close[cur_bar_shift];
+   int oc_gap_pt=(int)NormalizeDouble(MathAbs(oc_gap)/Point,0);
+   
+   if (g_debug) {
+      Print("oc_gap_pt=",oc_gap_pt);
+   }
+   
+   int cur_bar_status=0;
+   if (oc_gap>0) cur_bar_status=1;   //1 for negative bar(open>close)
+   
+   int touch_idx=0;
+   int cur_high_low_touch=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,1,arg_length,arg_th_pt,arg_expand,touch_idx,cur_bar_shift);       //nearest
+   int cur_high_low_touch2=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,0,arg_length,arg_th_pt,arg_expand,touch_idx,cur_bar_shift);      //second nearest
+   int lst_high_low_touch=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,1,arg_length,arg_th_pt,arg_expand,touch_idx,last_bar_shift);  //nearest
+   int lst_high_low_touch2=(int)iCustom(NULL,PERIOD_CURRENT,"lang_high_low_touch",false,0,arg_length,arg_th_pt,arg_expand,touch_idx,last_bar_shift); //second nearest
+   
+   if (g_debug) {
+      Print("cur_high_low_touch=",cur_high_low_touch,",cur_high_low_touch2=",cur_high_low_touch2);
+      Print("lst_high_low_touch=",lst_high_low_touch,",lst_high_low_touch2=",lst_high_low_touch2);
+   }
+      
+   string ind_name="lang_high_low2";
+   int low_idx=0;
+   int high_idx=1;
+   int low2_idx=2;
+   int high2_idx=3;
+   int low3_idx=4;
+   int high3_idx=5;
+   int high_gap_idx=12;
+   int low_gap_idx=13;
+   int high_low_gap_idx=14;
+   int high2_gap_idx=15;
+   int low2_gap_idx=16;
+   int exp=1;
+   int range=20;
+   int lng=1;
+  
+   double last_range_high=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_idx,last_bar_shift);
+   double last_range_high2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_idx,last_bar_shift);
+   double last_range_high3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high3_idx,last_bar_shift);
+   double last_range_low=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_idx,last_bar_shift);
+   double last_range_low2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_idx,last_bar_shift);
+   double last_range_low3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low3_idx,last_bar_shift);
+   int last_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_gap_idx,last_bar_shift);
+   int last_high2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_gap_idx,last_bar_shift);
+   int last_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_gap_idx,last_bar_shift);
+   int last_low2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_gap_idx,last_bar_shift);
+   int last_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_low_gap_idx,last_bar_shift);
+
+   double cur_range_high=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_idx,cur_bar_shift);
+   double cur_range_high2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_idx,cur_bar_shift);
+   double cur_range_high3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high3_idx,cur_bar_shift);
+   double cur_range_low=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_idx,cur_bar_shift);
+   double cur_range_low2=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_idx,cur_bar_shift);
+   double cur_range_low3=iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low3_idx,cur_bar_shift);
+   int cur_high_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_gap_idx,cur_bar_shift);
+   int cur_high2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high2_gap_idx,cur_bar_shift);
+   int cur_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low_gap_idx,cur_bar_shift);
+   int cur_low2_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,low2_gap_idx,cur_bar_shift);
+   int cur_high_low_gap_pt=(int)iCustom(NULL,PERIOD_CURRENT,ind_name,false,range,lng,0,exp,1,high_low_gap_idx,cur_bar_shift);
+
+   int high_low_change=0;
+   if (cur_range_high!=last_range_high || cur_range_low!=last_range_low) {
+      if (cur_range_high>last_range_high && cur_range_low>=last_range_low) {
+         high_low_change=1;   //range up
+      }
+      if (cur_range_low<last_range_low && cur_range_high<=last_range_high) {
+         high_low_change=-1;   //range down
+      }
+   }
+   int high_low_change2=0;
+   if (cur_range_high2!=last_range_high2 || cur_range_low2!=last_range_low2) {
+      if (cur_range_high2>last_range_high2 && cur_range_low2>=last_range_low2) {
+         high_low_change2=1;   //range up
+      }
+      if (cur_range_low2<last_range_low2 && cur_range_high2<=last_range_high2) {
+         high_low_change2=-1;   //range down
+      }
+   }
+
+   if (g_debug) {
+      Print("cur_range_high=",cur_range_high,",cur_range_high2=",cur_range_high2,",cur_range_high3=",cur_range_high3);
+      Print("cur_range_low=",cur_range_low,",cur_range_low2=",cur_range_low2,",cur_range_low3=",cur_range_low3);
+      Print("cur_high_gap_pt=",cur_high_gap_pt,",cur_low_gap_pt=",cur_low_gap_pt,",cur_high_low_gap_pt=",cur_high_low_gap_pt);
+      Print("cur_high2_gap_pt=",cur_high2_gap_pt,",cur_low2_gap_pt=",cur_low2_gap_pt);
+      Print("last_range_high=",last_range_high,",last_range_high2=",last_range_high2,",last_range_high3=",last_range_high3);
+      Print("last_range_low=",last_range_low,",last_range_low2=",last_range_low2,",last_range_low3=",last_range_low3);
+      Print("last_high_gap_pt=",last_high_gap_pt,",last_low_gap_pt=",last_low_gap_pt,",last_high_low_gap_pt=",last_high_low_gap_pt);
+      Print("last_high2_gap_pt=",last_high2_gap_pt,",last_low2_gap_pt=",last_low2_gap_pt);
+      Print("high_low_change=",high_low_change,",high_low_change2=",high_low_change2);
+   }
+   
+   if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==0) {   //no signal
+      Print(t,"no signal");
+      return 0;
+   }
+   
+   if (cur_high_low_gap_pt<arg_high_low_gap_pt) {     //high low gap is too narrow
+      Print(t,"high low gap is too narrow(<",arg_high_low_gap_pt,")");
+      return 0;
+   }
+   
+   int ret=0;
+   
+   if (ret==0) {
+      //break(up)
+      if (high_low_change==1 && cur_high_low_touch>=-1 && cur_bar_status==0) {         //high_low_change up,positive bar
+         if (cur_high_low_touch2>1) {  //break second high
+            if (g_debug) Print(t,"high_low_change up,positive bar,break second high,+3");
+            ret=4;
+         } else 
+         if (last_high_gap_pt>=arg_gap_pt2) {
+            if (g_debug) Print(t,"high_low_change up,positive bar,+3");
+            ret=3;
+         } else {
+            Print(t,"high_low_change up,positive bar,but last high gap is too narrow(<",arg_gap_pt2,"pt)");
+         }
+      }
+      //break(down)
+      if (high_low_change==-1 && cur_high_low_touch<=1 && cur_bar_status==1) {     //high_low_change down,negative bar
+         if (cur_high_low_touch2<-1) {  //break second low
+            if (g_debug) Print(t,"high_low_change down,negative bar,break second low,-3");
+            ret=-4;
+         } else 
+         if (last_low_gap_pt>=arg_gap_pt2) {
+            if (g_debug) Print(t,"high_low_change down,negative bar,-3");
+            ret=-3;
+         } else {
+            Print(t,"high_low_change down,negative bar,but last low gap is too narrow(<",arg_gap_pt2,"pt)");
+         }
+      }
+   }
+   
+   if (ret==0) {
+      //rebound(down)
+      if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==1) {     //hit high,turn down
+         if (g_debug) Print(t,"hit high,turn down,-2");
+         ret=-2;
+      }
+      /*
+      if (high_low_change==0 && lst_high_low_touch==1 && cur_high_low_touch==0) {     //hit high,turn down,more strong
+         Print(t,"hit high,turn down,more strong,-2");
+         ret=-2;
+      }
+      */
+   }
+
+   if (ret==0) {
+      //rebound(up)
+      if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==-1) {    //hit low,turn up
+         if (g_debug) Print(t,"hit low,turn up,positive bar,+2");
+         ret=2;
+      }
+      /*
+      if (high_low_change==0 && lst_high_low_touch==-1 && cur_high_low_touch==0) {    //hit low,turn up,more strong
+         Print(t,"hit low,turn up,more strong,+2");
+         ret=2;
+      }
+      */
+   }
+      
+   if (ret==0) {
+      //break(up)
+      if (high_low_change==0 && lst_high_low_touch>=0 && cur_high_low_touch>1 && cur_bar_status==0) {      //break high,positive bar,up
+         if (cur_high_low_touch2>1) {  //break second high
+            if (g_debug) Print(t,"break high,positive bar,break second high,+3");
+            ret=4;
+         } else 
+         if (cur_high_gap_pt>=arg_gap_pt2) {
+            if (g_debug) Print(t,"break high,positive bar,+3");
+            ret=3;
+         } else {
+            Print(t,"break high,positive bar,but cur high gap is too narrow(<",arg_gap_pt2,"pt)");
+         }
+      }
+      /*
+      if (lst_high_low_touch>1 && cur_high_low_touch>1 && bar_status==0) {      //break high(two bars),positive bar,up
+         if (last_high_gap_pt>=arg_high_gap_pt2) {
+            Print(t,"break high(two bars),positive bar,+3");
+            ret=3;
+         } else {
+            Print(t,"break high(two bars),positive bar,but high_gap is too narrow");
+         }
+         if (cur_high_low_touch2>1) {  //break second high
+            Print(t,"break high(two bars),positive bar,break second high,+3");
+            ret=3;
+         }
+      }
+      */
+   }
+   
+   if (ret==0) {
+      //break(down)
+      if (high_low_change==0 && lst_high_low_touch<=0 && cur_high_low_touch<-1 && cur_bar_status==1) {     //break low,negative bar,down
+         if (cur_high_low_touch2<-1) {  //break second low
+            if (g_debug) Print(t,"break low,negative bar,break second low,-3");
+            ret=-4;
+         } else 
+         if (cur_low_gap_pt>=arg_gap_pt2) {
+            if (g_debug) Print(t,"break low,negative bar,-3");
+            ret=-3;
+         } else {
+            Print(t,"break low,negative bar,but cur low gap is too narrow(<",arg_gap_pt2,"pt)");
+         }
+      }
+      /*
+      if (lst_high_low_touch<-1 && cur_high_low_touch<-1 && bar_status==0) {      //break low(two bars),negative bar,down
+         if (last_high_gap_pt>=arg_high_gap_pt2) {
+            Print(t,"break low(two bars),negative bar,-3");
+            ret=-3;
+         } else {
+            Print(t,"break low(two bars),negative bar,but low_gap is too narrow");
+         }
+         if (cur_high_low_touch2<-1) {  //break second low
+            Print(t,"break low(two bars),negative bar,break second low,-3");
+            ret=-3;
+         }
+      }
+      */
+   }
+
+   //<<< filter conditions
+   arg_touch_status=ret;
+   
+   //add ma condition
+   double short_ma=0;
+   int cur_ma_status=getMAStatus(PERIOD_CURRENT,cur_bar_shift,short_ma);
+   
+   /*  
+   if (cur_ma_status==0) {    //ma status is 0
+      Print(t,"ma status is 0,0");
+      return 0;
+   }
+   */
+   
+   if (ret==2) {     //rebound up
+      if (cur_ma_status<0) {    //ma is down
+         Print(t,"rebound up,but ma is down,0");
+         ret=0;
+      }
+   }
+   if (ret==-2) {    //rebound down
+      if (cur_ma_status>0) {    //ma is up
+         Print(t,"rebound down,but ma is up,0");
+         ret=0;
+      }
+   }
+
+   if (ret>=3) {     //break up
+      if (cur_ma_status<=0) {    //ma is down
+         Print(t,"break up,but ma is down,0");
+         ret=0;
+      }
+   }
+   if (ret<=-3) {    //break down
+      if (cur_ma_status>=0) {    //ma is up
+         Print(t,"break down,but ma is up,0");
+         ret=0;
+      }
+   }
+
+   if (MathAbs(ret)>=3) {     //break up or break down
+      if (oc_gap_pt<=arg_oc_gap_pt) {  //open close gap is too narrow
+         Print(t,"open close gap is too narrow(<=",arg_oc_gap_pt,"pt)");
+         ret=0;
+      }
+   }
+
+   if (ret==0) {     //final
+      if (cur_high_low_touch>0) {   //only touch high(can notify by email)
+         Print(t,"final,only touch high,+1");
+         ret=1;
+      }
+      if (cur_high_low_touch<0) {   //only touch low(can notify by email)
+         Print(t,"final,only touch low,-1");
+         ret=-1;
+      }
+   }
+   
+   arg_last_range_high=last_range_high;
+   arg_last_range_high2=last_range_high2;
+   arg_last_range_low=last_range_low;
+   arg_last_range_low2=last_range_low2;
+   arg_last_range_high_low_gap_pt=last_high_low_gap_pt;
+   arg_last_range_high_gap_pt=last_high_gap_pt;
+   arg_last_range_low_gap_pt=last_low_gap_pt;
+   arg_last_range_high2_gap_pt=last_high2_gap_pt;
+   arg_last_range_low2_gap_pt=last_low2_gap_pt;
+   
+   return ret;
+}
+
 //+------------------------------------------------------------------+
 //| Hit point break (use high_low_touch indicator)
 //| date: 2017/11/22

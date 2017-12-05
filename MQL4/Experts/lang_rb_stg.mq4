@@ -124,12 +124,17 @@ void OnTick()
    
    //double high_gap,low_gap,high_low_gap;
    double range_high,range_low;
+   double range_high2,range_low2;
    int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
+   int range_high2_gap_pt,range_low2_gap_pt;
    int touch_status=0;
    int sign;
-   sign=isBreak_Rebound2(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,touch_status,i_range,i_thredhold_pt,i_expand,5,150,20);
+   //sign=isBreak_Rebound2(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,touch_status,i_range,i_thredhold_pt,i_expand,5,150,20);
+   sign=isBreak_Rebound3(last_bar_shift,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,
+                        range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,touch_status,
+                        i_range,i_thredhold_pt,i_expand,5,150,20);
    
-   if (touch_status==3 && g_has_order) {    //break up,have order
+   if (touch_status>=3 && g_has_order) {    //break up,have order
       //close opposit order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
@@ -137,7 +142,7 @@ void OnTick()
       }
    }
 
-   if (touch_status==-3 && g_has_order) {   //break down,have order
+   if (touch_status<=-3 && g_has_order) {   //break down,have order
       //close opposit order
       if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
          Print("close opposit(buy) order");
@@ -157,11 +162,14 @@ void OnTick()
       return;
    }
    */
-
+   
+   //open order
    double higher_price=range_high+range_high_gap_pt*Point();
+   double higher2_price=range_high2+range_high2_gap_pt*Point();
    double high_price=range_high;
    double low_price=range_low;
    double lower_price=range_low-range_low_gap_pt*Point();
+   double lower2_price=range_low2-range_low2_gap_pt*Point();
    double last_bar_high=High[last_bar_shift];
    double last_bar_low=Low[last_bar_shift];
    
@@ -354,6 +362,68 @@ void OnTick()
       }
    }
 
+   //break(up/second)
+   if (sign==4 && !g_has_order) {
+      Print("ready to break up(second).create buy order.");
+      double price=ask_price;
+      double ls_tgt_price=NormalizeDouble(high_price-range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break up stop lose point
+      double ls_price=ls_tgt_price;
+      double ls_gap=NormalizeDouble(price-ls_price,Digits);
+      double tp_price=price+ls_gap;
+      double tp_price2=price+2*ls_gap;
+      int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
+      int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
+
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
+      if (tp_price>higher2_price) {
+         /*
+         Print("adjust tp_price to higher_price");
+         tp_price=higher_price-g_tp_offset*Point;
+         tp_gap_pt=(int)NormalizeDouble((tp_price-price)/Point,0);
+         if (tp_gap_pt<min_tp_pt) {
+            Print("tp_gap is too small(<",min_tp_pt,"pt)");
+            tp_price=0;
+         }
+         */
+         Print("tp_price(",tp_price,") is higher than higher2_price(",higher2_price,")");
+         tp_price=0;
+         tp_price2=0;
+      } else if (tp_price2>higher2_price) {
+         /*
+         Print("adjust tp_price2 to higher_price");
+         tp_price2=higher_price-g_tp_offset*Point;
+         tp_gap2_pt=(int)NormalizeDouble((tp_price2-price)/Point,0);
+         if (tp_gap2_pt<min_tp2_pt) {
+            Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
+            tp_price2=0;
+         }
+         */
+         Print("tp_price2(",tp_price2,") is higher than higher2_price(",higher2_price,")");
+         tp_price2=0;
+      }
+      
+      if (!g_debug) {
+         bool ret,ret2;
+         ret=ret2=0;
+         if (tp_price>0) {
+            ret=OrderBuy2(0,ls_price,tp_price,g_magic);
+         }
+         if (tp_price2>0) {
+            ret2=OrderBuy2(0,ls_price,tp_price2,g_magic);
+         }
+         if (ret || ret2) {
+            g_has_order=true;
+            g_orderdt=now;
+            return;
+         }
+      }
+   }
+
    //break(down)
    if (sign==-3 && !g_has_order) {
       Print("ready to break down.create sell order.");
@@ -415,7 +485,69 @@ void OnTick()
          }
       }
    }
+   
+   //break(down/second)
+   if (sign==-4 && !g_has_order) {
+      Print("ready to break down(second).create sell order.");
+      double price=bid_price;
+      double ls_tgt_price=NormalizeDouble(low_price+range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break down stop lose point
+      double ls_price=ls_tgt_price;
+      double ls_gap=NormalizeDouble(ls_price-price,Digits);
+      double tp_price=price-ls_gap;
+      double tp_price2=price-2*ls_gap;
+      int tp_gap_pt=(int)NormalizeDouble(ls_gap/Point,0);
+      int tp_gap2_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
 
+      Print("Time=",Time[cur_bar_shift]);
+      Print("high_price=",high_price,",low_price=",low_price,",higher_price=",higher_price,",lower_price=",lower_price,",range_high_low_gap_pt=",range_high_low_gap_pt);
+      Print("ask_price=",ask_price,",bid_price=",bid_price,",ab_gap=",ab_gap);
+      Print("price=",price,",ls_tgt_price=",ls_tgt_price,",ls_price=",ls_price,",ls_gap=",ls_gap);
+      Print("tp_price=",tp_price,",tp_price2=",tp_price2,",tp_gap_pt=",tp_gap_pt,",tp_gap2_pt=",tp_gap2_pt);
+
+      if (tp_price<lower2_price) {
+         /*
+         Print("adjust tp_price to lower_price");
+         tp_price=lower_price+g_tp_offset*Point;
+         tp_gap_pt=(int)NormalizeDouble((price-tp_price)/Point,0);
+         if (tp_gap_pt<min_tp_pt) {
+            Print("tp_gap is too small(<",min_tp_pt,"pt)");
+            tp_price=0;
+         }
+         */
+         Print("tp_price(",tp_price,") is lower than lower2_price(",lower2_price,")");
+         tp_price=0;
+         tp_price2=0;
+      } else if (tp_price2<lower2_price) {
+         /*
+         Print("adjust tp_price2 to lower_price");
+         tp_price2=lower_price+g_tp_offset*Point;
+         tp_gap2_pt=(int)NormalizeDouble((price-tp_price2)/Point,0);
+         if (tp_gap2_pt<min_tp2_pt) {
+            Print("tp_gap2 is too small(<",min_tp2_pt,"pt)");
+            tp_price2=0;
+         }
+         */
+         Print("tp_price2(",tp_price2,") is lower than lower2_price(",lower2_price,")");
+         tp_price2=0;
+      }
+      
+      if (!g_debug) {
+         bool ret,ret2;
+         ret=ret2=0;
+         if (tp_price>0) {
+            ret=OrderSell2(0,ls_price,tp_price,g_magic);
+         }
+         if (tp_price2>0) {
+            ret2=OrderSell2(0,ls_price,tp_price2,g_magic);
+         }
+         if (ret || ret2) {
+            g_has_order=true;
+            g_orderdt=now;
+            return;
+         }
+      }
+   }
+   
 }
 bool ifClose(int arg_shift)
 {
