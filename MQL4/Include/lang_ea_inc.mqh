@@ -597,12 +597,12 @@ int OrderCloseA(string symbol, int type, int magic)
       //Print("ret=",ret);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
-         {
+         //if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
+         //   (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
+         //   (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
+         //   (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
+         //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
+         if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type)) {
             if(OrderType()==OP_BUY) {
                //Print("send close buy order command");
                ret=OrderClose(OrderTicket(),OrderLots(),Bid,0,Green);
@@ -647,12 +647,12 @@ bool FindOrderA(string symbol, int type, int magic)
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
-            (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
-            (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
-            (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
-            (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
-         {
+         //if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
+         //   (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
+         //   (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
+         //   (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
+         //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
+         if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type)) {
             return true;
          }
       } else {
@@ -661,32 +661,6 @@ bool FindOrderA(string symbol, int type, int magic)
       }
    }
    return false;
-}
-
-//+------------------------------------------------------------------+
-// getVolume: get risk volume
-// ep: equity percent. ex,1=1%,2=2% (0 for not set, use )
-// ls_point: Loss Stop Point
-//+------------------------------------------------------------------+
-double getVolume(int ep, double ls_point)
-{
-   double risk_amount = AccountEquity() * ep / 100;
-   double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
-   if (tick_value == 0) return 1;
-   double volume = risk_amount / (ls_point * tick_value);
-   volume = NormalizeDouble(volume, 2);
-   
-   //<<<<debug
-   if (g_debug) {
-      Print("<<<<debug");
-      printf("risk amount=%.5f", risk_amount);
-      printf("tick value=%.5f", tick_value);
-      printf("volume=%.5f", volume);
-      Print("debug>>>>");
-   }
-   //debug>>>>
-   return volume;
-   
 }
 
 //+------------------------------------------------------------------+
@@ -706,7 +680,8 @@ bool movingStop(string symbol, int type, int magic, int shift, int spt)
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
+         //if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
+         if (type==1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type))
          {
             //buy order
             //double cur_price=Bid;
@@ -723,7 +698,8 @@ bool movingStop(string symbol, int type, int magic, int shift, int spt)
                }
             }
          }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
+         //if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
+         if (type==-1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type))
          {
             //sell order
             //double cur_price=Ask;
@@ -767,7 +743,8 @@ bool movingStop2(string symbol, int type, int magic, int shift, int tpt, int ppt
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
+         //if((type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic))
+         if (type==1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type))
          {
             //buy order
             //double cur_price=Bid;
@@ -785,7 +762,8 @@ bool movingStop2(string symbol, int type, int magic, int shift, int tpt, int ppt
                }
             }
          }
-         if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
+         //if((type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic)) 
+         if (type==-1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,magic,type))
          {
             //sell order
             //double cur_price=Ask;
@@ -828,7 +806,8 @@ bool movingStop3(string arg_sym, int arg_mag, int arg_sht)
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
          //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
-         if((StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==arg_mag)) {
+         //if((StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==arg_mag)) {
+         if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_mag)) {
             double cur_price=Close[arg_sht];
             double cur_open_price=NormalizeDouble(OrderOpenPrice(),Digits);
             double cur_ls_price=NormalizeDouble(OrderStopLoss(),Digits);
@@ -904,6 +883,49 @@ void writeOrderCmdToFile(s_Order &arg_order)
    FileClose(h);
 
 }
+
+// arg_type:1 buy,2 buy stop,-1 sell,-2 sell stop,0 all
+bool isSameOrder(string arg_order_symbol, int arg_order_magic, string arg_order_comment, int arg_order_type, string arg_symbol, int arg_magic, int arg_type=0)
+{
+   int tp=-1;
+   
+   switch (arg_type) {
+      case 1:
+         tp=OP_BUY;
+         break;
+      case 2:
+         tp=OP_BUYSTOP;
+         break;
+      case -1:
+         tp=OP_SELL;
+         break;
+      case -2:
+         tp=OP_SELLSTOP;
+         break;
+      default:
+         break;
+   }
+   
+   if (tp==-1) {
+      if (StringCompare(arg_order_symbol,arg_symbol)==0
+         && (arg_order_magic==arg_magic
+         || StringCompare(arg_order_comment,IntegerToString(arg_magic))==0)) 
+      {         
+         return true;
+      }
+   } else {
+      if (StringCompare(arg_order_symbol,arg_symbol)==0
+         && (arg_order_magic==arg_magic
+         || StringCompare(arg_order_comment,IntegerToString(arg_magic))==0)
+         && arg_order_type==arg_type) 
+      {
+         return true;
+      }
+   }
+   
+   return false;
+}
+
 //+------------------------------------------------------------------+
 // ea_init: ea init
 //+------------------------------------------------------------------+

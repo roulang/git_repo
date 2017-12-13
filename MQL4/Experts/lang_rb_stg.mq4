@@ -12,7 +12,7 @@
 
 //--- global
 int      g_magic=3;        //rebound and break
-bool     g_has_order=false;
+//bool     g_has_order=false;
 datetime g_orderdt;
 
 //--------------------------------
@@ -21,6 +21,7 @@ datetime g_orderdt;
 input int      i_range=20;
 input int      i_thredhold_pt=0;
 input int      i_expand=1;
+input bool     i_manual=false;
 
 //global
 int      g_tp_offset=10;
@@ -73,48 +74,47 @@ void OnTick()
    int cur_bar_shift=0;
    int last_bar_shift=1;
    datetime now=Time[cur_bar_shift];
-
+   bool has_order=true;
+   
    //check if exists any order
-   if (g_has_order) {
-      if (FindOrderA(NULL,1,g_magic)) {  //found buy order
-         if (ifClose(cur_bar_shift)) {
-            Print("closed buy order");
-            if (!FindOrderA(NULL,0,g_magic)) {
-               g_has_order=false;
-            }
+   if (FindOrderA(NULL,1,g_magic)) {  //found buy order
+      if (ifClose(cur_bar_shift)) {
+         Print("closed buy order");
+         if (!FindOrderA(NULL,0,g_magic)) {
+            has_order=false;
          }
-         /*
-         //move lose stop
-         if (movingStop3(NULL,g_magic,last_bar_shift)) {
-            Print("movingstop of buy order");
-         }
-         */
-      } else if(FindOrderA(NULL,-1,g_magic)) {  //found sell order
-         if (ifClose(cur_bar_shift)) {
-            Print("closed buy order");
-            if (!FindOrderA(NULL,0,g_magic)) {
-               g_has_order=false;
-            }
-         }
-         /*
-         //move lose stop
-         if (movingStop3(NULL,g_magic,last_bar_shift)) {
-            Print("movingstop of buy order");
-         }
-         */
-      } else {    //not found buy and sell order
-         g_has_order=false;
       }
+      /*
+      //move lose stop
+      if (movingStop3(NULL,g_magic,last_bar_shift)) {
+         Print("movingstop of buy order");
+      }
+      */
+   } else if(FindOrderA(NULL,-1,g_magic)) {  //found sell order
+      if (ifClose(cur_bar_shift)) {
+         Print("closed buy order");
+         if (!FindOrderA(NULL,0,g_magic)) {
+            has_order=false;
+         }
+      }
+      /*
+      //move lose stop
+      if (movingStop3(NULL,g_magic,last_bar_shift)) {
+         Print("movingstop of buy order");
+      }
+      */
+   } else {    //not found buy and sell order
+      has_order=false;
    }
    
    //news time skip control
    bool newsPd=isNewsPd(NULL,cur_bar_shift,i_news_bef,i_news_aft);
    if (i_news_skip && newsPd) {     //in news time
-      if (g_has_order) {
+      if (has_order) {
          Print("new time skip control:news time start, close all order");
          OrderCloseA(NULL,0,g_magic);   //close all order
          if (!FindOrderA(NULL,0,g_magic)) {
-            g_has_order=false;
+            has_order=false;
          }
       } else {
          Print("new time skip control:news time start, do not take action");
@@ -134,19 +134,19 @@ void OnTick()
                         range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,touch_status,
                         i_range,i_thredhold_pt,i_expand,5,150,20);
    
-   if (touch_status>=3 && g_has_order) {    //break up,have order
+   if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
-         g_has_order=false;
+         has_order=false;
       }
    }
 
-   if (touch_status<=-3 && g_has_order) {   //break down,have order
+   if (touch_status<=-3 && has_order) {   //break down,have order
       //close opposit order
       if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
          Print("close opposit(buy) order");
-         g_has_order=false;
+         has_order=false;
       }
    }
    
@@ -181,7 +181,7 @@ void OnTick()
    double break_ls_ratio=0.6;
 
    //rebound(up)
-   if (sign==2 && !g_has_order) {
+   if (sign==2 && !has_order) {
       Print("ready to turn up.create buy order.");
       double price=ask_price;
       double ls_tgt_price=last_bar_low;
@@ -223,7 +223,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -233,7 +233,7 @@ void OnTick()
             ret2=OrderBuy2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }
@@ -241,7 +241,7 @@ void OnTick()
    }
    
    //rebound(down)
-   if (sign==-2 && !g_has_order) {
+   if (sign==-2 && !has_order) {
       Print("ready to turn down.create sell order.");
       double price=bid_price;
       double ls_tgt_price=last_bar_high;
@@ -283,7 +283,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -293,7 +293,7 @@ void OnTick()
             ret2=OrderSell2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }
@@ -301,7 +301,7 @@ void OnTick()
    }
    
    //break(up)
-   if (sign==3 && !g_has_order) {
+   if (sign==3 && !has_order) {
       Print("ready to break up.create buy order.");
       double price=ask_price;
       double ls_tgt_price=NormalizeDouble(high_price-range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break up stop lose point
@@ -345,7 +345,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -355,7 +355,7 @@ void OnTick()
             ret2=OrderBuy2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }
@@ -363,7 +363,7 @@ void OnTick()
    }
 
    //break(up/second)
-   if (sign==4 && !g_has_order) {
+   if (sign==4 && !has_order) {
       Print("ready to break up(second).create buy order.");
       double price=ask_price;
       double ls_tgt_price=NormalizeDouble(high_price-range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break up stop lose point
@@ -407,7 +407,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -417,7 +417,7 @@ void OnTick()
             ret2=OrderBuy2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }
@@ -425,7 +425,7 @@ void OnTick()
    }
 
    //break(down)
-   if (sign==-3 && !g_has_order) {
+   if (sign==-3 && !has_order) {
       Print("ready to break down.create sell order.");
       double price=bid_price;
       double ls_tgt_price=NormalizeDouble(low_price+range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break down stop lose point
@@ -469,7 +469,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -479,7 +479,7 @@ void OnTick()
             ret2=OrderSell2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }
@@ -487,7 +487,7 @@ void OnTick()
    }
    
    //break(down/second)
-   if (sign==-4 && !g_has_order) {
+   if (sign==-4 && !has_order) {
       Print("ready to break down(second).create sell order.");
       double price=bid_price;
       double ls_tgt_price=NormalizeDouble(low_price+range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break down stop lose point
@@ -531,7 +531,7 @@ void OnTick()
          tp_price2=0;
       }
       
-      if (!g_debug) {
+      if (!g_debug && !i_manual) {
          bool ret,ret2;
          ret=ret2=0;
          if (tp_price>0) {
@@ -541,7 +541,7 @@ void OnTick()
             ret2=OrderSell2(0,ls_price,tp_price2,g_magic);
          }
          if (ret || ret2) {
-            g_has_order=true;
+            //has_order=true;
             g_orderdt=now;
             return;
          }

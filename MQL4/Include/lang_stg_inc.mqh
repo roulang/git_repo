@@ -16,6 +16,32 @@ int    g_adx_level=40; //adx level
 double adx_thred=0.5;
 
 //+------------------------------------------------------------------+
+// getVolume: get risk volume
+// ep: equity percent. ex,1=1%,2=2% (0 for not set, use )
+// ls_point: Loss Stop Point
+//+------------------------------------------------------------------+
+double getVolume(int ep, double ls_point)
+{
+   double risk_amount = AccountEquity() * ep / 100;
+   double tick_value = MarketInfo(Symbol(), MODE_TICKVALUE);
+   if (tick_value == 0) return 1;
+   double volume = risk_amount / (ls_point * tick_value);
+   volume = NormalizeDouble(volume, 2);
+   
+   //<<<<debug
+   if (g_debug) {
+      Print("<<<<debug");
+      printf("risk amount=%.5f", risk_amount);
+      printf("tick value=%.5f", tick_value);
+      printf("volume=%.5f", volume);
+      Print("debug>>>>");
+   }
+   //debug>>>>
+   return volume;
+   
+}
+
+//+------------------------------------------------------------------+
 //| Shot shoot strategy
 //+------------------------------------------------------------------+
 int ShotShootStgValue(int shift)
@@ -763,13 +789,6 @@ int isBreak_Rebound3(int arg_shift,double &arg_last_range_high,double &arg_last_
    int cur_bar_shift=arg_shift;
    int last_bar_shift=arg_shift+1;
 
-   //add atr by 20171121
-   int atr=getAtrValue(cur_bar_shift,arg_atr_lvl,arg_atr_range);
-   if (atr==0) {
-      Print(t,"atr too small(<=",arg_atr_lvl,")");
-      return 0;
-   }
-   
    double oc_gap=Open[cur_bar_shift]-Close[cur_bar_shift];
    int oc_gap_pt=(int)NormalizeDouble(MathAbs(oc_gap)/Point,0);
    
@@ -861,6 +880,16 @@ int isBreak_Rebound3(int arg_shift,double &arg_last_range_high,double &arg_last_
       Print("last_high2_gap_pt=",last_high2_gap_pt,",last_low2_gap_pt=",last_low2_gap_pt);
       Print("high_low_change=",high_low_change,",high_low_change2=",high_low_change2);
    }
+
+   arg_last_range_high=last_range_high;
+   arg_last_range_high2=last_range_high2;
+   arg_last_range_low=last_range_low;
+   arg_last_range_low2=last_range_low2;
+   arg_last_range_high_low_gap_pt=last_high_low_gap_pt;
+   arg_last_range_high_gap_pt=last_high_gap_pt;
+   arg_last_range_low_gap_pt=last_low_gap_pt;
+   arg_last_range_high2_gap_pt=last_high2_gap_pt;
+   arg_last_range_low2_gap_pt=last_low2_gap_pt;   
    
    if (high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==0) {   //no signal
       Print(t,"no signal");
@@ -994,6 +1023,15 @@ int isBreak_Rebound3(int arg_shift,double &arg_last_range_high,double &arg_last_
    //<<< filter conditions
    arg_touch_status=ret;
    
+   //add atr by 20171121
+   int atr=getAtrValue(cur_bar_shift,arg_atr_lvl,arg_atr_range);
+   if (ret!=0) {
+      if (atr==0) {
+         Print(t,"atr too small(<=",arg_atr_lvl,")");
+         ret=0;
+      }
+   }
+      
    //add ma condition
    double short_ma=0;
    int cur_ma_status=getMAStatus(PERIOD_CURRENT,cur_bar_shift,short_ma);
@@ -1048,16 +1086,6 @@ int isBreak_Rebound3(int arg_shift,double &arg_last_range_high,double &arg_last_
          ret=-1;
       }
    }
-   
-   arg_last_range_high=last_range_high;
-   arg_last_range_high2=last_range_high2;
-   arg_last_range_low=last_range_low;
-   arg_last_range_low2=last_range_low2;
-   arg_last_range_high_low_gap_pt=last_high_low_gap_pt;
-   arg_last_range_high_gap_pt=last_high_gap_pt;
-   arg_last_range_low_gap_pt=last_low_gap_pt;
-   arg_last_range_high2_gap_pt=last_high2_gap_pt;
-   arg_last_range_low2_gap_pt=last_low2_gap_pt;
    
    return ret;
 }
