@@ -921,3 +921,28 @@ bool isEndOfWeek(int arg_shift)
 
    return false;
 }
+
+//+------------------------------------------------------------------+
+//| send order mail
+//| arg_otp:order type(OP_BUY,OP_SELL)
+//| arg_price[]:
+//| arg_price_pt[]:
+//| arg_ls_price[]:
+//| arg_ls_price_pt[]:
+//| arg_tp_price[]:
+//| arg_tp_price_pt[]:
+//| arg_lot[]:
+//| arg_comment[]:
+//| arg_msg[]:
+//| arg_cnt:order count
+//| arg_high_low[]:
+//|
+//| ->format see below
+//| sell stop price=price(pt)\r\n
+//| -------rebound------
+//| ls_price(pt)|tp_price(pt)|lot|comment
+//+------------------------------------------------------------------+
+bool sendOrderMail(int arg_otp,double &arg_price[],int &arg_price_pt[],double &arg_ls_price[],int arg_cnt)
+{
+   return false;
+}
