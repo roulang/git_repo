@@ -103,16 +103,17 @@ int OnCalculate(const int rates_total,
    string ped=getPeriodTp(Period());
    string str=StringConcatenate("[",sym,"(",ped,")]");
    for(int i=st-1;i>0;i--) {
-      ret=isBreak_Rebound3(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,
+      high_low_touch_status=0;
+      ret2=isBreak_Rebound3(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,
                            range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,high_low_touch_status,
                            i_range,i_thredhold_pt,i_expand,5,150,20);
-      ret2=high_low_touch_status;
+      ret=high_low_touch_status;
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
          //string t1=TimeToStr(Time[i],TIME_DATE);
          string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));
          string t2=TimeToStr(Time[i],TIME_MINUTES);
          string t=StringConcatenate("[",t1," ",t2,"]");
-         string mail_title=StringConcatenate(str," ",t," hit high low (",ret,")");
+         string mail_title=StringConcatenate(str," ",t," hit high low (",ret,"|",ret2,")");
          string mail_body="";
 
          //order parameters
