@@ -25,6 +25,7 @@ input bool     i_manual=false;
 
 //global
 int      g_tp_offset=10;
+int      g_zone_aft=-SEC_H1*4;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -151,7 +152,7 @@ void OnTick()
    }
    
    //active time zone control
-   bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,i_zone_aft);
+   bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,g_zone_aft);
    if (MathAbs(sign)==3 && i_time_control && !curPd) {      //break
       Print("timezone control:avoid to break in non-active time.");
       return;
