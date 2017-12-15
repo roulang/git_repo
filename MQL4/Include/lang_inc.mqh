@@ -374,7 +374,9 @@ int writeOrderHistoryToFile(int arg_wrt_all=0)
          order.type=OrderType();
          //modified at 20170921
          if (arg_wrt_all==0) {
-            if (order.type!=OP_BUY && order.type!=OP_SELL) continue;   //skip pending cancel order
+            //if (order.type!=OP_BUY && order.type!=OP_SELL) continue;   //skip pending cancel order
+            //add Slippage(only for fxcm?) by 2017/12/15
+            if (order.type!=OP_BUY && order.type!=OP_SELL && order.type!=6) continue;   //skip pending cancel order
          }
          order.tic=OrderTicket();
          int t=ArrayBsearch(orderTickets,order.tic);
