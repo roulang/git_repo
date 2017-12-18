@@ -147,8 +147,6 @@ int OnCalculate(const int rates_total,
          string t=StringConcatenate("[",t1," ",t2,"]");
          string mail_title=StringConcatenate(str," ",t," hit high low (",ret,"|",ret2,")");
       
-         //ret2 =-1;
-         g_sendmail=true;
          sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment);
       }
       signalBuffer[i]=ret;
