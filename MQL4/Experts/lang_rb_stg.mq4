@@ -210,7 +210,7 @@ void OnTick()
          double t_ls_price=ls_price[idx];
          double t_ls_gap=MathAbs(ls_price_pt[idx]);
          double t_tp_price=tp_price[idx][0];
-         double t_tp_price2=tp_price[idx][0];
+         double t_tp_price2=tp_price[idx][1];
          int t_tp_gap_pt=MathAbs(tp_price_pt[idx][0]);
          int t_tp_gap2_pt=MathAbs(tp_price_pt[idx][1]);
 

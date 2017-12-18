@@ -917,7 +917,7 @@ bool isSameOrder(string arg_order_symbol, int arg_order_magic, string arg_order_
       if (StringCompare(arg_order_symbol,arg_symbol)==0
          && (arg_order_magic==arg_magic
          || StringCompare(arg_order_comment,IntegerToString(arg_magic))==0)
-         && arg_order_type==arg_type) 
+         && arg_order_type==tp)
       {
          return true;
       }
