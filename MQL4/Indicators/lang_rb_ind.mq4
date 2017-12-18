@@ -28,9 +28,9 @@
 double         signalBuffer[];
 
 //input
-input int      i_range=20;
-input int      i_thredhold_pt=0;
-input int      i_expand=1;
+//input int      i_range=20;
+//input int      i_thredhold_pt=0;
+//input int      i_expand=1;
 input bool     i_sendmail=true;
 
 //global
@@ -92,231 +92,66 @@ int OnCalculate(const int rates_total,
       Print("1:st=",st);
    }
    //double ls_price=0;
-   double range_high,range_low;
-   double range_high2,range_low2;
-   int range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt;
-   int range_high2_gap_pt,range_low2_gap_pt;
+   double price[4],ls_price[4],tp_price[4][2];
+   int ls_price_pt[4],tp_price_pt[4][2];
    int high_low_touch_status=0;
    int ret=0;
    int ret2=0;
-   string sym=Symbol();
-   string ped=getPeriodTp(Period());
-   string str=StringConcatenate("[",sym,"(",ped,")]");
    for(int i=st-1;i>0;i--) {
       high_low_touch_status=0;
-      ret2=isBreak_Rebound3(i,range_high,range_low,range_high_low_gap_pt,range_high_gap_pt,range_low_gap_pt,
-                           range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,high_low_touch_status,
-                           i_range,i_thredhold_pt,i_expand,5,150,20);
+      ret2=getHighLow_Value2(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,g_ls_pt);
       ret=high_low_touch_status;
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
-         //string t1=TimeToStr(Time[i],TIME_DATE);
+         //mail
+         string t_msg[8]={"buy_break","buy_break(2)","buy_rebound","buy_rebound(2)","sell_rebound","sell_rebound(2)","sell_break","sell_break(2)"};
+         string t_msg2[8],t_comment[8];
+         double t_price[8],t_tp_price[8],t_ls_price[8],t_lots[8];
+         int    t_price_pt[8],t_tp_price_pt[8],t_ls_price_pt[8];
+         
+         int cnt=0;   
+         for (int j=0;j<4;j++) {
+            if (tp_price[j][0]>0) {
+               t_msg2[cnt]=t_msg[j*2];
+               t_price[cnt]=price[j];
+               t_price_pt[cnt]=0;
+               t_ls_price[cnt]=ls_price[j];
+               t_ls_price_pt[cnt]=ls_price_pt[j];
+               t_tp_price[cnt]=tp_price[j][0];
+               t_tp_price_pt[cnt]=tp_price_pt[j][0];
+               t_lots[cnt]=getVolume(g_equity_percent,MathAbs(t_ls_price_pt[cnt]));
+               t_comment[cnt]=g_comment;
+               
+               cnt=cnt+1;
+            }
+            if (tp_price[j][1]>0) {
+               t_msg2[cnt]=t_msg[j*2+1];
+               t_price[cnt]=price[j];
+               t_price_pt[cnt]=0;
+               t_ls_price[cnt]=ls_price[j];
+               t_ls_price_pt[cnt]=ls_price_pt[j];
+               t_tp_price[cnt]=tp_price[j][1];
+               t_tp_price_pt[cnt]=tp_price_pt[j][1];
+               t_lots[cnt]=getVolume(g_equity_percent,MathAbs(t_ls_price_pt[cnt]));
+               t_comment[cnt]=g_comment;
+      
+               cnt=cnt+1;
+            }
+         }
+         
+         string sym=Symbol();
+         string ped=getPeriodTp(Period());
+         string str=StringConcatenate("[",sym,"(",ped,")]");
+      
          string t1=StringConcatenate(TimeMonth(Time[i]),"/",TimeDay(Time[i]));
          string t2=TimeToStr(Time[i],TIME_MINUTES);
          string t=StringConcatenate("[",t1," ",t2,"]");
          string mail_title=StringConcatenate(str," ",t," hit high low (",ret,"|",ret2,")");
-         string mail_body="";
-
-         //order parameters
-         double higher_price=range_high+range_high_gap_pt*Point();
-         double higher2_price=range_high2+range_high2_gap_pt*Point();
-         double high_price=range_high;
-         double low_price=range_low;
-         double lower_price=range_low-range_low_gap_pt*Point();
-         double lower2_price=range_low2-range_low2_gap_pt*Point();
-         double last_bar_high=High[i-1];
-         double last_bar_low=Low[i-1];
-         
-         double ask_price=Ask;
-         double bid_price=Bid;
-         double ab_gap=NormalizeDouble(Ask-Bid,Digits);
-         double break_ls_ratio=0.6;
-         
-         if (ret>0) {      //up
-            double price=ask_price;
-            double ls_tgt_price=last_bar_low;
-            double ls_tgt_price2=NormalizeDouble(high_price-range_high_low_gap_pt*break_ls_ratio*Point,Digits);   //break up stop lose point
-            double ls_price=ls_tgt_price-g_ls_pt*Point;
-            double ls_price2=ls_tgt_price2;
-            double ls_gap=NormalizeDouble(price-ls_price,Digits);
-            double ls_gap2=NormalizeDouble(price-ls_price2,Digits);
-            double tp_price11=price+ls_gap;
-            double tp_price12=price+2*ls_gap;
-            double tp_price21=price+ls_gap2;
-            double tp_price22=price+2*ls_gap2;
-            int tp_gap11_pt=(int)NormalizeDouble(ls_gap/Point,0);
-            int tp_gap12_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
-            int tp_gap21_pt=(int)NormalizeDouble(ls_gap2/Point,0);
-            int tp_gap22_pt=(int)NormalizeDouble(2*ls_gap2/Point,0);
-            int ls_gap_pt=tp_gap11_pt;
-            int ls_gap2_pt=tp_gap21_pt;
-            double risk_vol = getVolume(g_equity_percent,ls_gap_pt);            
-            double risk_vol2 = getVolume(g_equity_percent,ls_gap2_pt);            
-            
-            string str_fmt=StringFormat("buy price=%%.%df(ask)\r\n",Digits);
-            string temp_string=StringFormat(str_fmt,price);
-            StringAdd(mail_body,temp_string);
-
-            string tp_price11_str="";
-            string tp_price12_str="";
-            string tp_price21_str="";
-            string tp_price22_str="";
-            if (tp_price11>higher_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            } else if (tp_price11>high_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            }
-            if (tp_price12>higher_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            } else if (tp_price12>high_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            }
-            if (tp_price21>higher_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            } else if (tp_price21>high_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            }
-            if (tp_price22>higher_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            } else if (tp_price22>high_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            }
-
-            str_fmt=StringFormat("%%.%df(-%%d)|%%s(+%%d)|%%.2f|\"%%s\"\r\n",Digits);
-
-            //rebound
-            temp_string="---rebound---\r\n";
-            StringAdd(mail_body,temp_string);
-
-            temp_string=StringFormat(str_fmt,ls_price,ls_gap_pt,tp_price11_str,tp_gap11_pt,risk_vol,g_comment);
-            StringAdd(mail_body,temp_string);
-            temp_string=StringFormat(str_fmt,ls_price,ls_gap_pt,tp_price12_str,tp_gap12_pt,risk_vol,g_comment);
-            StringAdd(mail_body,temp_string);
-            
-            //break
-            temp_string="---break---\r\n";
-            StringAdd(mail_body,temp_string);
-
-            temp_string=StringFormat(str_fmt,ls_price2,tp_gap21_pt,tp_price21_str,tp_gap21_pt,risk_vol2,g_comment);
-            StringAdd(mail_body,temp_string);
-            temp_string=StringFormat(str_fmt,ls_price2,tp_gap22_pt,tp_price22_str,tp_gap22_pt,risk_vol2,g_comment);
-            StringAdd(mail_body,temp_string);
-         }
-         if (ret<0) {      //down
-            double price=bid_price;
-            double ls_tgt_price=last_bar_high;
-            double ls_tgt_price2=NormalizeDouble(low_price+range_high_low_gap_pt*break_ls_ratio*Point,Digits);      //break down stop lose point
-            double ls_price=ls_tgt_price+g_ls_pt*Point;
-            double ls_price2=ls_tgt_price2;
-            double ls_gap=NormalizeDouble(ls_price-price,Digits);
-            double ls_gap2=NormalizeDouble(ls_price2-price,Digits);
-            double tp_price11=price-ls_gap;
-            double tp_price12=price-2*ls_gap;
-            double tp_price21=price-ls_gap2;
-            double tp_price22=price-2*ls_gap2;
-            int tp_gap11_pt=(int)NormalizeDouble(ls_gap/Point,0);
-            int tp_gap12_pt=(int)NormalizeDouble(2*ls_gap/Point,0);
-            int tp_gap21_pt=(int)NormalizeDouble(ls_gap2/Point,0);
-            int tp_gap22_pt=(int)NormalizeDouble(2*ls_gap2/Point,0);
-            int ls_gap_pt=tp_gap11_pt;
-            int ls_gap2_pt=tp_gap21_pt;
-            double risk_vol = getVolume(g_equity_percent,ls_gap_pt);            
-            double risk_vol2 = getVolume(g_equity_percent,ls_gap2_pt);                 
-
-            string str_fmt=StringFormat("sell price=%%.%df(bid)\r\n",Digits);
-            string temp_string=StringFormat(str_fmt,price);
-            StringAdd(mail_body,temp_string);
-
-            string tp_price11_str="";
-            string tp_price12_str="";
-            string tp_price21_str="";
-            string tp_price22_str="";
-            if (tp_price11<lower_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            } else if (tp_price11<low_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price11_str=StringFormat(str_fmt,tp_price11);
-            }
-            if (tp_price12<lower_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            } else if (tp_price12<low_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price12_str=StringFormat(str_fmt,tp_price12);
-            }
-            if (tp_price21<lower_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            } else if (tp_price21<low_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price21_str=StringFormat(str_fmt,tp_price21);
-            }
-            if (tp_price22<lower_price) {
-               str_fmt=StringFormat("{%%.%df}",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            } else if (tp_price22<low_price) {
-               str_fmt=StringFormat("[%%.%df]",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            } else {
-               str_fmt=StringFormat("%%.%df",Digits);
-               tp_price22_str=StringFormat(str_fmt,tp_price22);
-            }
-
-            str_fmt=StringFormat("%%.%df(-%%d)|%%s(+%%d)|%%.2f|\"%%s\"\r\n",Digits);
-
-            //rebound
-            temp_string="---rebound---\r\n";
-            StringAdd(mail_body,temp_string);
-
-            temp_string=StringFormat(str_fmt,ls_price,ls_gap_pt,tp_price11_str,tp_gap11_pt,risk_vol,g_comment);
-            StringAdd(mail_body,temp_string);
-            temp_string=StringFormat(str_fmt,ls_price,ls_gap_pt,tp_price12_str,tp_gap12_pt,risk_vol,g_comment);
-            StringAdd(mail_body,temp_string);
-            
-            //break
-            temp_string="---break---\r\n";
-            StringAdd(mail_body,temp_string);
-
-            temp_string=StringFormat(str_fmt,ls_price2,ls_gap2_pt,tp_price21_str,tp_gap21_pt,risk_vol2,g_comment);
-            StringAdd(mail_body,temp_string);
-            temp_string=StringFormat(str_fmt,ls_price2,ls_gap2_pt,tp_price22_str,tp_gap22_pt,risk_vol2,g_comment);
-            StringAdd(mail_body,temp_string);
-         }
-
-         mailNotice(mail_title,mail_body);
+      
+         //ret2 =-1;
+         g_sendmail=true;
+         sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment);
       }
-      if (MathAbs(ret)>1) {
-         signalBuffer[i]=ret;
-      }
+      signalBuffer[i]=ret;
       /*
       //debug
       datetime t=Time[i];
