@@ -937,14 +937,53 @@ bool isEndOfWeek(int arg_shift)
 //| arg_comment[]:
 //| arg_msg[]:
 //| arg_cnt:order count
-//| arg_high_low[]:
 //|
 //| ->format see below
-//| sell stop price=price(pt)\r\n
-//| -------rebound------
-//| ls_price(pt)|tp_price(pt)|lot|comment
+//| -------buy rebound------
+//| price(pt)|ls_price(pt)|tp_price(pt)|lot|comment
 //+------------------------------------------------------------------+
-bool sendOrderMail(int arg_otp,double &arg_price[],int &arg_price_pt[],double &arg_ls_price[],int arg_cnt)
+bool sendOrderMail(  string arg_title,int arg_cnt,string &arg_msg[],
+                     double &arg_price[],int &arg_price_pt[],
+                     double &arg_ls_price[],int &arg_ls_price_pt[],
+                     double &arg_tp_price[],int &arg_tp_price_pt[],
+                     double &arg_lot[],string &arg_comment[],
+                  )
 {
-   return false;
+   string mail_title=arg_title;
+   string mail_body="";
+   string str_fmt="";
+   string temp_string="";
+   int    dgt=Digits;
+   
+   for (int i=0;i<arg_cnt;i++) {
+      //msg
+      temp_string=StringConcatenate("---",arg_msg[i],"---\r\n");
+      StringAdd(mail_body,temp_string);
+      
+      //price
+      if (arg_price_pt[i]==0) {
+         str_fmt=StringFormat("%%.%df(ask|bid)|%%.%df(%%d)|%%.%df(%%d)|%%.2f|\"%%s\"\r\n",dgt,dgt,dgt);
+         temp_string=StringFormat(  str_fmt,arg_price[i],
+                                    arg_ls_price[i],arg_ls_price_pt[i],
+                                    arg_tp_price[i],arg_tp_price_pt[i],
+                                    arg_lot[i],arg_comment[i]
+                                 );
+      } else {
+         str_fmt=StringFormat("%%.%df(%%d)|%%.%df(%%d)|%%.%df(%%d)|%%.2f|\"%%s\"\r\n",dgt,dgt,dgt);
+         temp_string=StringFormat(  str_fmt,arg_price[i],arg_price_pt[i],
+                                    arg_ls_price[i],arg_ls_price_pt[i],
+                                    arg_tp_price[i],arg_tp_price_pt[i],
+                                    arg_lot[i],arg_comment[i]
+                                 );
+      }
+      StringAdd(mail_body,temp_string);
+
+   }
+   
+   if (g_debug) {
+      Print("mail_title=",mail_title);
+      Print("mail_body=",mail_body);
+   }
+   
+   return mailNotice(mail_title,mail_body);
 }
