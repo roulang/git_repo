@@ -955,6 +955,11 @@ bool sendOrderMail(  string arg_title,int arg_cnt,string &arg_msg[],
    string temp_string="";
    int    dgt=Digits;
    
+   if (arg_cnt==0) {
+      Print("Nothing to send.");
+      return false;
+   }
+   
    for (int i=0;i<arg_cnt;i++) {
       //msg
       temp_string=StringConcatenate("---",arg_msg[i],"---\r\n");
@@ -986,4 +991,5 @@ bool sendOrderMail(  string arg_title,int arg_cnt,string &arg_msg[],
    }
    
    return mailNotice(mail_title,mail_body);
+   
 }
