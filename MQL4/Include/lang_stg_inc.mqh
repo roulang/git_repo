@@ -1652,10 +1652,12 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
       return 0;
    }
    
+   /*
    if (cur_high_low_gap_pt<arg_high_low_gap_pt) {     //high low gap is too narrow
       Print(t,"high low gap is too narrow(<",arg_high_low_gap_pt,")");
       return 0;
    }
+   */
    
    int ret=0;
    
@@ -1835,11 +1837,11 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)
          Print(t,"final,only touch high,+1");
-         ret=1;
+         arg_touch_status=ret=1;
       }
       if (cur_high_low_touch<0) {   //only touch low(can notify by email)
          Print(t,"final,only touch low,-1");
-         ret=-1;
+         arg_touch_status=ret=-1;
       }
    }
 
