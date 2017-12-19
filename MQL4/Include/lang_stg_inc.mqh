@@ -1986,9 +1986,11 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1>high_price) {
+      Print("buy break");
       Print("tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
       tp_price1=tp_price2=0;
    } else if (tp_price2>high_price) {
+      Print("buy break");
       Print("tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
       tp_price2=0;
    }
@@ -2026,9 +2028,11 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1>high_price) {
+      Print("buy rebound");
       Print("tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
       tp_price1=tp_price2=0;
    } else if (tp_price2>high_price) {
+      Print("buy rebound");
       Print("tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
       tp_price2=0;
    }
@@ -2066,10 +2070,12 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1<low_price) {
+      Print("sell break");
       Print("tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
       tp_price1=0;
       tp_price2=0;
    } else if (tp_price2<low_price) {
+      Print("sell break");
       Print("tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
       tp_price2=0;
    }
@@ -2107,10 +2113,12 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1<low_price) {
+      Print("sell rebound");
       Print("tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
       tp_price1=0;
       tp_price2=0;
    } else if (tp_price2<low_price) {
+      Print("sell rebound");
       Print("tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
       tp_price2=0;
    }

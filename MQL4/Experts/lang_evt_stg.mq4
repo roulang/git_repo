@@ -129,14 +129,20 @@ void OnTick()
    } else {    //not found buy and sell order
       //Print("not found buy and sell order");
       if (isPd3>0 && now!=g_orderdt) {    //another news time start
-         Print("another news time start, close old order and open new");
-         OrderCloseA(NULL,-2,g_magic);    //close sellstop order
-         OrderCloseA(NULL,2,g_magic);     //close buystop order
+         if (OrderCloseA(NULL,-2,g_magic)>0) {   //close sellstop order
+            Print("another news time start, close old sell stop orders");
+         }
+         if (OrderCloseA(NULL,2,g_magic)>0) {   //close buystop order
+            Print("another news time start, close old buy stop orders");
+         }
       } else
       if ((now-g_orderdt)>g_time_ped) {   //timeover
-         Print("over time, close buy stop and sell stop order");
-         OrderCloseA(NULL,-2,g_magic);    //close sellstop order
-         OrderCloseA(NULL,2,g_magic);     //close buystop order
+         if (OrderCloseA(NULL,-2,g_magic)>0) {   //close sellstop order
+            Print("over time, close sell stop order");
+         }
+         if (OrderCloseA(NULL,2,g_magic)>0) {   //close buystop order
+            Print("over time, close buy stop order");
+         }
       }
       if (!FindOrderA(NULL,0,g_magic)) {
          has_order=false;
