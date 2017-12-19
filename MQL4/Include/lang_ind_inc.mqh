@@ -1242,7 +1242,7 @@ int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
 }
 
 //+------------------------------------------------------------------+
-//| Get MA status (base on 3 continous values)
+//| Get ADX status (base on 3 continous values)
 //| date: 2017/11/23
 //| arg_period: time period
 //| arg_shift: bar shift

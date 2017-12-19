@@ -168,11 +168,11 @@ void OnTick()
    */
    
    //open order
-   //buy_break/buy_rebound/sell_rebound/sell_break
+   //buy_break/buy_rebound/sell_break/sell_rebound
    int buy_break_idx=0;
    int buy_rebound_idx=1;
-   int sell_rebound_idx=2;
-   int sell_break_idx=3;
+   int sell_break_idx=2;
+   int sell_rebound_idx=3;
    int idx=-1;
    
    if (!has_order) {

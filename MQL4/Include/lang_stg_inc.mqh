@@ -822,7 +822,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
 //| arg_shift: bar shift
 //| arg_ls_pt:ls point
 //| arg_ls_ratio:
-//| return value: (buy_break/buy_rebound/sell_rebound/sell_break)
+//| return value: (buy_break/buy_rebound/sell_break/sell_rebound)
 //|               arg_price[4],arg_ls_price[4],arg_tp_price[4][2]
 //|               arg_ls_price_pt[4],arg_tp_price_pt[4][2]
 //+------------------------------------------------------------------+

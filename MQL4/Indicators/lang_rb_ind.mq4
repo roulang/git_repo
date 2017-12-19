@@ -103,7 +103,8 @@ int OnCalculate(const int rates_total,
       ret=high_low_touch_status;
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
          //mail
-         string t_msg[8]={"buy_break","buy_break(2)","buy_rebound","buy_rebound(2)","sell_rebound","sell_rebound(2)","sell_break","sell_break(2)"};
+         //buy_break/buy_rebound/sell_break/sell_rebound
+         string t_msg[8]={"buy_break","buy_break(2)","buy_rebound","buy_rebound(2)","sell_break","sell_break(2)","sell_rebound","sell_rebound(2)"};
          string t_msg2[8],t_comment[8];
          double t_price[8],t_tp_price[8],t_ls_price[8],t_lots[8];
          int    t_price_pt[8],t_tp_price_pt[8],t_ls_price_pt[8];
