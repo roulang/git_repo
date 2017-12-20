@@ -215,10 +215,10 @@ void OnTick()
          bool ret,ret2;
          ret=ret2=false;
          if (idx==buy_rebound_idx || idx==buy_break_idx) {
-            if (idx==buy_rebound_idx && (t_tp_price>0 || t_tp_price2>0) {
+            if (idx==buy_rebound_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to turn up.create buy order.");
             }
-            if (idx==buy_break_idx && (t_tp_price>0 || t_tp_price2>0) {
+            if (idx==buy_break_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to break up.create buy order.");
             }
             if (t_tp_price>0) {
@@ -229,10 +229,10 @@ void OnTick()
             }
          } else 
          if (idx==sell_rebound_idx || idx==sell_break_idx) {
-            if (idx==sell_rebound_idx && (t_tp_price>0 || t_tp_price2>0) {
+            if (idx==sell_rebound_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to turn down.create sell order.");
             }
-            if (idx==sell_break_idx && (t_tp_price>0 || t_tp_price2>0) {
+            if (idx==sell_break_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to break down.create sell order.");
             }
             if (t_tp_price>0) {
