@@ -178,27 +178,21 @@ void OnTick()
    if (!has_order) {
       switch(sign) {
          case 2:        //rebound(up)
-            Print("ready to turn up.create buy order.");
             idx=buy_rebound_idx;
             break;
          case -2:       //rebound(down)
-            Print("ready to turn down.create sell order.");
             idx=sell_rebound_idx;
             break;
          case 3:        //break(up)
-            Print("ready to break up.create buy order.");
             idx=buy_break_idx;
             break;
          case -3:       //break(down)
-            Print("ready to break down.create sell order.");
             idx=sell_break_idx;
             break;
          case 4:        //break(up) second
-            Print("ready to break up(second).create buy order.");
             idx=buy_break_idx;
             break;
          case -4:       //break(down) second
-            Print("ready to break down(second).create sell order.");
             idx=sell_break_idx;
             break;
          default:
@@ -219,12 +213,34 @@ void OnTick()
          Print("tp_price=",t_tp_price,",tp_price2=",t_tp_price2,",tp_gap_pt=",t_tp_gap_pt,",tp_gap2_pt=",t_tp_gap2_pt);
    
          bool ret,ret2;
-         ret=ret2=0;
-         if (t_tp_price>0) {
-            ret=OrderBuy2(0,t_ls_price,t_tp_price,g_magic);
-         }
-         if (t_tp_price2>0) {
-            ret2=OrderBuy2(0,t_ls_price,t_tp_price2,g_magic);
+         ret=ret2=false;
+         if (idx==buy_rebound_idx || idx==buy_break_idx) {
+            if (idx==buy_rebound_idx && (t_tp_price>0 || t_tp_price2>0) {
+               Print("ready to turn up.create buy order.");
+            }
+            if (idx==buy_break_idx && (t_tp_price>0 || t_tp_price2>0) {
+               Print("ready to break up.create buy order.");
+            }
+            if (t_tp_price>0) {
+               ret=OrderBuy2(0,t_ls_price,t_tp_price,g_magic);
+            }
+            if (t_tp_price2>0) {
+               ret2=OrderBuy2(0,t_ls_price,t_tp_price2,g_magic);
+            }
+         } else 
+         if (idx==sell_rebound_idx || idx==sell_break_idx) {
+            if (idx==sell_rebound_idx && (t_tp_price>0 || t_tp_price2>0) {
+               Print("ready to turn down.create sell order.");
+            }
+            if (idx==sell_break_idx && (t_tp_price>0 || t_tp_price2>0) {
+               Print("ready to break down.create sell order.");
+            }
+            if (t_tp_price>0) {
+               ret=OrderSell2(0,t_ls_price,t_tp_price,g_magic);
+            }
+            if (t_tp_price2>0) {
+               ret2=OrderSell2(0,t_ls_price,t_tp_price2,g_magic);
+            }
          }
          if (ret || ret2) {
             //has_order=true;
