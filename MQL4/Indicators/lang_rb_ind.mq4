@@ -34,7 +34,6 @@ double         signalBuffer[];
 input bool     i_sendmail=true;
 
 //global
-int      g_ls_pt=50;
 string   g_comment="3";
 int      g_equity_percent=1;
 
@@ -99,7 +98,18 @@ int OnCalculate(const int rates_total,
    int ret2=0;
    for(int i=st-1;i>0;i--) {
       high_low_touch_status=0;
-      ret2=getHighLow_Value2(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,g_ls_pt);
+      /*
+      int arg_shift,int &arg_touch_status,
+      double &arg_price[],double &arg_ls_price[],double &arg_tp_price[][],
+      int &arg_ls_price_pt[],int &arg_tp_price_pt[][],
+      int arg_lspt=50,double arg_ls_ratio=0.6,
+      int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_long=1,
+      int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
+      double arg_atr_lvl_pt=5,int arg_atr_range=5
+      */
+      ret2=getHighLow_Value2(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+                           50,0.6,20,0,1,1,
+                           5,150,20,5,5);
       ret=high_low_touch_status;
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
          //mail

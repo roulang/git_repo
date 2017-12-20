@@ -28,7 +28,7 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
    int ret=0;
    if (arg_timeperiod==PERIOD_CURRENT) arg_timeperiod=Period();
    switch (arg_type) {
-      case 0:
+      case 0:     //short term
          switch (arg_timeperiod) {
             case PERIOD_M1: 
                ret=60;
@@ -62,7 +62,7 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                break;
          }
          break;
-      case 1:
+      case 1:     //mid term
          switch (arg_timeperiod) {
             case PERIOD_M1: 
                ret=60;
@@ -80,23 +80,23 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=36;
                break;
             case PERIOD_H4:
-               ret=12;
+               ret=36;
                break;
             case PERIOD_D1:
-               ret=10;
+               ret=36;
                break;
             case PERIOD_W1:
-               ret=12;
+               ret=36;
                break;
             case PERIOD_MN1:
-               ret=12;
+               ret=36;
                break;
             default:
                Print("error on time period");
                break;
          }
          break;
-      case 2:
+      case 2:     //long term
          switch (arg_timeperiod) {
             case PERIOD_M1: 
                ret=60;
@@ -114,16 +114,16 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
                ret=60;
                break;
             case PERIOD_H4:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_D1:
-               ret=10;
+               ret=60;
                break;
             case PERIOD_W1:
-               ret=12;
+               ret=60;
                break;
             case PERIOD_MN1:
-               ret=12;
+               ret=60;
                break;
             default:
                Print("error on time period");
@@ -1240,7 +1240,228 @@ int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
    
    return 0;
 }
+//+------------------------------------------------------------------+
+//| Get MA status (base on 3 continous values)
+//| date: 2017/10/20
+//| arg_period: time period
+//| arg_shift: bar shift
+//| arg_touch_status[2]:touch each ma line:short_ma(3/2/1),middle_ma(3/2/1)
+//| plus for positive bar(include nutual bar),minus for nagative bar.
+//| ->see below
+//| <<ma line>>
+//|     (above) 0
+//|  |  (high)  1
+//| [ ] (open)  2
+//| [ ] (close) 2
+//|  |  (low)   3
+//|     (below) 4
+//| return value: short>mid,same direction,up,5;
+//|               short>mid,different direction(short down,mid up),4;
+//|               short>mid,different direction(short up,mid down),3;
+//|               short>mid,same direction(short down,mid down),2;
+//|               short>mid,no direction(short down,mid down),1;
+//| return value: short<mid,same direction,down,-5;
+//|               short<mid,different direction(short up,mid down),-4;
+//|               short<mid,different direction(short down,mid up),-3;
+//|               short<mid,same direction(short up,mid up),-2;
+//|               short<mid,no direction(short down,mid down),-1;
+//|               n/a:0
+//| return value: short break mid,up(within last 2 bars):+10  
+//|               short break mid,down(within last 2 bars):-10  
+//+------------------------------------------------------------------+
+int getMAStatus2(int arg_period,int arg_shift,int &arg_touch_status[],double &arg_short_ma,double &arg_mid_ma)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
 
+   int short_tm=getMAPeriod(arg_period,0);  //short
+   if (short_tm==0) {
+      return 0;
+   }
+   int middle_tm=getMAPeriod(arg_period,1);  //middle
+   if (middle_tm==0) {
+      return 0;
+   }
+
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   int sec_lst_bar_shift=arg_shift+2;
+
+   double current_short_ma=iMA(NULL,arg_period,short_tm,0,MODE_EMA,PRICE_CLOSE,cur_bar_shift);
+
+   double current_bar_high,current_bar_low;
+   if (Open[cur_bar_shift]>Close[cur_bar_shift]) {
+      current_bar_high=Open[cur_bar_shift];
+      current_bar_low=Close[cur_bar_shift];
+   } else {
+      current_bar_high=Close[cur_bar_shift];
+      current_bar_low=Open[cur_bar_shift];
+   }
+   
+   /*
+   if (current_short_ma<=current_bar_high && current_short_ma>=current_bar_low)    //filter current bar's body through short ma
+      return 0;
+   */
+   
+   double last_short_ma=iMA(NULL,arg_period,short_tm,0,MODE_EMA,PRICE_CLOSE,lst_bar_shift);
+   double last_bar_high,last_bar_low;
+   if (Open[lst_bar_shift]>Close[lst_bar_shift]) {
+      last_bar_high=Open[lst_bar_shift];
+      last_bar_low=Close[lst_bar_shift];
+   } else {
+      last_bar_high=Close[lst_bar_shift];
+      last_bar_low=Open[lst_bar_shift];
+   }
+   
+   /*
+   if (last_short_ma<=last_bar_high && last_short_ma>=last_bar_low)                //filter last bar's body through short ma
+      return 0;
+   */
+   
+   double last_short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,sec_lst_bar_shift);
+   double current_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,cur_bar_shift);
+   double last_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,lst_bar_shift);
+   double last_middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,sec_lst_bar_shift);
+   
+   /*
+   //filter
+   if (current_short_ma<=current_bar_high && current_short_ma>=current_bar_low) {        //current bar's body through short ma
+      if (current_middle_ma<=current_bar_high && current_middle_ma>=current_bar_low) {   //current bar's body through middle ma
+         return 0;
+      }
+   }
+   */
+   
+   int short_direction=0;
+   int middle_direction=0;
+   if (last_short_ma2<last_short_ma && last_short_ma<current_short_ma) short_direction=1;          //short is up
+   if (last_short_ma2>last_short_ma && last_short_ma>current_short_ma) short_direction=-1;         //short is down
+   if (last_middle_ma2<last_middle_ma && last_middle_ma<current_middle_ma) middle_direction=1;     //middle is up
+   if (last_middle_ma2>last_middle_ma && last_middle_ma>current_middle_ma) middle_direction=-1;    //middle is down
+   
+   int break_status=0;
+   
+   if          (current_short_ma>current_middle_ma && last_short_ma<last_middle_ma) {  //short break mid(last), up
+      break_status=10;
+   } else if   (current_short_ma>current_middle_ma && last_short_ma>last_middle_ma 
+               && last_short_ma2<last_middle_ma2) {                                    //short break mid(last2), up
+      break_status=10;
+   } else if   (current_short_ma<current_middle_ma && last_short_ma>last_middle_ma) {  //short break mid(last), down
+      break_status=-10;
+   } else if   (current_short_ma<current_middle_ma && last_short_ma<last_middle_ma 
+               && last_short_ma2>last_middle_ma2) {                                    //short break mid(last2), down
+      break_status=-10;
+   }
+   
+   int ret=0;
+   
+   if (current_short_ma>current_middle_ma) {             //short>mid
+
+      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
+         ret=break_status+5;
+
+      else 
+      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
+         ret=break_status+2;
+
+      else
+      if (short_direction==-1 && middle_direction==1)   //short is down, mid is up
+         ret=break_status+4;
+
+      else
+      if (short_direction==1 && middle_direction==-1)   //short is up, mid is down
+         ret=break_status+3;
+      
+      else
+         ret=break_status+1;
+   }
+   
+   if (current_short_ma<current_middle_ma) {             //short<mid
+      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
+         ret=break_status-2;
+
+      else
+      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
+         ret=break_status-5;
+
+      else
+      if (short_direction==-1 && middle_direction==1)    //short is down, mid is up
+         ret=break_status-3;
+
+      else
+      if (short_direction==1 && middle_direction==-1)    //short is up, mid is down
+         ret=break_status-4;
+
+      else
+         ret=break_status-1;
+   }
+
+   arg_short_ma=current_short_ma;
+   arg_mid_ma=current_middle_ma;
+   
+   //get touch status
+   double current_close=Close[cur_bar_shift];
+   double current_open=Open[cur_bar_shift];
+   double current_high=High[cur_bar_shift];
+   double current_low=Low[cur_bar_shift];
+   double current_gap=NormalizeDouble(current_high-current_low,Digits);
+   
+   int    current_bar_status=0;
+   double current_sub_high=current_open;
+   double current_sub_low=current_close;
+   double current_sub_gap=NormalizeDouble(current_sub_high-current_sub_low,Digits);
+   if (current_open<=current_close) {
+      current_sub_high=current_close;
+      current_sub_low=current_open;
+      current_bar_status=1;
+   } else {
+      current_sub_high=current_open;
+      current_sub_low=current_close;
+      current_bar_status=-1;
+   }
+   
+   double target_price;
+   ArrayInitialize(arg_touch_status,0);
+
+   target_price=current_short_ma;
+   if (target_price>current_high) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=0*current_bar_status;
+   } else 
+   if (target_price>current_sub_high) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=1*current_bar_status;
+   } else
+   if (target_price>current_sub_low) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=2*current_bar_status;
+   } else
+   if (target_price>current_low) {
+      if (arg_touch_status[0]==0) arg_touch_status[0]=3*current_bar_status;
+   } else
+   if (arg_touch_status[0]==0) {
+      arg_touch_status[0]=4*current_bar_status;
+      datetime t=Time[arg_shift];
+      //Print("1.touch=4,t=",t);
+   }
+
+   target_price=current_middle_ma;
+   if (target_price>current_high) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=0*current_bar_status;
+   } else 
+   if (target_price>current_sub_high) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=1*current_bar_status;
+   } else
+   if (target_price>current_sub_low) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=2*current_bar_status;
+   } else
+   if (target_price>current_low) {
+      if (arg_touch_status[1]==0) arg_touch_status[1]=3*current_bar_status;
+   } else
+   if (arg_touch_status[1]==0) {
+      arg_touch_status[1]=4*current_bar_status;
+      datetime t=Time[arg_shift];
+      //Print("1.touch=4,t=",t);
+   }
+   
+   return ret;
+}
 //+------------------------------------------------------------------+
 //| Get ADX status (base on 3 continous values)
 //| date: 2017/11/23

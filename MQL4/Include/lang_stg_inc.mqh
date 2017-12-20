@@ -350,41 +350,27 @@ int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_d
 
 //+------------------------------------------------------------------+
 //| Trend strategy Open (use ma)
-//| date: 2017/08/31
+//| date: 2017/12/19
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
 //| return value: -1,sell(open);1:buy(open);0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgOpen(int arg_shift,double &arg_ls_price)
+int isTrendStgOpen(int arg_shift,int arg_last_cross,double &arg_ls_price,int arg_ls_pt=100)
 {
-   int short_tm=getMAPeriod(PERIOD_CURRENT,0);  //short
-   if (short_tm==0) {
-      return 0;
-   }
-   int middle_tm=getMAPeriod(PERIOD_CURRENT,1);  //middle
-   //Print("tm=",tm);
-   if (middle_tm==0) {
-      return 0;
-   }
-   double short_ma1=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
-   double short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
-   double middle_ma1=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
-   double middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
-   if (short_ma1>middle_ma1 && short_ma2<middle_ma2) {   //EMA12>EMA36,for up trend
-      if (Close[arg_shift]>Open[arg_shift] && Close[arg_shift]>short_ma1) {   //break EMA12
-         arg_ls_price=NormalizeDouble(middle_ma1,Digits);
-         return 1;
-      }
-      return 0;
-   }
-   if (short_ma1<middle_ma1 && short_ma2>middle_ma2) {   //EMA12<EMA36,for down trend
-      if (Close[arg_shift]<Open[arg_shift] && Close[arg_shift]<short_ma1) {   //break EMA12
-         arg_ls_price=NormalizeDouble(middle_ma1,Digits);
-         return -1;
-      }
-      return 0;
-   }
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   
+   int touch_status[2];
+   double short_ma,middle_ma;
+   int ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,touch_status,short_ma,middle_ma);
 
+   int short_ma_touch=touch_status[0];
+   int middle_ma_touch=touch_status[1];
+   if          (arg_last_cross==1) {      //short ma is up break middle ma
+      
+   } else if   (arg_last_cross==-1) {     //short ma is down break middle ma
+   }
+   
    return 0;
 }
 //+------------------------------------------------------------------+
@@ -832,7 +818,7 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
                         int arg_lspt=50,double arg_ls_ratio=0.6,
                         int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_long=1,
                         int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
-                        double arg_atr_lvl=0.0005,int arg_atr_range=5
+                        int arg_atr_lvl_pt=5,int arg_atr_range=5
                       )
 {
 
@@ -1093,10 +1079,11 @@ int getHighLow_Value2( int arg_shift,int &arg_touch_status,
    arg_touch_status=ret;
    
    //add atr by 20171121
-   int atr=getAtrValue(cur_bar_shift,arg_atr_lvl,arg_atr_range);
+   double atr_lvl=arg_atr_lvl_pt*Point;
+   int atr=getAtrValue(cur_bar_shift,atr_lvl,arg_atr_range);
    if (ret!=0) {
       if (atr==0) {
-         Print(t,"atr too small(<=",arg_atr_lvl,")");
+         Print(t,"atr too small(<=",atr_lvl,")");
          ret=0;
       }
    }

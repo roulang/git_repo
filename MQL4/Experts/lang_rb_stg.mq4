@@ -14,7 +14,6 @@
 int      g_magic=3;        //rebound and break
 //bool     g_has_order=false;
 datetime g_orderdt;
-int      g_ls_pt=50;
 string   g_comment="3";
 
 //--------------------------------
@@ -136,7 +135,18 @@ void OnTick()
                         range_high2,range_low2,range_high2_gap_pt,range_low2_gap_pt,touch_status,
                         i_range,i_thredhold_pt,i_expand,5,150,20);
    */
-   sign=getHighLow_Value2(last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,g_ls_pt);
+   /*
+   int arg_shift,int &arg_touch_status,
+   double &arg_price[],double &arg_ls_price[],double &arg_tp_price[][],
+   int &arg_ls_price_pt[],int &arg_tp_price_pt[][],
+   int arg_lspt=50,double arg_ls_ratio=0.6,
+   int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_long=1,
+   int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
+   double arg_atr_lvl_pt=5,int arg_atr_range=5
+   */
+   sign=getHighLow_Value2( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+                           50,0.6,20,0,1,1,
+                           5,150,20,5,5);
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order
