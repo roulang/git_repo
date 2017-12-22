@@ -14,7 +14,7 @@
 int      g_magic=1;              //evt(high/low buy/sell stop)
 //bool     g_has_order=false;
 datetime g_orderdt;
-int      g_time_ped=SEC_H1;      //60 minutes
+int      g_time_ped=SEC_H1/2;      //60 minutes
 
 //--------------------------------
 
