@@ -1028,7 +1028,7 @@ int OnCalculate(const int rates_total,
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
-   printf("init");
+   if(i_debug) printf("init");
    ArrayInitialize(innerBuffer,0.0);
    ArrayInitialize(outterBuffer,0.0);
    ArrayInitialize(upBuffer,0.0);
