@@ -11,10 +11,10 @@
 #include <lang_ea_inc.mqh>
 
 //--- global
-int      g_magic=3;        //rebound and break
+int      g_magic=3;        //rebound
+int      g_magic2=4;        //break
 //bool     g_has_order=false;
 datetime g_orderdt;
-string   g_comment="3";
 
 //--------------------------------
 
@@ -26,7 +26,8 @@ input bool     i_manual=false;
 
 //global
 int      g_tp_offset=10;
-int      g_zone_aft=-SEC_H1*4;
+//int      g_zone_aft=-SEC_H1*4;
+int      g_zone_aft=0;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -79,10 +80,10 @@ void OnTick()
    bool has_order=true;
    
    //check if exists any order
-   if (FindOrderA(NULL,1,g_magic)) {  //found buy order
+   if (FindOrderA(NULL,1,g_magic) || FindOrderA(NULL,1,g_magic2)) {  //found buy order
       if (ifClose(cur_bar_shift)) {
          Print("closed buy order");
-         if (!FindOrderA(NULL,0,g_magic)) {
+         if (!FindOrderA(NULL,0,g_magic) && !FindOrderA(NULL,0,g_magic2)) {
             has_order=false;
          }
       }
@@ -92,10 +93,10 @@ void OnTick()
          Print("movingstop of buy order");
       }
       */
-   } else if(FindOrderA(NULL,-1,g_magic)) {  //found sell order
+   } else if(FindOrderA(NULL,-1,g_magic) || FindOrderA(NULL,-1,g_magic2)) {  //found sell order
       if (ifClose(cur_bar_shift)) {
          Print("closed buy order");
-         if (!FindOrderA(NULL,0,g_magic)) {
+         if (!FindOrderA(NULL,0,g_magic) && !FindOrderA(NULL,0,g_magic2)) {
             has_order=false;
          }
       }
@@ -115,7 +116,8 @@ void OnTick()
       if (has_order) {
          Print("new time skip control:news time start, close all order");
          OrderCloseA(NULL,0,g_magic);   //close all order
-         if (!FindOrderA(NULL,0,g_magic)) {
+         OrderCloseA(NULL,0,g_magic2);   //close all order
+         if (!FindOrderA(NULL,0,g_magic) && !FindOrderA(NULL,0,g_magic2)) {
             has_order=false;
          }
       } else {
@@ -150,7 +152,7 @@ void OnTick()
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order
-      if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
+      if (OrderCloseA(NULL,-1,g_magic)>0 && OrderCloseA(NULL,-1,g_magic2)>0) {  //close sell order
          Print("close opposit(sell) order");
          has_order=false;
       }
@@ -158,7 +160,7 @@ void OnTick()
 
    if (touch_status<=-3 && has_order) {   //break down,have order
       //close opposit order
-      if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
+      if (OrderCloseA(NULL,1,g_magic)>0 && OrderCloseA(NULL,1,g_magic2)>0) {  //close buy order
          Print("close opposit(buy) order");
          has_order=false;
       }
@@ -217,6 +219,7 @@ void OnTick()
          double t_tp_price2=tp_price[idx][1];
          int t_tp_gap_pt=MathAbs(tp_price_pt[idx][0]);
          int t_tp_gap2_pt=MathAbs(tp_price_pt[idx][1]);
+         int t_magic=0;
 
          Print("Time=",Time[cur_bar_shift]);
          Print("price=",t_price,",ls_price=",t_ls_price,",ls_gap=",t_ls_gap);
@@ -227,29 +230,33 @@ void OnTick()
          if (idx==buy_rebound_idx || idx==buy_break_idx) {
             if (idx==buy_rebound_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to turn up.create buy order.");
+               t_magic=g_magic;  //rebound
             }
             if (idx==buy_break_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to break up.create buy order.");
+               t_magic=g_magic2;  //break
             }
             if (t_tp_price>0) {
-               ret=OrderBuy2(0,t_ls_price,t_tp_price,g_magic);
+               ret=OrderBuy2(0,t_ls_price,t_tp_price,t_magic);
             }
             if (t_tp_price2>0) {
-               ret2=OrderBuy2(0,t_ls_price,t_tp_price2,g_magic);
+               ret2=OrderBuy2(0,t_ls_price,t_tp_price2,t_magic);
             }
          } else 
          if (idx==sell_rebound_idx || idx==sell_break_idx) {
             if (idx==sell_rebound_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to turn down.create sell order.");
+               t_magic=g_magic;  //rebound
             }
             if (idx==sell_break_idx && (t_tp_price>0 || t_tp_price2>0)) {
                Print("ready to break down.create sell order.");
+               t_magic=g_magic2;  //rebound
             }
             if (t_tp_price>0) {
-               ret=OrderSell2(0,t_ls_price,t_tp_price,g_magic);
+               ret=OrderSell2(0,t_ls_price,t_tp_price,t_magic);
             }
             if (t_tp_price2>0) {
-               ret2=OrderSell2(0,t_ls_price,t_tp_price2,g_magic);
+               ret2=OrderSell2(0,t_ls_price,t_tp_price2,t_magic);
             }
          }
          if (ret || ret2) {
@@ -264,7 +271,7 @@ bool ifClose(int arg_shift)
 {
    if(isEndOfWeek(arg_shift)) {
       Print("market close,close all buy/sell order");
-      if (OrderCloseA(NULL,0,g_magic)>0) return true;
+      if (OrderCloseA(NULL,0,g_magic)>0 && OrderCloseA(NULL,0,g_magic2)>0) return true;
    }
 
    return false;
