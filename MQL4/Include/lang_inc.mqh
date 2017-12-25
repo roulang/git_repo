@@ -546,7 +546,7 @@ int news_read()
 {
    int cnt=0;
    int time_offset=getClientServerOffset();
-   Print("time_offset=",time_offset);
+   //Print("time_offset=",time_offset);
    int h=FileOpen(g_NewsFileName,FILE_CSV|FILE_SHARE_READ,',');
    if(h!=INVALID_HANDLE) {
       //read record count
