@@ -31,6 +31,7 @@ double         signalBuffer[];
 //input int      i_range=20;
 //input int      i_thredhold_pt=0;
 //input int      i_expand=1;
+input bool     i_filter=false;   
 input bool     i_sendmail=true;
 
 //global
@@ -90,13 +91,15 @@ int OnCalculate(const int rates_total,
    if(g_debug) {
       Print("1:st=",st);
    }
+
+   int skip_first_bars=2;
    //double ls_price=0;
    double price[4],ls_price[4],tp_price[4][2];
    int ls_price_pt[4],tp_price_pt[4][2];
    int high_low_touch_status=0;
    int ret=0;
    int ret2=0;
-   for(int i=st-1;i>0;i--) {
+   for(int i=st-skip_first_bars;i>0;i--) {
       high_low_touch_status=0;
       /*
       int arg_shift,int &arg_touch_status,
@@ -107,10 +110,17 @@ int OnCalculate(const int rates_total,
       int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
       double arg_atr_lvl_pt=5,int arg_atr_range=5
       */
-      ret2=getHighLow_Value2(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+      ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
                            50,0.6,20,0,1,1,
                            5,150,20,5,5);
-      ret=high_low_touch_status;
+      if (!i_filter) {
+         ret=high_low_touch_status;
+      } else if (MathAbs(ret2)>1) {
+         ret=ret2;
+      } else {
+         ret=0;
+      }
+      
       if (MathAbs(ret)>=1 && i==1) {   //sendmail in future
          //mail
          //buy_break/buy_rebound/sell_break/sell_rebound

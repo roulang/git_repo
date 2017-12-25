@@ -146,7 +146,7 @@ void OnTick()
    int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
    double arg_atr_lvl_pt=5,int arg_atr_range=5
    */
-   sign=getHighLow_Value2( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+   sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
                            50,0.6,20,0,1,1,
                            5,150,20,5,5);
    

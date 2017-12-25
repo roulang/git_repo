@@ -1259,12 +1259,12 @@ int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
 //|               short>mid,different direction(short down,mid up),4;
 //|               short>mid,different direction(short up,mid down),3;
 //|               short>mid,same direction(short down,mid down),2;
-//|               short>mid,no direction(short down,mid down),1;
+//|               short>mid,no direction,1;
 //| return value: short<mid,same direction,down,-5;
 //|               short<mid,different direction(short up,mid down),-4;
 //|               short<mid,different direction(short down,mid up),-3;
 //|               short<mid,same direction(short up,mid up),-2;
-//|               short<mid,no direction(short down,mid down),-1;
+//|               short<mid,no direction,-1;
 //|               n/a:0
 //| return value: short break mid,up(within last 2 bars):+10  
 //|               short break mid,down(within last 2 bars):-10  
