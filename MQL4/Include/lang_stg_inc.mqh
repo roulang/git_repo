@@ -432,17 +432,44 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
 }
 //+------------------------------------------------------------------+
 //| Trend strategy Close (use adx)
-//| date: 2017/08/31
-//| return value: 2:close(all);1:close(sell);-1:close(buy);0:n/a
+//| date: 2017/12/26
+//| arg_last_adx_status: 1,above 40(default);-1,below 40(default);0,N/A
+//| return value: 1:close(buy/sell)
 //+------------------------------------------------------------------+
-int isTrendStgClose(int arg_shift,int arg_period=PERIOD_CURRENT)
+int isTrendStgClose(int arg_shift,int &arg_last_adx_status,int arg_period=PERIOD_CURRENT)
 {
    int ret=0;
-
-   int adx_status=getADXStatus(arg_period,arg_shift);
-   if (adx_status==3) ret=1;
-   if (adx_status==-3) ret=-1;
-
+   int adx_level=0;
+   int adx_cross=0;  //1 for up cross,-1 for down cross
+   
+   int adx_status=getADXStatus(arg_period,arg_shift,adx_level);
+   if (adx_level==0) {     //adx is below 40
+      if (arg_last_adx_status==0) {
+         arg_last_adx_status=-1;
+      } else {
+         if (arg_last_adx_status==1) {   //down cross 40(default)
+            adx_cross=-1;
+            arg_last_adx_status=-1;
+         }
+      }
+   }
+   if (adx_level==1) {     //adx is above 40
+      if (arg_last_adx_status==0) {
+         arg_last_adx_status=1;
+      } else {
+         if (arg_last_adx_status==-1) {   //up cross 40(default)
+            adx_cross=1;
+            arg_last_adx_status=1;
+         }
+      }
+   }
+   
+   //if (adx_status>=2) ret=1;     //adx is top in up trend, close buy
+   //if (adx_status<=-2) ret=-1;   //adx is top in down trend, close sell
+   //if (adx_cross==-1 && adx_status>0) ret=1; //adx is down cross 40 in the up trend, close buy
+   //if (adx_cross==-1 && adx_status<0) ret=-1; //adx is down cross 40 in the down trend, close sell
+   if (adx_cross==-1) ret=1;
+   
    return ret;
 }
 

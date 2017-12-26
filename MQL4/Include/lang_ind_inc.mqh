@@ -1467,13 +1467,14 @@ int getMAStatus2(int arg_period,int arg_shift,int &arg_touch_status[],double &ar
 //| date: 2017/11/23
 //| arg_period: time period
 //| arg_shift: bar shift
+//| arg_adx_level: 1:adx>=arg_thrd
 //| return value: 
 //|   2,adx is top(pdi>mdi);-2,adx is top(pdi<mdi);
 //|   1,pdi_mdi_gap is top(pdi>mdi);-1,pdi_mdi_gap is top(pdi<mdi);
 //|   3,2+1
 //|   0,N/A
 //+------------------------------------------------------------------+
-int getADXStatus(int arg_period,int arg_shift,int arg_thrd=40)
+int getADXStatus(int arg_period,int arg_shift,int &arg_adx_level,int arg_thrd=40)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
@@ -1501,6 +1502,12 @@ int getADXStatus(int arg_period,int arg_shift,int arg_thrd=40)
    double cur_adx_mdi_gap=cur_adx-cur_adx_mdi;
    double lst_adx_mdi_gap=lst_adx-lst_adx_mdi;
    double sec_lst_adx_mdi_gap=sec_lst_adx-sec_lst_adx_mdi;
+   
+   if (cur_adx>=arg_thrd) {
+      arg_adx_level=1;
+   } else {
+      arg_adx_level=0;
+   }
    
    int adx_dir=0;
    if (cur_pdi_mdi_gap>0 && lst_pdi_mdi_gap>0 && sec_lst_pdi_mdi_gap>0) {

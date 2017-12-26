@@ -33,6 +33,7 @@ input int   i_type=0;
    
 //global
 int g_ma_cross=0;
+int g_adx_status=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -95,7 +96,9 @@ int OnCalculate(const int rates_total,
          //int ret=getMAStatus2(PERIOD_CURRENT,i,touch_status);
          //signalBuffer[i]=touch_status[1];
          //signalBuffer[i]=getADXStatus(PERIOD_CURRENT,i);
-         signalBuffer[i]=isTrendStgClose(i);
+         signalBuffer[i]=isTrendStgClose(i,g_adx_status);
+         //int ret=isTrendStgClose(i,g_adx_status);
+         //signalBuffer[i]=g_adx_status;
       }
       
       /*
