@@ -352,9 +352,9 @@ int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_d
 //| Trend strategy Open (use ma)
 //| date: 2017/12/19
 //| arg_shift: bar shift
-//| arg_last_cross: 1,fast ma up cross slow ma;-1,fast ma down cross slow ma 
+//| arg_last_cross: 1,fast ma up cross slow ma;-1,fast ma down cross slow ma
 //| &arg_ls_price: lose stop price(for return)
-//| return value: -1,sell(open);1:buy(open);0:n/a
+//| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
 //+------------------------------------------------------------------+
 int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int arg_ls_pt=100)
 {
@@ -388,11 +388,11 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
 
    if (cur_ret>=10 && arg_last_cross!=1) {   //short ma up cross mid ma
       arg_last_cross=1;
-      return 0;
+      return 1;
    }
-   if (cur_ret<=-10 && arg_last_cross!=-1) {   //short ma up cross mid ma
+   if (cur_ret<=-10 && arg_last_cross!=-1) {   //short ma down cross mid ma
       arg_last_cross=-1;
-      return 0;
+      return -1;
    }
    
 //| touch status
@@ -414,7 +414,7 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
       if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
          if (cur_short_ma_touch==3) {              //current bar is positive and under touch short ma
             if (MathAbs(lst_short_ma_touch)>=3) {   //last bar is above or under touch short ma
-               return 1;
+               return 2;
             }
          }
       }
@@ -422,7 +422,7 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
       if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
          if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
             if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
-               return -1;
+               return -2;
             }
          }
       }

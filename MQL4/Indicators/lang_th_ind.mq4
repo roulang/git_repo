@@ -13,8 +13,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -1
-#property indicator_maximum 1
+#property indicator_minimum -2
+#property indicator_maximum 2
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -32,8 +32,8 @@ double         signalBuffer[];
 input int   i_type=0;
    
 //global
-int g_ma_cross=0;
-int g_adx_status=0;
+int g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
+int g_adx_status=0;  //1,above 40(default);-1,below 40(default)
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
