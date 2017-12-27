@@ -36,8 +36,8 @@ input int      i_SL=100;               //take lose point
 bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
 {
    double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
+   //double g = Ask - Bid;
+   //double gap = NormalizeDouble(g / pt, 0);
    double price = Ask;
    int cmd = OP_BUY;
    if (argPrice != 0) {
@@ -46,7 +46,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
 	   } else {
 		   cmd = OP_BUYLIMIT;
 	   }
-      price = argPrice + g;
+      price = argPrice;
    }
 
    double ls_price;
@@ -97,7 +97,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
+      //printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
@@ -134,8 +134,8 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
 bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMag)
 {
    double pt = Point;
-   double g = Ask - Bid;
-   double gap = NormalizeDouble(g / pt, 0);
+   //double g = Ask - Bid;
+   //double gap = NormalizeDouble(g / pt, 0);
    double price = Bid;
    int cmd = OP_SELL;
    if (argPrice != 0) {
@@ -155,7 +155,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
       ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
 	   ls_pt = LossStopPt;
    } else {
-      ls_price = argLsPrice + g;
+      ls_price = argLsPrice;
       ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
    }
    
@@ -166,7 +166,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
       ps_price = 0;
       ps_pt = 0;
    } else {
-      ps_price = argPsPrice + g;
+      ps_price = argPsPrice;
       ps_pt = NormalizeDouble((price- ps_price) / pt, 0);
    }
 
@@ -195,7 +195,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
       printf("loss stop point=%.5f", ls_pt);
       printf("profit stop price=%.5f", ps_price);
       printf("profit stop point=%.5f", ps_pt);
-      printf("gap=%.0f", gap);
+      //printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
    //debug>>>>
