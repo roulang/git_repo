@@ -427,7 +427,7 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
          }
       }
    }
-   
+
    return 0;
 }
 //+------------------------------------------------------------------+
@@ -438,11 +438,14 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
 //+------------------------------------------------------------------+
 int isTrendStgClose(int arg_shift,int &arg_last_adx_status,int arg_period=PERIOD_CURRENT)
 {
+
+   int cur_bar_shift=arg_shift;
+
    int ret=0;
    int adx_level=0;
    int adx_cross=0;  //1 for up cross,-1 for down cross
    
-   int adx_status=getADXStatus(arg_period,arg_shift,adx_level);
+   int adx_status=getADXStatus(arg_period,cur_bar_shift,adx_level);
    if (adx_level==0) {     //adx is below 40
       if (arg_last_adx_status==0) {
          arg_last_adx_status=-1;
@@ -469,7 +472,43 @@ int isTrendStgClose(int arg_shift,int &arg_last_adx_status,int arg_period=PERIOD
    //if (adx_cross==-1 && adx_status>0) ret=1; //adx is down cross 40 in the up trend, close buy
    //if (adx_cross==-1 && adx_status<0) ret=-1; //adx is down cross 40 in the down trend, close sell
    if (adx_cross==-1) ret=1;
-   
+
+   if (ret==0) {
+      int cur_touch_status[2];
+      double cur_short_ma,cur_middle_ma;
+      int cur_ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,cur_short_ma,cur_middle_ma);
+      int cur_short_ma_touch=cur_touch_status[0];
+      int cur_middle_ma_touch=cur_touch_status[1];
+
+      //| return value: short>mid,same direction,up,5;
+      //|               short>mid,different direction(short down,mid up),4;
+      //|               short>mid,different direction(short up,mid down),3;
+      //|               short>mid,same direction(short down,mid down),2;
+      //|               short>mid,no direction(short down,mid down),1;
+      //| return value: short<mid,same direction,down,-5;
+      //|               short<mid,different direction(short up,mid down),-4;
+      //|               short<mid,different direction(short down,mid up),-3;
+      //|               short<mid,same direction(short up,mid up),-2;
+      //|               short<mid,no direction(short down,mid down),-1;
+      //|               n/a:0
+      //| return value: short break mid,up(within last 2 bars):+10
+      //|               short break mid,down(within last 2 bars):-10
+
+      //| touch status
+      //| ->see below
+      //| <<ma line>>
+      //|     (above) 0
+      //|  |  (high)  1
+      //| [ ] (open)  2
+      //| [ ] (close) 2
+      //|  |  (low)   3
+      //|     (below) 4
+      //| plus for positive bar(include nutual bar),minus for nagative bar.
+      if (MathAbs(cur_middle_ma_touch)==2) {
+         ret=-1;
+      }
+   }
+      
    return ret;
 }
 
@@ -1493,7 +1532,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
                         double &arg_price[],double &arg_ls_price[],double &arg_tp_price[][],
                         int &arg_ls_price_pt[],int &arg_tp_price_pt[][],
                         int arg_lspt=50,double arg_ls_ratio=0.6,
-                        int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_long=1,
+                        int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
                         int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
                         int arg_atr_lvl_pt=5,int arg_atr_range=5
                       )
@@ -1684,18 +1723,20 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    //|  |  (low)   3
    //|     (below) 4
    //| <<range_low,range_sub_low>>
-   //|     (above) 4
-   //|  |  (high)  3
-   //| [ ] (open)  2
-   //| [ ] (close) 2
-   //|  |  (low)   1
+   //|     (above) -4
+   //|  |  (high)  -3
+   //| [ ] (open)  -2
+   //| [ ] (close) -2
+   //|  |  (low)   -1
    //|     (below) 0
-   //| plus for positive bar(include nutual bar),minus for nagative bar.
-
+   //| plus for touch high;minus for touch low
    if (ret==0) {
       //break(up)
-      if (lst_high_low_change==0 && cur_high_low_change==1 && MathAbs(cur_high_low_touch)<=1 && cur_bar_status==0) {         //high_low_change up,positive bar
-         if (MathAbs(lst_high_low_touch2)>=2) {  //break second high
+      if (  lst_high_low_change==0 && cur_high_low_change==1 && 
+            (cur_high_low_touch==-1 || cur_high_low_touch==0) && 
+            cur_bar_status==0) {          //high_low_change up,positive bar
+
+         if (lst_high_low_touch2>=2) {    //break second high
             if (g_debug) Print(t,"high_low_change up,positive bar,break second high,+3");
             ret=4;
          } else
@@ -1707,8 +1748,11 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
          }
       }
       //break(down)
-      if (lst_high_low_change==0 && cur_high_low_change==-1 && MathAbs(cur_high_low_touch)<=1 && cur_bar_status==1) {     //high_low_change down,negative bar
-         if (MathAbs(lst_high_low_touch2)>=2) {  //break second low
+      if (  lst_high_low_change==0 && cur_high_low_change==-1 && 
+            (cur_high_low_touch==1 || cur_high_low_touch==0) && 
+            cur_bar_status==1) {          //high_low_change down,negative bar
+
+         if (lst_high_low_touch2<=-2) {   //break second low
             if (g_debug) Print(t,"high_low_change down,negative bar,break second low,-3");
             ret=-4;
          } else 
@@ -1723,7 +1767,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    
    if (ret==0) {
       //rebound(down)
-      if (lst_high_low_change==0 && cur_high_low_change==0 && lst_high_low_touch==0 && MathAbs(cur_high_low_touch)==1) {     //hit high,turn down
+      if (lst_high_low_change==0 && cur_high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==1) {     //hit high,turn down
          if (g_debug) Print(t,"hit high,turn down,-2");
          ret=-2;
       }
@@ -1731,7 +1775,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
 
    if (ret==0) {
       //rebound(up)
-      if (lst_high_low_change==0 && cur_high_low_change==0 && lst_high_low_touch==0 && MathAbs(cur_high_low_touch)==1) {    //hit low,turn up
+      if (lst_high_low_change==0 && cur_high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==-1) {    //hit low,turn up
          if (g_debug) Print(t,"hit low,turn up,positive bar,+2");
          ret=2;
       }
@@ -1780,16 +1824,20 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    //| return value: short break mid,up(within last 2 bars):+10  
    //|               short break mid,down(within last 2 bars):-10  
    if (ret==2) {     //rebound up
-      if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status==-5 || cur_ma_status==-4 || 
-            cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down
-         Print(t,"rebound up,but ma mid is not down,(ma=",cur_ma_status,")");
+      //if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status==-5 || cur_ma_status==-4 || 
+      //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down
+      //   Print(t,"rebound up,but ma mid is not down,(ma=",cur_ma_status,")");
+      if (cur_ma_status<=0) {    //short<mid
+         Print(t,"rebound up,but ma is down,(ma=",cur_ma_status,")");
          ret=0;
       }
    }
    if (ret==-2) {    //rebound down
-      if (  cur_ma_status==5 || cur_ma_status==4 || cur_ma_status==-3 || cur_ma_status==-2 ||
-            cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up
-         Print(t,"rebound down,but ma mid is up,(ma=",cur_ma_status,")");
+      //if (  cur_ma_status==5 || cur_ma_status==4 || cur_ma_status==-3 || cur_ma_status==-2 ||
+      //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up
+      //   Print(t,"rebound down,but ma mid is up,(ma=",cur_ma_status,")");
+      if (cur_ma_status>=0) {    //short>mid
+         Print(t,"rebound up,but ma is up,(ma=",cur_ma_status,")");
          ret=0;
       }
    }
@@ -1819,11 +1867,15 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)
          Print(t,"final,only touch high,+1");
-         arg_touch_status=ret=1;
+         ret=1;
+         if (arg_touch_status==0)
+            arg_touch_status=ret;
       }
       if (cur_high_low_touch<0) {   //only touch low(can notify by email)
          Print(t,"final,only touch low,-1");
-         arg_touch_status=ret=-1;
+         ret=-1;
+         if (arg_touch_status==0)
+            arg_touch_status=ret;
       }
    }
 
@@ -1923,6 +1975,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    if (MathAbs(ls_gap_pt)<min_ls_pt) {
       Print(t,"buy break");
       Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      tp_price1=tp_price2=0;
    } else if (tp_price1>high_price) {
       Print(t,"buy break");
       Print(t,"tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
@@ -2010,6 +2063,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    if (MathAbs(ls_gap_pt)<min_ls_pt) {
       Print(t,"sell break");
       Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      tp_price1=tp_price2=0;
    } else if (tp_price1<low_price) {
       Print(t,"sell break");
       Print(t,"tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
