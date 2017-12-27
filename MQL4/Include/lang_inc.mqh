@@ -146,8 +146,24 @@ bool mailNoticeOrderOpen(int arg_tic,string arg_sym,int arg_type,double arg_lots
    string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#)(",arg_lots," lots) placed");
    double sl_pt=0,tp_pt=0;
    double vpoint=MarketInfo(arg_sym,MODE_POINT);
-   if (arg_sl != 0) sl_pt=NormalizeDouble((arg_p-arg_sl)/vpoint,0);
-   if (arg_tp != 0) tp_pt=NormalizeDouble((arg_p-arg_tp)/vpoint,0);
+   if (arg_sl != 0) {
+      sl_pt=NormalizeDouble((arg_p-arg_sl)/vpoint,0);
+      if (arg_type==OP_BUY || arg_type==OP_BUYLIMIT || arg_type==OP_BUYSTOP) {
+         sl_pt=-MathAbs(sl_pt);
+      }
+      if (arg_type==OP_SELL || arg_type==OP_SELLLIMIT || arg_type==OP_SELLSTOP) {
+         sl_pt=MathAbs(sl_pt);
+      }
+   }
+   if (arg_tp != 0) {
+      tp_pt=NormalizeDouble((arg_p-arg_tp)/vpoint,0);
+      if (arg_type==OP_BUY || arg_type==OP_BUYLIMIT || arg_type==OP_BUYSTOP) {
+         tp_pt=MathAbs(tp_pt);
+      }
+      if (arg_type==OP_SELL || arg_type==OP_SELLLIMIT || arg_type==OP_SELLSTOP) {
+         tp_pt=-MathAbs(tp_pt);
+      }
+   }
    
    string EmailBody=StringConcatenate(EmailSubject," at ",dToStr(NULL,arg_p),", lose stop at ",dToStr(NULL,arg_sl),"(",sl_pt,"pt), profit stop at ",dToStr(NULL,arg_tp),"(",tp_pt,"pt), ",arg_com,"(",arg_mag,").");
    // Sample output: "EURUSD Buy order(#1233456#)(0.1 lots) placed at 1.4545, lose stop at 1.4545(-200), profit stop at 1.4545(+200), tt stg(12345)."

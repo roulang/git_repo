@@ -106,7 +106,7 @@ int OnCalculate(const int rates_total,
       double &arg_price[],double &arg_ls_price[],double &arg_tp_price[][],
       int &arg_ls_price_pt[],int &arg_tp_price_pt[][],
       int arg_lspt=50,double arg_ls_ratio=0.6,
-      int arg_length=20,int arg_th_pt=10,int arg_expand=1,int arg_long=1,
+      int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
       int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
       double arg_atr_lvl_pt=5,int arg_atr_range=5
       */
