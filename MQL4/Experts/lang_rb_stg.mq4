@@ -20,6 +20,8 @@ input int      i_zone_aft=0;           // time zone after
 input int      i_oc_gap_pt=5;
 input int      i_high_low_gap_pt=150;
 input int      i_gap2_pt=20;
+input bool     i_atr_control=true;
+input bool     i_ma_control=true;
 input bool     i_manual=false;
 
 //--- global
@@ -102,7 +104,7 @@ void OnTick()
       */
    } else if(FindOrderA(NULL,-1,g_magic) || FindOrderA(NULL,-1,g_magic2)) {  //found sell order
       if (ifClose(cur_bar_shift)) {
-         Print("closed buy order");
+         Print("closed sell order");
          if (!FindOrderA(NULL,0,g_magic) && !FindOrderA(NULL,0,g_magic2)) {
             has_order=false;
          }
@@ -153,12 +155,14 @@ void OnTick()
    int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
    int arg_atr_lvl_pt=5,int arg_atr_range=5
    int arg_short_ma_ped=12,int arg_mid_ma_ped=36
+   bool arg_atr_control=true,bool arg_ma_control=true
    */
    sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
                            i_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
-                           g_short_ma_ped,g_mid_ma_ped);
+                           g_short_ma_ped,g_mid_ma_ped,
+                           i_atr_control,i_ma_control);
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order

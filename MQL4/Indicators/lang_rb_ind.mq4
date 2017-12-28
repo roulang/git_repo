@@ -32,6 +32,8 @@ input int      i_oc_gap_pt=5;
 input int      i_high_low_gap_pt=150;
 input int      i_gap2_pt=20;
 
+input bool     i_atr_control=true;
+input bool     i_ma_control=true;
 input bool     i_filter=false;   
 input bool     i_sendmail=true;
 
@@ -96,13 +98,13 @@ int OnCalculate(const int rates_total,
    int limit=Bars-1;
 
    //1:skip last bar
-   int st=uncal_bars+1;
+   int skip_first_bars=2;
+   int st=uncal_bars+skip_first_bars;
    if (st>limit) st=limit;
    if(g_debug) {
       Print("1:st=",st);
    }
 
-   int skip_first_bars=2;
    //double ls_price=0;
    double price[4],ls_price[4],tp_price[4][2];
    int ls_price_pt[4],tp_price_pt[4][2];
@@ -120,12 +122,14 @@ int OnCalculate(const int rates_total,
       int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
       int arg_atr_lvl_pt=5,int arg_atr_range=5
       int arg_short_ma_ped=12,int arg_mid_ma_ped=36
+      bool arg_atr_control=true,bool arg_ma_control=true
       */
       ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
                            g_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
-                           g_short_ma_ped,g_mid_ma_ped);
+                           g_short_ma_ped,g_mid_ma_ped,
+                           i_atr_control,i_ma_control);
 
       if (!i_filter) {
          ret=high_low_touch_status;
@@ -186,18 +190,16 @@ int OnCalculate(const int rates_total,
          sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment);
       }
       signalBuffer[i]=ret;
+      //datetime t=Time[i];
+      //Print("time=",t,",shift=",i,",ret=",ret,",ret2=",ret2,",high_low_touch_status=",high_low_touch_status);
       /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.18 19:00");
+      datetime t1=StringToTime("2017.12.28 08:41");
       if (t==t1) {
          Print("time=",t);
          Print("shift=",i);
-         Print("g_high_low=");
-         PrintTwoDimArray(g_high_low);
-         for (int j=0;j<ArraySize(g_touch_highlow);j++) {
-            Print("g_touch_highlow[",j,"]=",g_touch_highlow[j]);
-         }
+         Print("ret=",ret,",ret2=",ret2,",high_low_touch_status=",high_low_touch_status);
       }
       */
    }

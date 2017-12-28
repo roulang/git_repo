@@ -945,7 +945,8 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
                         int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
                         int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
                         int arg_atr_lvl_pt=5,int arg_atr_range=5,
-                        int arg_short_ma_ped=12,int arg_mid_ma_ped=36
+                        int arg_short_ma_ped=12,int arg_mid_ma_ped=36,
+                        bool arg_atr_control=true,bool arg_ma_control=true
                       )
 {
 
@@ -1196,75 +1197,79 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    arg_touch_status=ret;
    
    //add atr by 20171121
-   double atr_lvl=arg_atr_lvl_pt*Point;
-   int atr=getAtrValue(cur_bar_shift,atr_lvl,arg_atr_range);
-   if (ret!=0) {
-      if (atr==0) {
-         Print(t,"atr too small(<=",atr_lvl,")");
-         ret=0;
+   if (arg_atr_control) {
+      double atr_lvl=arg_atr_lvl_pt*Point;
+      int atr=getAtrValue(cur_bar_shift,atr_lvl,arg_atr_range);
+      if (ret!=0) {
+         if (atr==0) {
+            Print(t,"atr too small(<=",atr_lvl,")");
+            ret=0;
+         }
       }
    }
       
    //add ma condition
-   double short_ma,middle_ma;
-   short_ma=middle_ma=0;
-   int cur_touch_status[2];
-   int cur_ma_status=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,short_ma,middle_ma,arg_short_ma_ped,arg_mid_ma_ped);
-   if (cur_ma_status>=10) cur_ma_status -= 10;
-   if (cur_ma_status<=-10) cur_ma_status += 10;
+   if (arg_ma_control) {
+      double short_ma,middle_ma;
+      short_ma=middle_ma=0;
+      int cur_touch_status[2];
+      int cur_ma_status=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,short_ma,middle_ma,arg_short_ma_ped,arg_mid_ma_ped);
+      if (cur_ma_status>=10) cur_ma_status -= 10;
+      if (cur_ma_status<=-10) cur_ma_status += 10;
+      
+      /*  
+      if (cur_ma_status==0) {    //ma status is 0
+         Print(t,"ma status is 0,0");
+         return 0;
+      }
+      */
+      
+      //| ma
+      //| return value: short>mid,same direction,up,5;
+      //|               short>mid,different direction(short down,mid up),4;
+      //|               short>mid,different direction(short up,mid down),3;
+      //|               short>mid,same direction(short down,mid down),2;
+      //|               short>mid,no direction,1;
+      //| return value: short<mid,same direction,down,-5;
+      //|               short<mid,different direction(short up,mid down),-4;
+      //|               short<mid,different direction(short down,mid up),-3;
+      //|               short<mid,same direction(short up,mid up),-2;
+      //|               short<mid,no direction,-1;
+      //|               n/a:0
+      //| return value: short break mid,up(within last 2 bars):+10  
+      //|               short break mid,down(within last 2 bars):-10  
+      if (ret==2) {     //rebound up
+         //if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status==-5 || cur_ma_status==-4 || 
+         //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down
+         //   Print(t,"rebound up,but ma mid is not down,(ma=",cur_ma_status,")");
+         if (cur_ma_status<=0) {    //short<mid
+            Print(t,"rebound up,but ma is down,(ma=",cur_ma_status,")");
+            ret=0;
+         }
+      }
+      if (ret==-2) {    //rebound down
+         //if (  cur_ma_status==5 || cur_ma_status==4 || cur_ma_status==-3 || cur_ma_status==-2 ||
+         //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up
+         //   Print(t,"rebound down,but ma mid is up,(ma=",cur_ma_status,")");
+         if (cur_ma_status>=0) {    //short>mid
+            Print(t,"rebound up,but ma is up,(ma=",cur_ma_status,")");
+            ret=0;
+         }
+      }
    
-   /*  
-   if (cur_ma_status==0) {    //ma status is 0
-      Print(t,"ma status is 0,0");
-      return 0;
-   }
-   */
-   
-   //| ma
-   //| return value: short>mid,same direction,up,5;
-   //|               short>mid,different direction(short down,mid up),4;
-   //|               short>mid,different direction(short up,mid down),3;
-   //|               short>mid,same direction(short down,mid down),2;
-   //|               short>mid,no direction,1;
-   //| return value: short<mid,same direction,down,-5;
-   //|               short<mid,different direction(short up,mid down),-4;
-   //|               short<mid,different direction(short down,mid up),-3;
-   //|               short<mid,same direction(short up,mid up),-2;
-   //|               short<mid,no direction,-1;
-   //|               n/a:0
-   //| return value: short break mid,up(within last 2 bars):+10  
-   //|               short break mid,down(within last 2 bars):-10  
-   if (ret==2) {     //rebound up
-      //if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status==-5 || cur_ma_status==-4 || 
-      //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down
-      //   Print(t,"rebound up,but ma mid is not down,(ma=",cur_ma_status,")");
-      if (cur_ma_status<=0) {    //short<mid
-         Print(t,"rebound up,but ma is down,(ma=",cur_ma_status,")");
-         ret=0;
+      if (ret>=3) {     //break up
+         if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status<=0 ||
+               cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down or short<mid
+            Print(t,"break up,but ma mid is down,(ma=",cur_ma_status,")");
+            ret=0;
+         }
       }
-   }
-   if (ret==-2) {    //rebound down
-      //if (  cur_ma_status==5 || cur_ma_status==4 || cur_ma_status==-3 || cur_ma_status==-2 ||
-      //      cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up
-      //   Print(t,"rebound down,but ma mid is up,(ma=",cur_ma_status,")");
-      if (cur_ma_status>=0) {    //short>mid
-         Print(t,"rebound up,but ma is up,(ma=",cur_ma_status,")");
-         ret=0;
-      }
-   }
-
-   if (ret>=3) {     //break up
-      if (  cur_ma_status==3 || cur_ma_status==2 || cur_ma_status<=0 ||
-            cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is down or short<mid
-         Print(t,"break up,but ma mid is down,(ma=",cur_ma_status,")");
-         ret=0;
-      }
-   }
-   if (ret<=-3) {    //break down
-      if (  cur_ma_status>=0 || cur_ma_status==-3 || cur_ma_status==-2 ||
-            cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up or short>mid
-         Print(t,"break down,but ma mid is up,(ma=",cur_ma_status,")");
-         ret=0;
+      if (ret<=-3) {    //break down
+         if (  cur_ma_status>=0 || cur_ma_status==-3 || cur_ma_status==-2 ||
+               cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up or short>mid
+            Print(t,"break down,but ma mid is up,(ma=",cur_ma_status,")");
+            ret=0;
+         }
       }
    }
 
