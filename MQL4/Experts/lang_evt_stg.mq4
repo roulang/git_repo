@@ -14,20 +14,20 @@
 int      g_magic=1;              //evt(high/low buy/sell stop)
 //bool     g_has_order=false;
 datetime g_orderdt;
-int      g_time_ped=SEC_H1/2;      //60 minutes
 
 //--------------------------------
 
-//input
+//--- input
+input int   i_max_ls_pt=200;
+input int   i_th_pt=80;
+input int   i_th2_pt=50;
+input int   i_offset_pt=20;
+input int   i_time_ped=SEC_H1/2;
 
 //global
-int      g_thpt=80;
-int      g_thpt2=50;
-int      g_offset_pt=20;
 int      g_expand=1;
 int      g_long=1;
 int      g_range=20;
-int      g_max_ls_pt=200;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -136,7 +136,7 @@ void OnTick()
             Print("another news time start, close old buy stop orders");
          }
       } else
-      if ((now-g_orderdt)>g_time_ped) {   //timeover
+      if ((now-g_orderdt)>i_time_ped) {   //timeover
          if (OrderCloseA(NULL,-2,g_magic)>0) {   //close sellstop order
             Print("over time, close sell stop order");
          }
@@ -152,7 +152,7 @@ void OnTick()
    if (isPd3>0 && !has_order) {
       double price[2],ls_price[2];
       
-      getHighLow_Value(cur_bar_shift,g_expand,g_range,g_long,g_thpt,g_thpt2,g_offset_pt,g_max_ls_pt,price,ls_price);
+      getHighLow_Value(cur_bar_shift,g_expand,g_range,g_long,i_th_pt,i_th2_pt,i_offset_pt,i_max_ls_pt,price,ls_price);
 
       if (price[0]>0 && ls_price[0]>0) {
          Print("Open buy stop order,",now);
