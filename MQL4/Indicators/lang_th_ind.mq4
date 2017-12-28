@@ -81,12 +81,12 @@ int OnCalculate(const int rates_total,
    int limit=Bars-1;
 
    //1:skip last bar
-   int st=uncal_bars+1;
+   int skip_first_bars=2;
+   int st=uncal_bars+skip_first_bars;
    if (st>limit) st=limit;
    if(g_debug) {
       Print("1:st=",st);
    }
-   int skip_first_bars=2;
    for(int i=st-skip_first_bars;i>0;i--) {
       int touch_status[2];
       double ls_price=0;
