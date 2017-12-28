@@ -67,7 +67,7 @@ double         pivot_Buffer[];
 //input
 
 //global
-bool           g_debug=false;
+//bool           g_debug=false;
 bool           g_for_test=false;
 
 int            g_last_shift=0;
