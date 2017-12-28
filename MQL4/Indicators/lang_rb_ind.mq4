@@ -45,6 +45,8 @@ int      g_range=20;
 double   g_break_ls_ratio=0.6;
 int      g_atr_lvl_pt=5;
 int      g_atr_range=5;
+int      g_short_ma_ped=12;
+int      g_mid_ma_ped=36;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -116,12 +118,14 @@ int OnCalculate(const int rates_total,
       int arg_lspt=50,double arg_ls_ratio=0.6,
       int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
       int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
-      double arg_atr_lvl_pt=5,int arg_atr_range=5
+      int arg_atr_lvl_pt=5,int arg_atr_range=5
+      int arg_short_ma_ped=12,int arg_mid_ma_ped=36
       */
       ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
                            g_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
-                           g_atr_lvl_pt,g_atr_range);
+                           g_atr_lvl_pt,g_atr_range,
+                           g_short_ma_ped,g_mid_ma_ped);
 
       if (!i_filter) {
          ret=high_low_touch_status;

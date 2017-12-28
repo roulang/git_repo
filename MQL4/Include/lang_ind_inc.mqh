@@ -1115,136 +1115,6 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
 //| date: 2017/10/20
 //| arg_period: time period
 //| arg_shift: bar shift
-//| return value: short>mid,same direction,up,5;
-//|               short>mid,different direction(short down,mid up),4;
-//|               short>mid,different direction(short up,mid down),3;
-//|               short>mid,same direction(short down,mid down),2;
-//|               short>mid,no direction(short down,mid down),1;
-//| return value: short<mid,same direction,down,-5;
-//|               short<mid,different direction(short up,mid down),-4;
-//|               short<mid,different direction(short down,mid up),-3;
-//|               short<mid,same direction(short up,mid up),-2;
-//|               short<mid,no direction(short down,mid down),-1;
-//|               n/a:0
-//| return value: short break mid,up(within last 2 bars):+10  
-//|               short break mid,down(within last 2 bars):-10  
-//+------------------------------------------------------------------+
-int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
-{
-   if (arg_period==PERIOD_CURRENT) arg_period=Period();
-
-   int short_tm=getMAPeriod(arg_period,0);  //short
-   if (short_tm==0) {
-      return 0;
-   }
-   int middle_tm=getMAPeriod(arg_period,1);  //middle
-   if (middle_tm==0) {
-      return 0;
-   }
-
-   double current_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
-   arg_short_value=current_short_ma;
-   double current_high,current_low;
-   if (Open[arg_shift]>Close[arg_shift]) {
-      current_high=Open[arg_shift];
-      current_low=Close[arg_shift];
-   } else {
-      current_high=Close[arg_shift];
-      current_low=Open[arg_shift];
-   }
-   
-   if (current_short_ma<=current_high && current_short_ma>=current_low)    //filter current bar's body through short ma
-      return 0;
-   
-   double last_short_ma=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
-   double last_high,last_low;
-   if (Open[arg_shift+1]>Close[arg_shift+1]) {
-      last_high=Open[arg_shift+1];
-      last_low=Close[arg_shift+1];
-   } else {
-      last_high=Close[arg_shift+1];
-      last_low=Open[arg_shift+1];
-   }
-   
-   /*
-   if (last_short_ma<=last_high && last_short_ma>=last_low)                //filter last bar's body through short ma
-      return 0;
-   */
-   
-   double last_short_ma2=iMA(NULL,PERIOD_CURRENT,short_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
-   double current_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift);
-   double last_middle_ma=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+1);
-   double last_middle_ma2=iMA(NULL,PERIOD_CURRENT,middle_tm,0,MODE_EMA,PRICE_CLOSE,arg_shift+2);
-   
-   /*
-   //filter
-   if (current_short_ma<=current_high && current_short_ma>=current_low) {        //current bar's body through short ma
-      if (current_middle_ma<=current_high && current_middle_ma>=current_low) {   //current bar's body through middle ma
-         return 0;
-      }
-   }
-   */
-   
-   int ret=0;
-   int short_direction=0;
-   int middle_direction=0;
-   if (last_short_ma2<last_short_ma && last_short_ma<current_short_ma) short_direction=1;          //short is up
-   if (last_short_ma2>last_short_ma && last_short_ma>current_short_ma) short_direction=-1;         //short is down
-   if (last_middle_ma2<last_middle_ma && last_middle_ma<current_middle_ma) middle_direction=1;     //middle is up
-   if (last_middle_ma2>last_middle_ma && last_middle_ma>current_middle_ma) middle_direction=-1;    //middle is down
-   int break_status=0;
-   
-   if          (current_short_ma>current_middle_ma && last_short_ma<last_middle_ma) {  //short break mid(last), up
-      break_status=10;
-   } else if   (current_short_ma>current_middle_ma && last_short_ma>last_middle_ma 
-               && last_short_ma2<last_middle_ma2) {                                    //short break mid(last2), up
-      break_status=10;
-   } else if   (current_short_ma<current_middle_ma && last_short_ma>last_middle_ma) {  //short break mid(last), down
-      break_status=-10;
-   } else if   (current_short_ma<current_middle_ma && last_short_ma<last_middle_ma 
-               && last_short_ma2>last_middle_ma2) {                                    //short break mid(last2), down
-      break_status=-10;
-   }
-      
-   if (current_short_ma>current_middle_ma) {             //short>mid
-
-      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
-         return (break_status+5);
-
-      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
-         return (break_status+2);
-
-      if (short_direction==-1 && middle_direction==1)   //short is down, mid is up
-         return (break_status+4);
-
-      if (short_direction==1 && middle_direction==-1)   //short is up, mid is down
-         return (break_status+3);
-
-      return (break_status+1);
-   }
-   if (current_short_ma<current_middle_ma) {    //short<mid
-      if (short_direction==1 && middle_direction==1)     //short mid in same direction up
-         return (break_status-2);
-
-      if (short_direction==-1 && middle_direction==-1)   //short mid in same direction down
-         return (break_status-5);
-
-      if (short_direction==-1 && middle_direction==1)   //short is down, mid is up
-         return (break_status-3);
-
-      if (short_direction==1 && middle_direction==-1)   //short is up, mid is down
-         return (break_status-4);
-
-      return (break_status-1);
-   }
-   
-   return 0;
-}
-//+------------------------------------------------------------------+
-//| Get MA status (base on 3 continous values)
-//| date: 2017/10/20
-//| arg_period: time period
-//| arg_shift: bar shift
 //| arg_touch_status[2]:touch each ma line:short_ma(3/2/1),middle_ma(3/2/1)
 //| plus for positive bar(include nutual bar),minus for nagative bar.
 //| ->see below
@@ -1269,15 +1139,27 @@ int getMAStatus(int arg_period,int arg_shift,double &arg_short_value)
 //| return value: short break mid,up(within last 2 bars):+10  
 //|               short break mid,down(within last 2 bars):-10  
 //+------------------------------------------------------------------+
-int getMAStatus2(int arg_period,int arg_shift,int &arg_touch_status[],double &arg_short_ma,double &arg_mid_ma)
+int getMAStatus2( int arg_period,int arg_shift,int &arg_touch_status[],double &arg_short_ma,double &arg_mid_ma,
+                  int arg_short_ma_ped=0,int arg_mid_ma_ped=0)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
 
-   int short_tm=getMAPeriod(arg_period,0);  //short
+   int short_tm=0;      //short ma period
+   if (arg_short_ma_ped==0) {
+      short_tm=getMAPeriod(arg_period,0);
+   } else {
+      short_tm=arg_short_ma_ped;
+   }
    if (short_tm==0) {
       return 0;
    }
-   int middle_tm=getMAPeriod(arg_period,1);  //middle
+   
+   int middle_tm=0;     //middle ma period
+   if (arg_mid_ma_ped==0) {
+      middle_tm=getMAPeriod(arg_period,1);
+   } else {
+      middle_tm=arg_mid_ma_ped;
+   }
    if (middle_tm==0) {
       return 0;
    }
