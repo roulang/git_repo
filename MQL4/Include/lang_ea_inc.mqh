@@ -14,7 +14,7 @@ input bool     i_sendmail=true;
 input int      i_equity_percent=1;
 input double   i_max_lots=0.01;
 input int      i_slippage=5;
-input int      i_SL=100;               //take lose point
+input int      i_ls_pt=100;      //take lose point
 //input bool     i_skip_jpychf_usd_relate=true;
 
 //--- input

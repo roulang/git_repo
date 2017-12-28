@@ -1701,7 +1701,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    */
    
    if (lst_high_low_change==0 && cur_high_low_change==0 && lst_high_low_touch==0 && cur_high_low_touch==0) {   //no signal
-      Print(t,"no signal");
+      if (g_debug) Print(t,"no signal");
       return 0;
    }
    
@@ -1744,7 +1744,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
             if (g_debug) Print(t,"high_low_change up,positive bar,+3");
             ret=3;
          } else {
-            Print(t,"high_low_change up,positive bar,but last high gap is too narrow(<",arg_gap_pt2,"pt)");
+            if (g_debug) Print(t,"high_low_change up,positive bar,but last high gap is too narrow(<",arg_gap_pt2,"pt)");
          }
       }
       //break(down)
@@ -1760,7 +1760,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
             if (g_debug) Print(t,"high_low_change down,negative bar,-3");
             ret=-3;
          } else {
-            Print(t,"high_low_change down,negative bar,but last low gap is too narrow(<",arg_gap_pt2,"pt)");
+            if (g_debug) Print(t,"high_low_change down,negative bar,but last low gap is too narrow(<",arg_gap_pt2,"pt)");
          }
       }
    }
@@ -1866,13 +1866,13 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
 
    if (ret==0) {     //final
       if (cur_high_low_touch>0) {   //only touch high(can notify by email)
-         Print(t,"final,only touch high,+1");
+         if (g_debug) Print(t,"final,only touch high,+1");
          ret=1;
          if (arg_touch_status==0)
             arg_touch_status=ret;
       }
       if (cur_high_low_touch<0) {   //only touch low(can notify by email)
-         Print(t,"final,only touch low,-1");
+         if (g_debug) Print(t,"final,only touch low,-1");
          ret=-1;
          if (arg_touch_status==0)
             arg_touch_status=ret;
@@ -1973,16 +1973,22 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    }
    
    if (MathAbs(ls_gap_pt)<min_ls_pt) {
-      Print(t,"buy break");
-      Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      if (g_debug) {
+         Print(t,"buy break");
+         Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      }
       tp_price1=tp_price2=0;
    } else if (tp_price1>high_price) {
-      Print(t,"buy break");
-      Print(t,"tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
+      if (g_debug) {
+         Print(t,"buy break");
+         Print(t,"tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
+      }
       tp_price1=tp_price2=0;
    } else if (tp_price2>high_price) {
-      Print(t,"buy break");
-      Print(t,"tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
+      if (g_debug) {
+         Print(t,"buy break");
+         Print(t,"tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
+      }
       tp_price2=0;
    }
    
@@ -2019,12 +2025,16 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1>high_price) {
-      Print(t,"buy rebound");
-      Print(t,"tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
+      if (g_debug) {
+         Print(t,"buy rebound");
+         Print(t,"tp_price1(",tp_price1,") is higher than high_price(",high_price,")");
+      }
       tp_price1=tp_price2=0;
    } else if (tp_price2>high_price) {
-      Print(t,"buy rebound");
-      Print(t,"tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
+      if (g_debug) {
+         Print(t,"buy rebound");
+         Print(t,"tp_price2(",tp_price2,") is higher than high_price(",high_price,")");
+      }
       tp_price2=0;
    }
 
@@ -2061,17 +2071,23 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    }
    
    if (MathAbs(ls_gap_pt)<min_ls_pt) {
-      Print(t,"sell break");
-      Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      if (g_debug) {
+         Print(t,"sell break");
+         Print(t,"ls_gap_pt(",MathAbs(ls_gap_pt),") is smaller than min_ls_pt(",min_ls_pt,")");
+      }
       tp_price1=tp_price2=0;
    } else if (tp_price1<low_price) {
-      Print(t,"sell break");
-      Print(t,"tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
+      if (g_debug) {
+         Print(t,"sell break");
+         Print(t,"tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
+      }
       tp_price1=0;
       tp_price2=0;
    } else if (tp_price2<low_price) {
-      Print(t,"sell break");
-      Print(t,"tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
+      if (g_debug) {
+         Print(t,"sell break");
+         Print(t,"tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
+      }
       tp_price2=0;
    }
 
@@ -2108,13 +2124,17 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    }
    
    if (tp_price1<low_price) {
-      Print(t,"sell rebound");
-      Print(t,"tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
+      if (g_debug) {
+         Print(t,"sell rebound");
+         Print(t,"tp_price1(",tp_price1,") is lower than low_price(",low_price,")");
+      }
       tp_price1=0;
       tp_price2=0;
    } else if (tp_price2<low_price) {
-      Print(t,"sell rebound");
-      Print(t,"tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
+      if (g_debug) {
+         Print(t,"sell rebound");
+         Print(t,"tp_price2(",tp_price2,") is lower than low_price(",low_price,")");
+      }
       tp_price2=0;
    }
 
