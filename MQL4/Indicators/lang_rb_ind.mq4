@@ -28,15 +28,23 @@
 double         signalBuffer[];
 
 //input
-//input int      i_range=20;
-//input int      i_thredhold_pt=0;
-//input int      i_expand=1;
+input int      i_oc_gap_pt=5;
+input int      i_high_low_gap_pt=150;
+input int      i_gap2_pt=20;
+
 input bool     i_filter=false;   
 input bool     i_sendmail=true;
 
 //global
 //string   g_comment="3";
 int      g_equity_percent=1;
+int      g_ls_pt=50;
+int      g_expand=1;
+int      g_long=1;
+int      g_range=20;
+double   g_break_ls_ratio=0.6;
+int      g_atr_lvl_pt=5;
+int      g_atr_range=5;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -111,8 +119,10 @@ int OnCalculate(const int rates_total,
       double arg_atr_lvl_pt=5,int arg_atr_range=5
       */
       ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
-                           50,0.6,20,0,1,1,
-                           5,150,20,5,5);
+                           g_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
+                           i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
+                           g_atr_lvl_pt,g_atr_range);
+
       if (!i_filter) {
          ret=high_low_touch_status;
       } else if (MathAbs(ret2)>1) {

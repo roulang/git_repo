@@ -10,24 +10,29 @@
 
 #include <lang_ea_inc.mqh>
 
+//--- input
+input bool     i_news_skip=true;       // news zone skip
+input int      i_news_bef=SEC_H1/4;    // news before 1/4 hour
+input int      i_news_aft=SEC_H1;      // news after 1 hour
+input bool     i_zone_control=false;   // time zone control
+input int      i_zone_bef=SEC_H1/2;    // time zone before
+input int      i_zone_aft=0;           // time zone after
+input int      i_oc_gap_pt=5;
+input int      i_high_low_gap_pt=150;
+input int      i_gap2_pt=20;
+input bool     i_manual=false;
+
 //--- global
 int      g_magic=3;        //rebound
 int      g_magic2=4;        //break
-//bool     g_has_order=false;
 datetime g_orderdt;
 
-//--------------------------------
-
-//input
-input int      i_range=20;
-input int      i_thredhold_pt=0;
-input int      i_expand=1;
-input bool     i_manual=false;
-
-//global
-int      g_tp_offset=10;
-//int      g_zone_aft=-SEC_H1*4;
-int      g_zone_aft=0;
+int      g_expand=1;
+int      g_long=1;
+int      g_range=20;
+double   g_break_ls_ratio=0.6;
+int      g_atr_lvl_pt=5;
+int      g_atr_range=5;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -144,11 +149,12 @@ void OnTick()
    int arg_lspt=50,double arg_ls_ratio=0.6,
    int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
    int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
-   double arg_atr_lvl_pt=5,int arg_atr_range=5
+   int arg_atr_lvl_pt=5,int arg_atr_range=5
    */
    sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
-                           50,0.6,20,0,1,1,
-                           5,150,20,5,5);
+                           i_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
+                           i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
+                           g_atr_lvl_pt,g_atr_range);
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order
@@ -167,8 +173,8 @@ void OnTick()
    }
    
    //active time zone control
-   bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,g_zone_aft);
-   if (MathAbs(sign)==3 && i_time_control && !curPd) {      //break
+   bool curPd=isCurPd(NULL,cur_bar_shift,i_zone_bef,i_zone_aft);
+   if (MathAbs(sign)==3 && i_zone_control && !curPd) {      //break
       Print("timezone control:avoid to break in non-active time.");
       return;
    }
