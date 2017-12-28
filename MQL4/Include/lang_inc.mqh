@@ -43,10 +43,6 @@ const  int ASIA_PD = 1;
 const  int AMA_PD = 4;
 const  int EUR_PD = 2;
 
-int      LossStopPt = 150;
-int      ProfitStopPt = 300;
-int      OOPt = 100;
-
 //struct
 struct s_News
 { 

@@ -14,16 +14,21 @@ input bool     i_sendmail=true;
 input int      i_equity_percent=1;
 input double   i_max_lots=0.01;
 input int      i_slippage=5;
+input int      i_SL=100;               //take lose point
 //input bool     i_skip_jpychf_usd_relate=true;
 
 //--- input
-input bool     i_time_control=false;   // time zone control
-input bool     i_news_skip=true;       // news zone skip
-input int      i_news_bef=SEC_H1/4;    // news before 1/4 hour
-input int      i_news_aft=SEC_H1;      // news after 1 hour
-input int      i_zone_bef=SEC_H1/2;    // time zone before 30 minutes
-input int      i_zone_aft=0;           // time zone after 1 hour
-input int      i_SL=100;               //take lose point
+//input bool     i_time_control=false;   // time zone control
+//input bool     i_news_skip=true;       // news zone skip
+//input int      i_news_bef=SEC_H1/4;    // news before 1/4 hour
+//input int      i_news_aft=SEC_H1;      // news after 1 hour
+//input int      i_zone_bef=SEC_H1/2;    // time zone before 30 minutes
+//input int      i_zone_aft=0;           // time zone after 1 hour
+
+//--- global
+int      g_LossStopPt = 150;
+int      g_ProfitStopPt = 300;
+int      g_OOPt = 100;
 
 //+------------------------------------------------------------------+
 // OrderBuy2 (auto set risk volume)
@@ -54,16 +59,16 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    double ls_pt;
    double ps_pt;
    if (argLsPrice == 0) {
-      ls_price = NormalizeDouble(price - LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
+      ls_price = NormalizeDouble(price - g_LossStopPt * pt, Digits);
+	   ls_pt = g_LossStopPt;
    } else {
       ls_price = argLsPrice;
       ls_pt = NormalizeDouble((price - ls_price) / pt, 0);
    }
    
    if (argPsPrice == 0) {
-      ps_price = NormalizeDouble(price + ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
+      ps_price = NormalizeDouble(price + g_ProfitStopPt * pt, Digits);
+	   ps_pt = g_ProfitStopPt;
    } else if (argPsPrice == -1) {
       ps_price = 0;
       ps_pt = 0;
@@ -152,16 +157,16 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    double ls_pt;
    double ps_pt;
    if (argLsPrice == 0) {
-      ls_price = NormalizeDouble(price + LossStopPt * pt, Digits);
-	   ls_pt = LossStopPt;
+      ls_price = NormalizeDouble(price + g_LossStopPt * pt, Digits);
+	   ls_pt = g_LossStopPt;
    } else {
       ls_price = argLsPrice;
       ls_pt = NormalizeDouble((ls_price - price) / pt, 0);
    }
    
    if (argPsPrice == 0) {
-      ps_price = NormalizeDouble(price - ProfitStopPt * pt, Digits);
-	   ps_pt = ProfitStopPt;
+      ps_price = NormalizeDouble(price - g_ProfitStopPt * pt, Digits);
+	   ps_pt = g_ProfitStopPt;
    } else if (argPsPrice == -1) {
       ps_price = 0;
       ps_pt = 0;
@@ -236,7 +241,7 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    double pt = Point;
    double g = Ask - Bid;
    double gap = NormalizeDouble(g / pt, 0);
-   if (argOPt == 0) argOPt = OOPt;
+   if (argOPt == 0) argOPt = g_OOPt;
    double price1 = Bid;
    price1 = NormalizeDouble(price1 - argOPt * pt, Digits);  //sell price
    double price2 = Ask;
@@ -244,8 +249,8 @@ bool OrderOO(int argMag, int argOPt=0, int argLsPt=0, int argPsPt=0)
    int cmd1 = OP_SELLSTOP;
    int cmd2 = OP_BUYSTOP;
 
-   if (argLsPt == 0) argLsPt = LossStopPt;
-   if (argPsPt == 0) argPsPt = ProfitStopPt;
+   if (argLsPt == 0) argLsPt = g_LossStopPt;
+   if (argPsPt == 0) argPsPt = g_ProfitStopPt;
    
    double ls_price1; //sell's lose stop
    double ps_price1; //sell's profit stop
@@ -370,17 +375,17 @@ bool OrderOO2(int argMag, double argPrice1, double argPrice2, double argLs1=0, d
    
    double ls_price1; //lose stop price for sell stop
    double ps_price1; //profit stop price for sell stop
-   if (argLs1==0) ls_price1=NormalizeDouble(price1+LossStopPt*pt,Digits);
+   if (argLs1==0) ls_price1=NormalizeDouble(price1+g_LossStopPt*pt,Digits);
    else ls_price1=argLs1;
-   if (argPs1==0) ps_price1=NormalizeDouble(price1-ProfitStopPt*pt,Digits);
+   if (argPs1==0) ps_price1=NormalizeDouble(price1-g_ProfitStopPt*pt,Digits);
    else if(argPs1==-1) ps_price1=0;
    else ps_price1=argPs1;
 
    double ls_price2; //lose stop price for buy stop
    double ps_price2; //profit stop price for buy stop
-   if (argLs2==0) ls_price2=NormalizeDouble(price1-LossStopPt*pt,Digits);
+   if (argLs2==0) ls_price2=NormalizeDouble(price1-g_LossStopPt*pt,Digits);
    else ls_price2=argLs2;
-   if (argPs2==0) ps_price2=NormalizeDouble(price1+ProfitStopPt*pt,Digits);
+   if (argPs2==0) ps_price2=NormalizeDouble(price1+g_ProfitStopPt*pt,Digits);
    else if(argPs2==-1) ps_price2=0;
    else ps_price2=argPs2;
 
@@ -481,8 +486,8 @@ bool OrderOO3(int argMag, int argLsPt=0, int argPsPt=0)
    int cmd1 = OP_SELL;
    int cmd2 = OP_BUY;
 
-   if (argLsPt == 0) argLsPt = LossStopPt;
-   if (argPsPt == 0) argPsPt = ProfitStopPt;
+   if (argLsPt == 0) argLsPt = g_LossStopPt;
+   if (argPsPt == 0) argPsPt = g_ProfitStopPt;
    
    double ls_price1; //sell's lose stop
    double ps_price1; //sell's profit stop
