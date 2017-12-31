@@ -96,12 +96,12 @@ void OnTick()
             has_order=false;
          }
       }
-      /*
+      
       //move lose stop
       if (movingStop3(NULL,g_magic,last_bar_shift)) {
          Print("movingstop of buy order");
       }
-      */
+      
    } else if(FindOrderA(NULL,-1,g_magic) || FindOrderA(NULL,-1,g_magic2)) {  //found sell order
       if (ifClose(cur_bar_shift)) {
          Print("closed sell order");
@@ -109,12 +109,12 @@ void OnTick()
             has_order=false;
          }
       }
-      /*
+      
       //move lose stop
       if (movingStop3(NULL,g_magic,last_bar_shift)) {
-         Print("movingstop of buy order");
+         Print("movingstop of sell order");
       }
-      */
+      
    } else {    //not found buy and sell order
       has_order=false;
    }
