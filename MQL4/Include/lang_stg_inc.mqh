@@ -418,7 +418,8 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
             }
          }
       }
-   } else if   (arg_last_cross==-1) {              //fast ma down cross slow ma
+   }
+   if (arg_last_cross==-1) {                       //fast ma down cross slow ma
       if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
          if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
             if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
@@ -427,7 +428,15 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
          }
       }
    }
-
+   /*
+   if (MathAbs(arg_last_cross)==1) {               //has crossed
+      if (MathAbs(cur_middle_ma_touch)==2) {       //current bar is crossing middle ma
+         arg_last_cross=0;
+         return 1;                                 //close all
+      }
+   }
+   */
+   
    return 0;
 }
 //+------------------------------------------------------------------+
