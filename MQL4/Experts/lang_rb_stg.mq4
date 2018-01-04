@@ -250,9 +250,11 @@ void OnTick()
                Print("ready to break up.create buy order.");
                t_magic=g_magic2;  //break
             }
+            /*
             if (t_tp_price>0) {
                ret=OrderBuy2(0,t_ls_price,t_tp_price,t_magic);
             }
+            */
             if (t_tp_price2>0) {
                ret2=OrderBuy2(0,t_ls_price,t_tp_price2,t_magic);
             }
@@ -266,9 +268,11 @@ void OnTick()
                Print("ready to break down.create sell order.");
                t_magic=g_magic2;  //rebound
             }
+            /*
             if (t_tp_price>0) {
                ret=OrderSell2(0,t_ls_price,t_tp_price,t_magic);
             }
+            */
             if (t_tp_price2>0) {
                ret2=OrderSell2(0,t_ls_price,t_tp_price2,t_magic);
             }
