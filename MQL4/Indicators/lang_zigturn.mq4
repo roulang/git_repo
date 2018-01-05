@@ -82,7 +82,7 @@ int OnCalculate(const int rates_total,
    //1:skip last bar
    int st=uncal_bars+1;
    if (st>limit) st=limit;
-   if(i_debug) {
+   if(g_debug) {
       Print("1:st=",st);
    }
    int i1,i2,i3,i4;
@@ -111,6 +111,6 @@ int InitializeAll()
 //+------------------------------------------------------------------+
 void OnTimer()
 {
-   if(i_debug) Print("OnTimer()");
+   if(g_debug) Print("OnTimer()");
 
 }
