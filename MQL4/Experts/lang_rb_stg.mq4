@@ -22,6 +22,7 @@ input int      i_high_low_gap_pt=150;
 input int      i_gap2_pt=20;
 input bool     i_atr_control=true;
 input bool     i_ma_control=true;
+input int      i_tp_cnt=1;             //one|two|three times tp
 input bool     i_manual=false;
 
 //--- global
@@ -250,13 +251,23 @@ void OnTick()
                Print("ready to break up.create buy order.");
                t_magic=g_magic2;  //break
             }
-            /*
-            if (t_tp_price>0) {
-               ret=OrderBuy2(0,t_ls_price,t_tp_price,t_magic);
+            if (i_tp_cnt==1) {
+               if (t_tp_price>0) {
+                  ret=OrderBuy2(0,t_ls_price,t_tp_price,t_magic);
+               }
             }
-            */
-            if (t_tp_price2>0) {
-               ret2=OrderBuy2(0,t_ls_price,t_tp_price2,t_magic);
+            if (i_tp_cnt==2) {
+               if (t_tp_price2>0) {
+                  ret2=OrderBuy2(0,t_ls_price,t_tp_price2,t_magic);
+               }
+            }
+            if (i_tp_cnt==3) {
+               if (t_tp_price>0) {
+                  ret=OrderBuy2(0,t_ls_price,t_tp_price,t_magic);
+               }
+               if (t_tp_price2>0) {
+                  ret2=OrderBuy2(0,t_ls_price,t_tp_price2,t_magic);
+               }
             }
          } else 
          if (idx==sell_rebound_idx || idx==sell_break_idx) {
@@ -268,13 +279,23 @@ void OnTick()
                Print("ready to break down.create sell order.");
                t_magic=g_magic2;  //rebound
             }
-            /*
-            if (t_tp_price>0) {
-               ret=OrderSell2(0,t_ls_price,t_tp_price,t_magic);
+            if (i_tp_cnt==1) {
+               if (t_tp_price>0) {
+                  ret=OrderSell2(0,t_ls_price,t_tp_price,t_magic);
+               }
             }
-            */
-            if (t_tp_price2>0) {
-               ret2=OrderSell2(0,t_ls_price,t_tp_price2,t_magic);
+            if (i_tp_cnt==2) {
+               if (t_tp_price2>0) {
+                  ret2=OrderSell2(0,t_ls_price,t_tp_price2,t_magic);
+               }
+            }
+            if (i_tp_cnt==3) {
+               if (t_tp_price>0) {
+                  ret=OrderSell2(0,t_ls_price,t_tp_price,t_magic);
+               }
+               if (t_tp_price2>0) {
+                  ret2=OrderSell2(0,t_ls_price,t_tp_price2,t_magic);
+               }
             }
          }
          if (ret || ret2) {
