@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                 lang_zigturn.mq4 |
+//|                                                  lang_zt_ind.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -8,12 +8,12 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_stg_inc.mqh>
+#include <lang_ind_inc.mqh>
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -5
-#property indicator_maximum 5
+#property indicator_minimum -3
+#property indicator_maximum 3
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -85,11 +85,11 @@ int OnCalculate(const int rates_total,
    if(g_debug) {
       Print("1:st=",st);
    }
-   int i1,i2,i3,i4;
+   int lst_short_low_sht=0,lst_mid_low_sht=0,lst_short_high_sht=0,lst_mid_high_sht=0;
    for(int i=st-1;i>0;i--) {
-      signalBuffer[i]=getZigTurn(i,i_deviation_st,i_deviation_md,i_deviation_lg,i_thredhold,i1,i2,i3,i4);
+      signalBuffer[i]=getZigTurn(i,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht,i_deviation_st,i_deviation_md,i_deviation_lg,i_thredhold);
       if (MathAbs(signalBuffer[i])>1) {
-         //Print(Time[i],",i1=",i1,",i2=",i2,",i3=",i3,",i4=",i4);
+         //Print(Time[i],",lst_stl_sht=",lst_short_low_sht,",lst_mdl_sht=",lst_mid_low_sht,",lst_sth_sht=",lst_short_high_sht,",lst_mdh_sht=",lst_mid_high_sht);
       }
    }
 
