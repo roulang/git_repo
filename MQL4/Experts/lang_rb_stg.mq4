@@ -167,7 +167,8 @@ void OnTick()
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order
-      if (OrderCloseA(NULL,-1,g_magic)>0 && OrderCloseA(NULL,-1,g_magic2)>0) {  //close sell order
+      //if (OrderCloseA(NULL,-1,g_magic)>0 || OrderCloseA(NULL,-1,g_magic2)>0) {  //close sell order
+      if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell rebound order
          Print("close opposit(sell) order");
          has_order=false;
       }
@@ -175,7 +176,8 @@ void OnTick()
 
    if (touch_status<=-3 && has_order) {   //break down,have order
       //close opposit order
-      if (OrderCloseA(NULL,1,g_magic)>0 && OrderCloseA(NULL,1,g_magic2)>0) {  //close buy order
+      //if (OrderCloseA(NULL,1,g_magic)>0 || OrderCloseA(NULL,1,g_magic2)>0) {  //close buy order
+      if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy rebound order
          Print("close opposit(buy) order");
          has_order=false;
       }
