@@ -211,7 +211,12 @@ bool mailNoticeOrderMod(int arg_tic,string arg_sym,int arg_type,double arg_p,dou
 */
    if (!g_sendmail) return true;
    
-   string EmailSubject=StringConcatenate("[",arg_sym,"]",getOrderTp(arg_type)," order(#",arg_tic,"#) modified");
+   datetime dt=Time[0];
+   string t1=StringConcatenate(TimeMonth(dt),"/",TimeDay(dt));
+   string t2=TimeToStr(dt,TIME_MINUTES);
+   string t=StringConcatenate("[",t1," ",t2,"]");
+
+   string EmailSubject=StringConcatenate("[",arg_sym,"][",t,"]",getOrderTp(arg_type)," order(#",arg_tic,"#) modified");
    double sl_pt=0,tp_pt=0;
    double vpoint=MarketInfo(arg_sym,MODE_POINT);
    if (arg_sl != 0) sl_pt=NormalizeDouble((arg_p-arg_sl)/vpoint,0);
