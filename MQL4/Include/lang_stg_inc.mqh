@@ -201,154 +201,6 @@ int getAtrValue(int arg_shift,double arg_lvl=0.0005,int arg_range=10)
 }
 
 //+------------------------------------------------------------------+
-//| Zigzag strategy
-//| arg_shift: series
-//| arg_deviation: used by zigzag indicator
-//| arg_lsp: lose stop price
-//| arg_tpp: take profit price
-//| arg_thpt: threhold point
-//| arg_lst_stupi: last short up shift
-//| arg_lst_mdupi: last middle up shift
-//| arg_lst_stdwi: last short down shift
-//| arg_lst_mddwi: last middle down shift
-//| return value: -1,turn down;1:turn up;0:n/a
-//+------------------------------------------------------------------+
-int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_deviation_lg,int arg_thpt,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi)
-{
-   int tm=getMAPeriod(PERIOD_CURRENT);
-   //Print("tm=",tm);
-   if (tm==0) {
-      return 0;
-   }
-   double ma=iMA(NULL,PERIOD_CURRENT,tm,0,MODE_SMA,PRICE_CLOSE,arg_shift);
-   
-   //filter ma across
-   if ((Open[arg_shift]>ma && Close[arg_shift]<ma) || (Open[arg_shift]<ma && Close[arg_shift]>ma))
-      return 0;
-   
-   arg_lst_stupi=arg_lst_mdupi=arg_lst_stdwi=arg_lst_mddwi=0;
-
-   int up_idx=8;
-   int dw_idx=9;
-   int midup_idx=10;
-   int middw_idx=11;
-   int zig_idx=15;
-   
-   int high_shift=0;
-   int low_shift=0;
-   double high_p=0;
-   double low_p=0;
-   
-   int shortUpShift=0;
-   int shortDownShift=0;
-   int midUpShift=0;
-   int midDownShift=0;
-   int shortUpShift2=0;
-   int shortDownShift2=0;
-   shortUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,arg_shift);
-   shortDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,arg_shift);
-   midUpShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,arg_shift);
-   midDownShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,arg_shift);
-
-   bool upSign=false;
-   //
-   if (shortUpShift>0 && midUpShift>0 && shortUpShift<midUpShift) {
-      if (Low[arg_shift+shortUpShift]>Low[arg_shift+midUpShift]) {
-         high_shift=iHighest(NULL,PERIOD_CURRENT,MODE_HIGH,midUpShift-shortUpShift-1,arg_shift+shortUpShift+1);
-         //high_p=iHigh(NULL,PERIOD_CURRENT,high_shift);
-         high_p=High[high_shift];
-         upSign=true;
-      }
-      shortUpShift2=shortUpShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,arg_shift+shortUpShift);
-   }
-
-   bool downSign=false;
-   if (shortDownShift>0&& midDownShift>0 && shortDownShift<midDownShift) {
-      if (High[arg_shift+shortDownShift]<High[arg_shift+midDownShift]) {
-         low_shift=iLowest(NULL,PERIOD_CURRENT,MODE_LOW,midDownShift-shortDownShift-1,arg_shift+shortDownShift+1);
-         //low_p=iLow(NULL,PERIOD_CURRENT,low_shift);
-         low_p=Low[low_shift];
-         downSign=true;
-      }
-      shortDownShift2=shortDownShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,arg_shift+shortDownShift);
-   }
-   
-   if (upSign && shortUpShift2>midUpShift) upSign=true;  //start turn up
-   else upSign=false;
-
-   if (downSign && shortDownShift2>midDownShift) downSign=true;   //start turn down
-   else downSign=false;
-   
-   if (upSign && downSign) {
-      if (shortUpShift<shortDownShift && midUpShift>midDownShift) downSign=false;
-      if (shortDownShift<shortUpShift && midDownShift>midUpShift) upSign=false;
-   }
-   
-   if (g_debug) {
-      //Print("shortUpShift=",shortUpShift);
-      //Print("midUpShift=",midUpShift);
-      //Print("shortUpShift2=",shortUpShift2);
-      //Print("shortDownShift=",shortDownShift);
-      //Print("midDownShift=",midDownShift);
-      //Print("shortDownShift2=",shortDownShift2);
-   }
-
-   arg_lst_stupi=shortUpShift;
-   arg_lst_mdupi=midUpShift;
-   arg_lst_stdwi=shortDownShift;
-   arg_lst_mddwi=midDownShift;
-   
-   if (upSign && !downSign) {
-      if (Open[arg_shift]<Close[arg_shift] && Close[arg_shift]>(high_p+arg_thpt*Point)) {
-         if (g_debug) {
-               Print("arg_shift=",arg_shift);
-               Print("shortUpShift=",shortUpShift);
-               Print("midUpShift=",midUpShift);
-               Print("shortUpShift2=",shortUpShift2);
-               Print("shortDownShift=",shortDownShift);
-               Print("midDownShift=",midDownShift);
-               Print("shortDownShift2=",shortDownShift2);
-               Print(Time[arg_shift],",high_shift*=",high_shift-arg_shift,",high_p=",high_p);
-         }
-         //add ma check
-         if (Open[arg_shift]>=ma && Close[arg_shift]>=ma) {
-            return 3; 
-         } else {
-            return 2;
-         }
-      } else {
-         return 1;
-      }
-   }
-   
-   if (downSign && !upSign) {
-      if (Open[arg_shift]>Close[arg_shift] && Close[arg_shift]<(low_p-arg_thpt*Point)) {
-         if (g_debug) {
-            Print("arg_shift=",arg_shift);
-            Print("shortUpShift=",shortUpShift);
-            Print("midUpShift=",midUpShift);
-            Print("shortUpShift2=",shortUpShift2);
-            Print("shortDownShift=",shortDownShift);
-            Print("midDownShift=",midDownShift);
-            Print("shortDownShift2=",shortDownShift2);
-            Print(Time[arg_shift],",low_shift*=",low_shift-arg_shift,",low_p=",low_p);
-         }
-         //add ma check
-         if (Open[arg_shift]<=ma && Close[arg_shift]<=ma) {
-            return -3;
-         } else {
-            return -2;
-         }
-      } else {
-         return -1;
-      }
-   }
-   
-   return 0;
-   
-}
-
-//+------------------------------------------------------------------+
 //| Trend strategy Open (use ma)
 //| date: 2017/12/19
 //| arg_shift: bar shift
@@ -356,7 +208,7 @@ int getZigTurn(int arg_shift,int arg_deviation_st,int arg_deviation_md,int arg_d
 //| &arg_ls_price: lose stop price(for return)
 //| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int arg_ls_pt=100)
+int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
 {
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
@@ -439,6 +291,105 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price,int ar
    
    return 0;
 }
+
+//+------------------------------------------------------------------+
+//| Trend strategy Open2 (use ma & zigturn)
+//| date: 2018/01/09
+//| arg_shift: bar shift
+//| arg_last_cross: 1,fast ma up cross slow ma;-1,fast ma down cross slow ma
+//| &arg_ls_price: lose stop price(for return)
+//| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
+//+------------------------------------------------------------------+
+int isTrendStgOpen2(int arg_shift,int &arg_last_cross,double &arg_ls_price)
+{
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   
+   //zigturn support
+   int lst_short_low_sht=0,lst_mid_low_sht=0,lst_short_high_sht=0,lst_mid_high_sht=0;
+   //1 for up,2 for up first,3 for up break
+   //-1 for down,-2 for down first,-3 for down break
+   int zt=getZigTurn(cur_bar_shift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
+   
+   int cur_touch_status[2];
+   double cur_short_ma,cur_middle_ma;
+   int cur_ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,cur_short_ma,cur_middle_ma);
+
+   int lst_touch_status[2];
+   double lst_short_ma,lst_middle_ma;
+   int lst_ret=getMAStatus2(PERIOD_CURRENT,lst_bar_shift,lst_touch_status,lst_short_ma,lst_middle_ma);
+
+   arg_ls_price=cur_middle_ma;
+   
+//| ret
+//| return value: short>mid,same direction,up,5;
+//|               short>mid,different direction(short down,mid up),4;
+//|               short>mid,different direction(short up,mid down),3;
+//|               short>mid,same direction(short down,mid down),2;
+//|               short>mid,no direction(short down,mid down),1;
+//| return value: short<mid,same direction,down,-5;
+//|               short<mid,different direction(short up,mid down),-4;
+//|               short<mid,different direction(short down,mid up),-3;
+//|               short<mid,same direction(short up,mid up),-2;
+//|               short<mid,no direction(short down,mid down),-1;
+//|               n/a:0
+//| return value: short break mid,up(within last 2 bars):+10
+//|               short break mid,down(within last 2 bars):-10
+
+   if (cur_ret>=10 && arg_last_cross!=1) {   //short ma up cross mid ma
+      arg_last_cross=1;
+      return 1;
+   }
+   if (cur_ret<=-10 && arg_last_cross!=-1) {   //short ma down cross mid ma
+      arg_last_cross=-1;
+      return -1;
+   }
+   
+//| touch status
+//| ->see below
+//| <<ma line>>
+//|     (above) 0
+//|  |  (high)  1
+//| [ ] (open)  2
+//| [ ] (close) 2
+//|  |  (low)   3
+//|     (below) 4
+
+   int cur_short_ma_touch=cur_touch_status[0];
+   int cur_middle_ma_touch=cur_touch_status[1];
+   int lst_short_ma_touch=lst_touch_status[0];
+   int lst_middle_ma_touch=lst_touch_status[1];
+
+   if (arg_last_cross==1) {                        //fast ma up cross slow ma
+      if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
+         if (cur_short_ma_touch==3) {              //current bar is positive and under touch short ma
+            if (MathAbs(lst_short_ma_touch)>=3) {   //last bar is above or under touch short ma
+               return 2;
+            }
+         }
+      }
+   }
+   if (arg_last_cross==-1) {                       //fast ma down cross slow ma
+      if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
+         if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
+            if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
+               return -2;
+            }
+         }
+      }
+   }
+   /*
+   if (MathAbs(arg_last_cross)==1) {               //has crossed
+      if (MathAbs(cur_middle_ma_touch)==2) {       //current bar is crossing middle ma
+         arg_last_cross=0;
+         return 1;                                 //close all
+      }
+   }
+   */
+   
+   return 0;
+}
+
 //+------------------------------------------------------------------+
 //| Trend strategy Close (use adx)
 //| date: 2017/12/26
