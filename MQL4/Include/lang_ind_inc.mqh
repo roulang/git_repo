@@ -1466,8 +1466,10 @@ int getADXStatus(int arg_period,int arg_shift,int &arg_adx_level,int arg_thrd=40
 //| arg_lst_mddwi: last middle down shift
 //| return value: -1,turn down;1:turn up;0:n/a
 //+------------------------------------------------------------------+
-int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi,int arg_deviation_st=0,int arg_deviation_md=0,int arg_deviation_lg=0,int arg_thpt=0)
+int getZigTurn(int arg_period,int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_stdwi,int &arg_lst_mddwi,int arg_deviation_st=0,int arg_deviation_md=0,int arg_deviation_lg=0,int arg_thpt=0)
 {
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
 
@@ -1488,6 +1490,8 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    int dw_idx=9;
    int midup_idx=10;
    int middw_idx=11;
+   int lgup_idx=12;
+   int lgdw_idx=13;
    int zig_idx=15;
    
    int high_shift=0;
@@ -1501,10 +1505,10 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    int midHighShift=0;
    int shortLowShift2=0;
    int shortHighShift2=0;
-   shortLowShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift);
-   shortHighShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift);
-   midLowShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,cur_bar_shift);
-   midHighShift=(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,cur_bar_shift);
+   shortLowShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift);
+   shortHighShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift);
+   midLowShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,cur_bar_shift);
+   midHighShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,cur_bar_shift);
 
    if (shortHighShift>0 && midHighShift>0 && shortHighShift==midHighShift) {
       return 0;
@@ -1517,13 +1521,17 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    bool upSign_fst=false;
    //
    if (shortLowShift>0 && midLowShift>0 && shortLowShift<midLowShift) {
-      if (Low[cur_bar_shift+shortLowShift]>Low[cur_bar_shift+midLowShift]) {
-         high_shift=iHighest(NULL,PERIOD_CURRENT,MODE_HIGH,midLowShift-shortLowShift-1,cur_bar_shift+shortLowShift+1);
+      double shortLow_low=iLow(NULL,arg_period,cur_bar_shift+shortLowShift);
+      double midLow_low=iLow(NULL,arg_period,cur_bar_shift+midLowShift);
+      //if (Low[cur_bar_shift+shortLowShift]>Low[cur_bar_shift+midLowShift]) {
+      if (shortLow_low>midLow_low) {
+         high_shift=iHighest(NULL,arg_period,MODE_HIGH,midLowShift-shortLowShift-1,cur_bar_shift+shortLowShift+1);
          //high_p=iHigh(NULL,PERIOD_CURRENT,high_shift);
-         high_p=High[high_shift];
+         //high_p=High[high_shift];
+         high_p=iHigh(NULL,arg_period,high_shift);
          upSign=true;
       }
-      shortLowShift2=shortLowShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift+shortLowShift);
+      shortLowShift2=shortLowShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift+shortLowShift);
    }
    if (upSign && shortLowShift2>=midLowShift) upSign_fst=true;  //start turn up
    else upSign_fst=false;
@@ -1532,13 +1540,17 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    bool downSign_fst=false;
    //
    if (shortHighShift>0 && midHighShift>0 && shortHighShift<midHighShift) {
-      if (High[cur_bar_shift+shortHighShift]<High[cur_bar_shift+midHighShift]) {
-         low_shift=iLowest(NULL,PERIOD_CURRENT,MODE_LOW,midHighShift-shortHighShift-1,cur_bar_shift+shortHighShift+1);
+      double shortHigh_high=iHigh(NULL,arg_period,cur_bar_shift+shortHighShift);
+      double midHigh_high=iHigh(NULL,arg_period,cur_bar_shift+midHighShift);
+      //if (High[cur_bar_shift+shortHighShift]<High[cur_bar_shift+midHighShift]) {
+      if (shortHigh_high<midHigh_high) {
+         low_shift=iLowest(NULL,arg_period,MODE_LOW,midHighShift-shortHighShift-1,cur_bar_shift+shortHighShift+1);
          //low_p=iLow(NULL,PERIOD_CURRENT,low_shift);
-         low_p=Low[low_shift];
+         //low_p=Low[low_shift];
+         low_p=iLow(NULL,arg_period,low_shift);
          downSign=true;
       }
-      shortHighShift2=shortHighShift+(int)iCustom(NULL,PERIOD_CURRENT,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift+shortHighShift);
+      shortHighShift2=shortHighShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift+shortHighShift);
    }
    
    if (downSign && shortHighShift2>=midHighShift) downSign_fst=true;   //start turn down
@@ -1557,6 +1569,7 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    }
    
    if (g_debug) {
+      Print("period=",arg_period);
       Print("upSign=",upSign,",downSign=",downSign);
       Print("shortLowShift=",shortLowShift);
       Print("midLowShift=",midLowShift);
@@ -1573,14 +1586,22 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    arg_lst_stdwi=shortHighShift;
    arg_lst_mddwi=midHighShift;
    int bar_status=0;
-   if (Open[cur_bar_shift]>Close[cur_bar_shift]) bar_status=-1;      //negative bar
-   if (Open[cur_bar_shift]<Close[cur_bar_shift]) bar_status=1;       //positive bar
+   double cur_open_price=iOpen(NULL,arg_period,cur_bar_shift);
+   double cur_close_price=iClose(NULL,arg_period,cur_bar_shift);
+   //if (Open[cur_bar_shift]>Close[cur_bar_shift]) bar_status=-1;      //negative bar
+   //if (Open[cur_bar_shift]<Close[cur_bar_shift]) bar_status=1;       //positive bar
+   if (cur_open_price>cur_close_price) bar_status=-1;      //negative bar
+   if (cur_open_price<cur_close_price) bar_status=1;       //positive bar
    if (upSign && !downSign) {
       if (upSign_fst) {
-         if (bar_status==1 && Close[cur_bar_shift]>(high_p+arg_thpt*Point)) {    //positive bar and go beyond high_p
+         //if (bar_status==1 && Close[cur_bar_shift]>(high_p+arg_thpt*Point)) {    //positive bar and go beyond high_p
+         if (bar_status==1 && cur_close_price>(high_p+arg_thpt*Point)) {    //positive bar and go beyond high_p
             if (g_debug) {
                Print("upSign=True and go beyond high_p");
-               Print(Time[cur_bar_shift],",high_shift=",high_shift-cur_bar_shift,",high_p=",high_p);
+               Print("period=",arg_period);
+               datetime tm=iTime(NULL,arg_period,cur_bar_shift);
+               //Print(Time[cur_bar_shift],",high_shift=",high_shift-cur_bar_shift,",high_p=",high_p);
+               Print(tm,",high_shift=",high_shift-cur_bar_shift,",high_p=",high_p);
                Print("cur_bar_shift=",cur_bar_shift);
                Print("shortLowShift=",shortLowShift);
                Print("midLowShift=",midLowShift);
@@ -1605,10 +1626,14 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
    
    if (downSign && !upSign) {
       if (downSign_fst) {
-         if (bar_status==-1 && Close[cur_bar_shift]<(low_p-arg_thpt*Point)) {    //negative bar and go below low_p 
+         //if (bar_status==-1 && Close[cur_bar_shift]<(low_p-arg_thpt*Point)) {    //negative bar and go below low_p 
+         if (bar_status==-1 && cur_close_price<(low_p-arg_thpt*Point)) {    //negative bar and go below low_p 
             if (g_debug) {
                Print("downSign=True and go below low_p");
-               Print(Time[cur_bar_shift],",low_shift=",low_shift-cur_bar_shift,",low_p=",low_p);
+               Print("period=",arg_period);
+               datetime tm=iTime(NULL,arg_period,cur_bar_shift);
+               //Print(Time[cur_bar_shift],",low_shift=",low_shift-cur_bar_shift,",low_p=",low_p);
+               Print(tm,",low_shift=",low_shift-cur_bar_shift,",low_p=",low_p);
                Print("cur_bar_shift=",cur_bar_shift);
                Print("shortLowShift=",shortLowShift);
                Print("midLowShift=",midLowShift);
@@ -1625,6 +1650,208 @@ int getZigTurn(int arg_shift,int &arg_lst_stupi,int &arg_lst_mdupi,int &arg_lst_
             //}
          } else {
                return -2;
+         }
+      } else {
+         return -1;
+      }
+   }
+   
+   return 0;
+   
+}
+//+------------------------------------------------------------------+
+//| Zigzag Turn
+//| arg_period: period
+//| arg_shift: series
+//| arg_lst_small_upi: last short up shift
+//| arg_lst_big_upi: last middle up shift
+//| arg_lst_small_dwi: last short down shift
+//| arg_lst_big_dwi: last middle down shift
+//| arg_long: 0,for short and mid;1,for mid and long
+//| return value: -1,turn down;1:turn up;0:n/a
+//+------------------------------------------------------------------+
+int getZigTurn2(  int arg_period,int arg_shift,int &arg_lst_small_upi,int &arg_lst_big_upi,int &arg_lst_small_dwi,int &arg_lst_big_dwi,
+                  int arg_long=0,int arg_deviation_st=0,int arg_deviation_md=0,int arg_deviation_lg=0,int arg_thpt=0)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   
+   arg_lst_small_upi=arg_lst_big_upi=arg_lst_small_dwi=arg_lst_big_dwi=0;
+
+   int up_idx=8;
+   int dw_idx=9;
+   int midup_idx=10;
+   int middw_idx=11;
+   int longup_idx=12;
+   int longdw_idx=13;
+   
+   int high_shift=0;
+   int low_shift=0;
+   double high_p=0;
+   double low_p=0;
+   
+   int smallLowShift=0,smallHighShift=0;
+   int bigLowShift=0,bigHighShift=0;
+   int smallLowShift2=0,smallHighShift2=0;
+   
+   int shortLowShift=0,shortHighShift=0;
+   int midLowShift=0,midHighShift=0;
+   int shortLowShift2=0,shortHighShift2=0;
+   int longLowShift=0,longHighShift=0;
+   int midLowShift2=0,midHighShift2=0;
+
+   shortLowShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift);
+   shortHighShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift);
+   midLowShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,cur_bar_shift);
+   midHighShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,cur_bar_shift);
+   longLowShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,longup_idx,cur_bar_shift);
+   longHighShift=(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,longdw_idx,cur_bar_shift);
+   if (shortLowShift>0) {
+      shortLowShift2=shortLowShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,up_idx,cur_bar_shift+shortLowShift);
+   }
+   if (shortHighShift>0) {
+      shortHighShift2=shortHighShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,dw_idx,cur_bar_shift+shortHighShift);
+   }
+   if (midLowShift>0) {
+      midLowShift2=midLowShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,midup_idx,cur_bar_shift+midLowShift);
+   }
+   if (midHighShift>0) {
+      midHighShift2=midHighShift+(int)iCustom(NULL,arg_period,"lang_zigzag",false,arg_deviation_st,arg_deviation_md,arg_deviation_lg,0,middw_idx,cur_bar_shift+midHighShift);
+   }
+   
+   if (arg_long==0) {
+      smallLowShift=shortLowShift;
+      smallHighShift=shortHighShift;
+      bigLowShift=midLowShift;
+      bigHighShift=midHighShift;
+      smallLowShift2=shortLowShift2;
+      smallHighShift2=shortHighShift2;
+   } else {
+      smallLowShift=midLowShift;
+      smallHighShift=midHighShift;
+      bigLowShift=longLowShift;
+      bigHighShift=longHighShift;
+      smallLowShift2=midLowShift2;
+      smallHighShift2=midHighShift2;
+   }
+   
+   if (smallHighShift>0 && bigHighShift>0 && smallHighShift==bigHighShift) {
+      return 0;
+   }
+   if (smallLowShift>0 && bigLowShift>0 && smallLowShift==bigLowShift) {
+      return 0;
+   }
+
+   bool upSign=false;
+   bool upSign_fst=false;
+   //
+   if (smallLowShift>0 && bigLowShift>0 && smallLowShift<bigLowShift) {
+      double smallLow_low=iLow(NULL,arg_period,cur_bar_shift+smallLowShift);
+      double bigLow_low=iLow(NULL,arg_period,cur_bar_shift+bigLowShift);
+      if (smallLow_low>bigLow_low) {
+         high_shift=iHighest(NULL,arg_period,MODE_HIGH,bigLowShift-smallLowShift-1,cur_bar_shift+smallLowShift+1);
+         high_p=iHigh(NULL,arg_period,high_shift);
+         upSign=true;
+      }
+   }
+   if (upSign && smallLowShift2>=bigLowShift) upSign_fst=true;  //start turn up
+   else upSign_fst=false;
+
+   bool downSign=false;
+   bool downSign_fst=false;
+   //
+   if (smallHighShift>0 && bigHighShift>0 && smallHighShift<bigHighShift) {
+      double smallHigh_high=iHigh(NULL,arg_period,cur_bar_shift+smallHighShift);
+      double bigHigh_high=iHigh(NULL,arg_period,cur_bar_shift+bigHighShift);
+      if (smallHigh_high<bigHigh_high) {
+         low_shift=iLowest(NULL,arg_period,MODE_LOW,bigHighShift-smallHighShift-1,cur_bar_shift+smallHighShift+1);
+         low_p=iLow(NULL,arg_period,low_shift);
+         downSign=true;
+      }
+   }
+   
+   if (downSign && smallHighShift2>=bigHighShift) downSign_fst=true;   //start turn down
+   else downSign_fst=false;
+   
+   if (upSign && downSign) {
+      if          (bigLowShift<bigHighShift) {
+         downSign=false;
+      } else if   (bigHighShift<bigLowShift) {
+         upSign=false;
+      } else {
+         return 0;
+      }
+   }
+   
+   if (g_debug) {
+      Print("period=",arg_period,",long=",arg_long);
+      Print("upSign=",upSign,",downSign=",downSign);
+      Print("smallLowShift=",smallLowShift);
+      Print("bigLowShift=",bigLowShift);
+      Print("smallLowShift2=",smallLowShift2);
+      Print("smallHighShift=",smallHighShift);
+      Print("bigHighShift=",bigHighShift);
+      Print("smallHighShift2=",smallHighShift2);
+      Print("high_shift=",high_shift,",low_shift=",low_shift);
+      Print("high_p=",high_p,",low_p=",low_p);
+   }
+
+   arg_lst_small_upi=smallLowShift;
+   arg_lst_big_upi=bigLowShift;
+   arg_lst_small_dwi=smallHighShift;
+   arg_lst_big_dwi=bigHighShift;
+   
+   int bar_status=0;
+   double cur_open_price=iOpen(NULL,arg_period,cur_bar_shift);
+   double cur_close_price=iClose(NULL,arg_period,cur_bar_shift);
+   if (cur_open_price>cur_close_price) bar_status=-1;      //negative bar
+   if (cur_open_price<cur_close_price) bar_status=1;       //positive bar
+   if (upSign && !downSign) {
+      if (upSign_fst) {
+         if (bar_status==1 && cur_close_price>(high_p+arg_thpt*Point)) {    //positive bar and go beyond high_p
+            if (g_debug) {
+               Print("upSign=True and go beyond high_p");
+               Print("period=",arg_period,",long=",arg_long);
+               datetime tm=iTime(NULL,arg_period,cur_bar_shift);
+               Print(tm,",high_shift=",high_shift-cur_bar_shift,",high_p=",high_p);
+               Print("cur_bar_shift=",cur_bar_shift);
+               Print("smallLowShift=",smallLowShift);
+               Print("bigLowShift=",bigLowShift);
+               Print("smallLowShift2=",smallLowShift2);
+               Print("smallHighShift=",smallHighShift);
+               Print("bigHighShift=",bigHighShift);
+               Print("smallHighShift2=",smallHighShift2);
+            }
+            return 3;
+         } else {
+            return 2;
+         }
+      } else {
+         return 1;
+      }
+   }
+   
+   if (downSign && !upSign) {
+      if (downSign_fst) {
+         if (bar_status==-1 && cur_close_price<(low_p-arg_thpt*Point)) {    //negative bar and go below low_p 
+            if (g_debug) {
+               Print("downSign=True and go below low_p");
+               Print("period=",arg_period,",long=",arg_long);
+               datetime tm=iTime(NULL,arg_period,cur_bar_shift);
+               Print(tm,",low_shift=",low_shift-cur_bar_shift,",low_p=",low_p);
+               Print("cur_bar_shift=",cur_bar_shift);
+               Print("smallLowShift=",smallLowShift);
+               Print("bigLowShift=",bigLowShift);
+               Print("smallLowShift2=",smallLowShift2);
+               Print("smallHighShift=",smallHighShift);
+               Print("bigHighShift=",bigHighShift);
+               Print("smallHighShift2=",smallHighShift2);
+            }
+            return -3;
+         } else {
+            return -2;
          }
       } else {
          return -1;

@@ -28,11 +28,16 @@
 double         signalBuffer[];
 
 //input
-input int i_deviation_st=0;     // Deviation(short),should set to equal to zigzag's deviation value
-input int i_deviation_md=0;     // Deviation(mid),should set to equal to zigzag's deviation value
-input int i_deviation_lg=0;     // Deviation(long),should set to equal to zigzag's deviation value
-input int i_thredhold=0;         // breakthrough thredhold point
+input int      i_expand=0;          //0:current(not expand),1:expand one level,2:expand two level
+input int      i_long=0;            //0:short vs mid,1:mid vs long
 
+//global
+int   g_deviation_st=0;     // Deviation(short),should set to equal to zigzag's deviation value
+int   g_deviation_md=0;     // Deviation(mid),should set to equal to zigzag's deviation value
+int   g_deviation_lg=0;     // Deviation(long),should set to equal to zigzag's deviation value
+int   g_thredhold=0;        // breakthrough thredhold point
+
+int   g_larger_shift=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -48,8 +53,7 @@ int OnInit()
    SetIndexBuffer(0,signalBuffer);
    
    //SetIndexArrow(0,SYMBOL_ARROWUP);
-   
-   
+      
 //---
    return(INIT_SUCCEEDED);
 }
@@ -85,11 +89,41 @@ int OnCalculate(const int rates_total,
    if(g_debug) {
       Print("1:st=",st);
    }
-   int lst_short_low_sht=0,lst_mid_low_sht=0,lst_short_high_sht=0,lst_mid_high_sht=0;
+   int lst_small_low_sht=0,lst_big_low_sht=0,lst_small_high_sht=0,lst_big_high_sht=0;
    for(int i=st-1;i>0;i--) {
-      signalBuffer[i]=getZigTurn(i,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht,i_deviation_st,i_deviation_md,i_deviation_lg,i_thredhold);
+      int bar_shift=i;
+      int pd=PERIOD_CURRENT;
+      
+      if          (i_expand==0) {                        //not expand
+         bar_shift=i;
+         pd=PERIOD_CURRENT;
+         signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
+                                       i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
+                                       
+      } else if   (i_expand==1) {  //expand to larger period
+         pd=expandPeriod(PERIOD_CURRENT,i,bar_shift,0);
+         if (g_larger_shift>0 && g_larger_shift==bar_shift) {
+            signalBuffer[i]=signalBuffer[i+1];
+         } else {
+            signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
+                                          i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
+
+            g_larger_shift=bar_shift;
+         }
+      } else if   (i_expand==2) {  //expand to larger period
+         pd=expandPeriod(PERIOD_CURRENT,i,bar_shift,1);
+         if (g_larger_shift>0 && g_larger_shift==bar_shift) {
+            signalBuffer[i]=signalBuffer[i+1];
+         } else {
+            signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
+                                          i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
+
+            g_larger_shift=bar_shift;
+         }
+      }
+      
       if (MathAbs(signalBuffer[i])>1) {
-         //Print(Time[i],",lst_stl_sht=",lst_short_low_sht,",lst_mdl_sht=",lst_mid_low_sht,",lst_sth_sht=",lst_short_high_sht,",lst_mdh_sht=",lst_mid_high_sht);
+         //Print(Time[i],",lst_sml_sht=",lst_small_low_sht,",lst_bgl_sht=",lst_big_low_sht,",lst_smh_sht=",lst_small_high_sht,",lst_bgh_sht=",lst_big_high_sht);
       }
    }
 
