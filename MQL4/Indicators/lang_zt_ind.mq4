@@ -37,7 +37,7 @@ int   g_deviation_md=0;     // Deviation(mid),should set to equal to zigzag's de
 int   g_deviation_lg=0;     // Deviation(long),should set to equal to zigzag's deviation value
 int   g_thredhold=0;        // breakthrough thredhold point
 
-int   g_larger_shift=0;
+//int   g_larger_shift=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -102,26 +102,28 @@ int OnCalculate(const int rates_total,
                                        
       } else if   (i_expand==1) {  //expand to larger period
          pd=expandPeriod(PERIOD_CURRENT,i,bar_shift,0);
-         if (g_larger_shift>0 && g_larger_shift==bar_shift) {
-            signalBuffer[i]=signalBuffer[i+1];
-         } else {
-            signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
-                                          i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
+         signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
+                                       i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
 
-            g_larger_shift=bar_shift;
-         }
       } else if   (i_expand==2) {  //expand to larger period
          pd=expandPeriod(PERIOD_CURRENT,i,bar_shift,1);
-         if (g_larger_shift>0 && g_larger_shift==bar_shift) {
-            signalBuffer[i]=signalBuffer[i+1];
-         } else {
-            signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
-                                          i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
+         signalBuffer[i]=getZigTurn2(  pd,bar_shift,lst_small_low_sht,lst_big_low_sht,lst_small_high_sht,lst_big_high_sht,
+                                       i_long,g_deviation_st,g_deviation_md,g_deviation_lg,g_thredhold);
 
-            g_larger_shift=bar_shift;
-         }
       }
       
+      /*
+      //debug
+      datetime t=Time[i];
+      datetime t1=StringToTime("2018.01.15 09:15");
+      string   sym="AUDUSD";
+      if (t==t1 && StringCompare(sym,Symbol()==0)) {
+         Print("time=",t);
+         Print("shift=",i);
+         Print("ret=",signalBuffer[i]);
+      }
+      */
+
       if (MathAbs(signalBuffer[i])>1) {
          //Print(Time[i],",lst_sml_sht=",lst_small_low_sht,",lst_bgl_sht=",lst_big_low_sht,",lst_smh_sht=",lst_small_high_sht,",lst_bgh_sht=",lst_big_high_sht);
       }
