@@ -121,7 +121,7 @@ void OnTick()
       */
 
       if (ifClose(last_bar_shift,-1)) {
-         Print("closed buy order");
+         Print("closed sell order");
          if (!FindOrderA(NULL,0,g_magic)) {
             has_order=false;
          }
