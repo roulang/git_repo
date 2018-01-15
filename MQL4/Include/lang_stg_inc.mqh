@@ -246,6 +246,8 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
       arg_last_cross=-1;
       return -1;
    }
+
+   int ret=0;   
    
 //| touch status
 //| ->see below
@@ -266,7 +268,7 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
       if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
          if (cur_short_ma_touch==3) {              //current bar is positive and under touch short ma
             if (MathAbs(lst_short_ma_touch)>=3) {   //last bar is above or under touch short ma
-               return 2;
+               ret=2;
             }
          }
       }
@@ -275,7 +277,7 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
       if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
          if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
             if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
-               return -2;
+               ret=-2;
             }
          }
       }
@@ -288,106 +290,21 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
       }
    }
    */
-   
-   return 0;
-}
 
-//+------------------------------------------------------------------+
-//| Trend strategy Open2 (use ma & zigturn)
-//| date: 2018/01/09
-//| arg_shift: bar shift
-//| arg_last_cross: 1,fast ma up cross slow ma;-1,fast ma down cross slow ma
-//| &arg_ls_price: lose stop price(for return)
-//| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
-//+------------------------------------------------------------------+
-int isTrendStgOpen2(int arg_shift,int &arg_last_cross,double &arg_ls_price)
-{
-   int cur_bar_shift=arg_shift;
-   int lst_bar_shift=arg_shift+1;
-   
-   //zigturn support
+   //add zigturn
    int lst_short_low_sht=0,lst_mid_low_sht=0,lst_short_high_sht=0,lst_mid_high_sht=0;
-   //1 for up,2 for up first,3 for up break
-   //-1 for down,-2 for down first,-3 for down break
-   int zt=getZigTurn(cur_bar_shift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
-   
-   int cur_touch_status[2];
-   double cur_short_ma,cur_middle_ma;
-   int cur_ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,cur_short_ma,cur_middle_ma);
+   int cur_pd=PERIOD_CURRENT;
+   int zt1=getZigTurn2(cur_pd,cur_bar_shift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
+   int exp_bar_shift;
+   int exp_pd=expandPeriod(PERIOD_CURRENT,cur_bar_shift,exp_bar_shift,0);
+   int zt2=getZigTurn2(exp_pd,exp_bar_shift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
 
-   int lst_touch_status[2];
-   double lst_short_ma,lst_middle_ma;
-   int lst_ret=getMAStatus2(PERIOD_CURRENT,lst_bar_shift,lst_touch_status,lst_short_ma,lst_middle_ma);
+   if (MathAbs(ret)==2) {
+      if (ret>0 && zt1>=0 && zt2>=1) ret += 1;
+      if (ret<0 && zt1<=0 && zt2<=-1) ret -= 1;
+   }
 
-   arg_ls_price=cur_middle_ma;
-   
-//| ret
-//| return value: short>mid,same direction,up,5;
-//|               short>mid,different direction(short down,mid up),4;
-//|               short>mid,different direction(short up,mid down),3;
-//|               short>mid,same direction(short down,mid down),2;
-//|               short>mid,no direction(short down,mid down),1;
-//| return value: short<mid,same direction,down,-5;
-//|               short<mid,different direction(short up,mid down),-4;
-//|               short<mid,different direction(short down,mid up),-3;
-//|               short<mid,same direction(short up,mid up),-2;
-//|               short<mid,no direction(short down,mid down),-1;
-//|               n/a:0
-//| return value: short break mid,up(within last 2 bars):+10
-//|               short break mid,down(within last 2 bars):-10
-
-   if (cur_ret>=10 && arg_last_cross!=1) {   //short ma up cross mid ma
-      arg_last_cross=1;
-      return 1;
-   }
-   if (cur_ret<=-10 && arg_last_cross!=-1) {   //short ma down cross mid ma
-      arg_last_cross=-1;
-      return -1;
-   }
-   
-//| touch status
-//| ->see below
-//| <<ma line>>
-//|     (above) 0
-//|  |  (high)  1
-//| [ ] (open)  2
-//| [ ] (close) 2
-//|  |  (low)   3
-//|     (below) 4
-
-   int cur_short_ma_touch=cur_touch_status[0];
-   int cur_middle_ma_touch=cur_touch_status[1];
-   int lst_short_ma_touch=lst_touch_status[0];
-   int lst_middle_ma_touch=lst_touch_status[1];
-
-   if (arg_last_cross==1) {                        //fast ma up cross slow ma
-      if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
-         if (cur_short_ma_touch==3) {              //current bar is positive and under touch short ma
-            if (MathAbs(lst_short_ma_touch)>=3) {   //last bar is above or under touch short ma
-               return 2;
-            }
-         }
-      }
-   }
-   if (arg_last_cross==-1) {                       //fast ma down cross slow ma
-      if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
-         if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
-            if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
-               return -2;
-            }
-         }
-      }
-   }
-   /*
-   if (MathAbs(arg_last_cross)==1) {               //has crossed
-      if (MathAbs(cur_middle_ma_touch)==2) {       //current bar is crossing middle ma
-         arg_last_cross=0;
-         return 1;                                 //close all
-      }
-   }
-   */
-   
-   return 0;
+   return ret;
 }
 
 //+------------------------------------------------------------------+
