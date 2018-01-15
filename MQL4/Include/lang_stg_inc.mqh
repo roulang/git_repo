@@ -823,7 +823,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
                         int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
                         int arg_atr_lvl_pt=5,int arg_atr_range=5,
                         int arg_short_ma_ped=12,int arg_mid_ma_ped=36,
-                        bool arg_atr_control=true,bool arg_ma_control=true
+                        bool arg_atr_control=true,bool arg_ma_control=true,bool arg_zt_control=true
                       )
 {
 
@@ -1145,6 +1145,38 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
          if (  cur_ma_status>=0 || cur_ma_status==-3 || cur_ma_status==-2 ||
                cur_ma_status==1 || cur_ma_status==-1 || cur_ma_status==0) {  //ma mid is up or short>mid
             Print(t,"break down,but ma mid is up,(ma=",cur_ma_status,")");
+            ret=0;
+         }
+      }
+   }
+
+   //add zt by 20180115
+   if (arg_zt_control) {
+      int lst_short_low_sht=0,lst_mid_low_sht=0,lst_short_high_sht=0,lst_mid_high_sht=0;
+      int expBarShift=0;
+      int expPd=expandPeriod(PERIOD_CURRENT,cur_bar_shift,expBarShift,0);
+      int zt_status=getZigTurn2(expPd,expBarShift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
+      if (ret==2) {     //rebound up
+         if (zt_status<0) {
+            Print(t,"rebound up,but zt is down,(zt=",zt_status,")");
+            ret=0;
+         }
+      }
+      if (ret==-2) {    //rebound down
+         if (zt_status>0) {
+            Print(t,"rebound down,but zt is up,(zt=",zt_status,")");
+            ret=0;
+         }
+      }
+      if (ret>=3) {     //break up
+         if (zt_status<=0) {
+            Print(t,"break up,but zt is down,(zt=",zt_status,")");
+            ret=0;
+         }
+      }
+      if (ret<=-3) {    //break down
+         if (zt_status>=0) {
+            Print(t,"break down,but zt is up,(zt=",zt_status,")");
             ret=0;
          }
       }

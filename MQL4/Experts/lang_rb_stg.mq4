@@ -22,6 +22,7 @@ input int      i_high_low_gap_pt=150;
 input int      i_gap2_pt=20;
 input bool     i_atr_control=true;
 input bool     i_ma_control=true;
+input bool     i_zt_control=true;
 input int      i_tp_cnt=1;             //one|two|three times tp
 input bool     i_manual=false;
 
@@ -163,7 +164,7 @@ void OnTick()
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
                            g_short_ma_ped,g_mid_ma_ped,
-                           i_atr_control,i_ma_control);
+                           i_atr_control,i_ma_control,i_zt_control);
    
    if (touch_status>=3 && has_order) {    //break up,have order
       //close opposit order

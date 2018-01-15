@@ -34,6 +34,7 @@ input int      i_gap2_pt=20;
 
 input bool     i_atr_control=true;
 input bool     i_ma_control=true;
+input bool     i_zt_control=true;
 input bool     i_filter=false;   
 input bool     i_sendmail=true;
 
@@ -129,7 +130,7 @@ int OnCalculate(const int rates_total,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
                            g_short_ma_ped,g_mid_ma_ped,
-                           i_atr_control,i_ma_control);
+                           i_atr_control,i_ma_control,i_zt_control);
 
       if (!i_filter) {
          ret=high_low_touch_status;
