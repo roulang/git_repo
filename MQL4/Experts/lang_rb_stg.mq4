@@ -23,6 +23,7 @@ input int      i_gap2_pt=20;
 input bool     i_atr_control=true;
 input bool     i_ma_control=true;
 input bool     i_zt_control=true;
+input int      i_expand=1;             //0:current(not expand),1:expand one level,2:expand two level
 input int      i_tp_cnt=1;             //one|two|three times tp
 input bool     i_manual=false;
 
@@ -31,7 +32,6 @@ int      g_magic=3;        //rebound
 int      g_magic2=4;        //break
 datetime g_orderdt;
 
-int      g_expand=1;
 int      g_long=1;
 int      g_range=20;
 double   g_break_ls_ratio=0.6;
@@ -160,7 +160,7 @@ void OnTick()
    bool arg_atr_control=true,bool arg_ma_control=true
    */
    sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
-                           i_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
+                           i_ls_pt,g_break_ls_ratio,g_range,0,i_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
                            g_short_ma_ped,g_mid_ma_ped,
