@@ -1157,13 +1157,13 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
       int expPd=expandPeriod(PERIOD_CURRENT,cur_bar_shift,expBarShift,0);
       int zt_status=getZigTurn2(expPd,expBarShift,lst_short_low_sht,lst_mid_low_sht,lst_short_high_sht,lst_mid_high_sht);
       if (ret==2) {     //rebound up
-         if (zt_status<0) {
+         if (zt_status<=0) {
             Print(t,"rebound up,but zt is down,(zt=",zt_status,")");
             ret=0;
          }
       }
       if (ret==-2) {    //rebound down
-         if (zt_status>0) {
+         if (zt_status>=0) {
             Print(t,"rebound down,but zt is up,(zt=",zt_status,")");
             ret=0;
          }
