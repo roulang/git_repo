@@ -128,13 +128,13 @@ void OnTick()
 
    double ls_tgt_price;
    int sign=isTrendStgOpen(last_bar_shift,g_ma_cross,ls_tgt_price);
-   if (sign==1 && has_order) {
+   if (sign>=1 && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
       }
    }
-   if (sign==-1 && has_order) {
+   if (sign<=-1 && has_order) {
       //close opposit buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {   //close buy order
          Print("close opposit(buy) order");
@@ -153,15 +153,53 @@ void OnTick()
       has_order=false;
    }
    
+   //modify buy order
+   if (sign==3 && has_order) {
+      if (FindOrderA(NULL,1,g_magic)) {   //buy order
+         //moving stop
+         double price,ls_price;
+         price=Bid;
+         int ls_pt=(int)NormalizeDouble((price-ls_tgt_price)/Point,0);
+         if (ls_pt<g_min_ls_pt) {
+            ls_price=NormalizeDouble(price-g_min_ls_pt*Point,Digits);
+            Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt below(",ls_price,")");
+         } else {
+            ls_price=ls_tgt_price;
+         }
+         if (movingStop4(NULL,1,g_magic,ls_price,g_min_ls_pt)) {
+            Print("movingstop of buy order");
+         }
+      }
+   }
+
+   //modify sell order
+   if (sign==-3 && has_order) {
+      if (FindOrderA(NULL,-1,g_magic)) {   //sell order
+         //moving stop
+         double price,ls_price;
+         price=Ask;
+         int ls_pt=(int)NormalizeDouble((ls_tgt_price-price)/Point,0);
+         if (ls_pt<g_min_ls_pt) {
+            ls_price=NormalizeDouble(price+g_min_ls_pt*Point,Digits);
+            Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt above(",ls_price,")");
+         } else {
+            ls_price=ls_tgt_price;
+         }
+         if (movingStop4(NULL,-1,g_magic,ls_price,g_min_ls_pt)) {
+            Print("movingstop of sell order");
+         }
+      }
+   }
+
    //open buy
-   if (sign==2 && !has_order) {
+   if (sign==3 && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
-      price=Ask;
+      price=Bid;
       int ls_pt=(int)NormalizeDouble((price-ls_tgt_price)/Point,0);
       if (ls_pt<g_min_ls_pt) {
          ls_price=NormalizeDouble(price-g_min_ls_pt*Point,Digits);
-         Print("adjust ls_price(",ls_tgt_price," to atleast ",g_min_ls_pt,"pt below(",ls_price,")");
+         Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt below(",ls_price,")");
       } else {
          ls_price=ls_tgt_price;
       }
@@ -173,14 +211,14 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-2 && !has_order) {
+   if (sign==-3 && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
-      price=Bid;
+      price=Ask;
       int ls_pt=(int)NormalizeDouble((ls_tgt_price-price)/Point,0);
       if (ls_pt<g_min_ls_pt) {
          ls_price=NormalizeDouble(price+g_min_ls_pt*Point,Digits);
-         Print("adjust ls_price(",ls_tgt_price," to atleast ",g_min_ls_pt,"pt above(",ls_price,")");
+         Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt above(",ls_price,")");
       } else {
          ls_price=ls_tgt_price;
       }
