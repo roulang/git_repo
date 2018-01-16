@@ -134,10 +134,15 @@ void OnTick()
       g_start=true;
       g_start_dt=now;
       getHighLow_Value(cur_bar_shift,g_expand,g_range,g_long,i_th_pt,i_th2_pt,0,0,g_price,g_ls_price);
+      if (g_price[0]>0) {
+         Print("high_range=",g_price[0]);
+      }
+      if (g_price[1]>0) {
+         Print("low_range=",g_price[1]);
+      }
       if (g_price[0]>0 && g_price[1]>0) {
          g_high_low_range=g_price[0]-g_price[1];
          g_high_low_range=NormalizeDouble(g_high_low_range,Digits);
-         Print("high_range=",g_price[0],",low_range=",g_price[1]);
       } else {
          g_high_low_range=0;
       }
@@ -164,7 +169,7 @@ void OnTick()
       //check bar status
       double high_price=g_price[0];
       double low_price=g_price[1];
-      if (g_high_low_range>0) {
+      if (low_price>0) {
          if (last_bar_low<low_price && last_bar_sub_low>low_price) {      //rebound up
             Print("Open buy order(rebound up),",now);
             double ls_tgt_price=last_bar_low-i_ls_pt*Point;
@@ -176,7 +181,9 @@ void OnTick()
             if (OrderBuy2(0,ls_tgt_price,tp_tgt_price,g_magic2)) {    //open buy rebound order
                has_order=true;
             }
-         } else
+         }
+      }
+      if (low_price>0 && g_high_low_range>0) {
          if (last_bar_low<low_price && last_bar_sub_low<low_price && last_bar_status==1) {      //break down
             Print("Open sell order(break down),",now);
             double ls_tgt_price=low_price+g_high_low_range*g_ls_ratio;
@@ -185,7 +192,9 @@ void OnTick()
             if (OrderSell2(0,ls_tgt_price,-1,g_magic)) {             //open sell break order
                has_order=true;
             }
-         } else
+         }
+      }
+      if (high_price>0) {
          if (last_bar_high>high_price && last_bar_sub_high<high_price) {  //rebound down
             Print("Open sell order(rebound down),",now);
             double ls_tgt_price=last_bar_high+i_ls_pt*Point;
@@ -197,7 +206,9 @@ void OnTick()
             if (OrderSell2(0,ls_tgt_price,tp_tgt_price,g_magic2)) {  //open sell rebound order
                has_order=true;
             }
-         } else
+         }
+      }
+      if (high_price>0 && g_high_low_range>0) {
          if (last_bar_high>high_price && last_bar_sub_high>high_price && last_bar_status==0) {  //break up
             Print("Open buy order(break up),",now);
             double ls_tgt_price=high_price-g_high_low_range*g_ls_ratio;
