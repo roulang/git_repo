@@ -848,7 +848,67 @@ bool movingStop3(string arg_sym, int arg_mag, int arg_sht)
    }
    return ret2;
 }
+//+------------------------------------------------------------------+
+//| moving stop function 
+//| arg_type:1 buy,-1 sell
+//|
+//+------------------------------------------------------------------+
+bool movingStop4(string arg_sym, int arg_type, int arg_mag, double arg_ls_price, int arg_min_offset_pt)
+{
+   string cur;
+   if (arg_sym==NULL) cur=Symbol();
+   else cur=arg_sym;
 
+   bool ret2=false;
+   int t=OrdersTotal();
+   for(int i=t-1;i>=0;i--) {
+      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if (ret==true) {
+         //if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_mag)) {
+         if (arg_type==1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_mag,arg_type)) {
+            //buy order
+            double cur_open_price=NormalizeDouble(OrderOpenPrice(),Digits);
+            double cur_ls_price=NormalizeDouble(OrderStopLoss(),Digits);
+            double cur_tp_price=NormalizeDouble(OrderTakeProfit(),Digits);
+            int    offset_pt=(int)NormalizeDouble((arg_ls_price-cur_ls_price)/Point,0);
+            if (offset_pt>=arg_min_offset_pt) {
+               ret2=OrderModify(OrderTicket(),cur_open_price,arg_ls_price,cur_tp_price,0,Green);
+               if (ret2) {
+                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),arg_ls_price,cur_tp_price);
+               } else {
+                  int check=GetLastError(); 
+                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
+               }
+            } else {
+               Print("tgt_ls_price(",arg_ls_price,") is not enough ",arg_min_offset_pt,"pt above the cur_ls_price(",cur_ls_price,")" );
+            }
+         }
+         if (arg_type==-1 && isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_mag,arg_type)) {
+            //sell order
+            double cur_open_price=NormalizeDouble(OrderOpenPrice(),Digits);
+            double cur_ls_price=NormalizeDouble(OrderStopLoss(),Digits);
+            double cur_tp_price=NormalizeDouble(OrderTakeProfit(),Digits);
+            int    offset_pt=(int)NormalizeDouble((cur_ls_price-arg_ls_price)/Point,0);
+            if (offset_pt>=arg_min_offset_pt) {
+               ret2=OrderModify(OrderTicket(),cur_open_price,arg_ls_price,cur_tp_price,0,Red);
+               if (ret2) {
+                  mailNoticeOrderMod(OrderTicket(),OrderSymbol(),OrderType(),OrderOpenPrice(),arg_ls_price,cur_tp_price);
+               } else {
+                  int check=GetLastError(); 
+                  if(check != ERR_NO_ERROR) Print("Order Modify Error: ", ErrorDescription(check));
+               }
+            } else {
+               Print("tgt_ls_price(",arg_ls_price,") is not enough ",arg_min_offset_pt,"pt below the cur_ls_price(",cur_ls_price,")" );
+            }
+         }
+      } else {
+         int check=GetLastError(); 
+         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+      }
+   }
+
+   return ret2;
+}
 void writeOrderCmdToFile(s_Order &arg_order)
 {
    if (i_for_test) return;
