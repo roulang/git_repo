@@ -13,6 +13,7 @@
 //--------------------------------
 
 //--- input
+input int i_min_ls_pt=300;
 
 //--- global
 int      g_magic=5;        //trend horse
@@ -21,7 +22,6 @@ datetime g_orderdt;
 
 int g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
 int g_adx_status=0;  //1,above 40(default);-1,below 40(default)
-int g_min_ls_pt=300;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -160,13 +160,13 @@ void OnTick()
          double price,ls_price;
          price=Bid;
          int ls_pt=(int)NormalizeDouble((price-ls_tgt_price)/Point,0);
-         if (ls_pt<g_min_ls_pt) {
-            ls_price=NormalizeDouble(price-g_min_ls_pt*Point,Digits);
-            Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt below(",ls_price,")");
+         if (ls_pt<i_min_ls_pt) {
+            ls_price=NormalizeDouble(price-i_min_ls_pt*Point,Digits);
+            Print("adjust ls_price(",ls_tgt_price," to at least ",i_min_ls_pt,"pt below(",ls_price,")");
          } else {
             ls_price=ls_tgt_price;
          }
-         if (movingStop4(NULL,1,g_magic,ls_price,g_min_ls_pt)) {
+         if (movingStop4(NULL,1,g_magic,ls_price,i_min_ls_pt)) {
             Print("movingstop of buy order");
          }
       }
@@ -179,13 +179,13 @@ void OnTick()
          double price,ls_price;
          price=Ask;
          int ls_pt=(int)NormalizeDouble((ls_tgt_price-price)/Point,0);
-         if (ls_pt<g_min_ls_pt) {
-            ls_price=NormalizeDouble(price+g_min_ls_pt*Point,Digits);
-            Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt above(",ls_price,")");
+         if (ls_pt<i_min_ls_pt) {
+            ls_price=NormalizeDouble(price+i_min_ls_pt*Point,Digits);
+            Print("adjust ls_price(",ls_tgt_price," to at least ",i_min_ls_pt,"pt above(",ls_price,")");
          } else {
             ls_price=ls_tgt_price;
          }
-         if (movingStop4(NULL,-1,g_magic,ls_price,g_min_ls_pt)) {
+         if (movingStop4(NULL,-1,g_magic,ls_price,i_min_ls_pt)) {
             Print("movingstop of sell order");
          }
       }
@@ -197,9 +197,9 @@ void OnTick()
       double price,ls_price;
       price=Bid;
       int ls_pt=(int)NormalizeDouble((price-ls_tgt_price)/Point,0);
-      if (ls_pt<g_min_ls_pt) {
-         ls_price=NormalizeDouble(price-g_min_ls_pt*Point,Digits);
-         Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt below(",ls_price,")");
+      if (ls_pt<i_min_ls_pt) {
+         ls_price=NormalizeDouble(price-i_min_ls_pt*Point,Digits);
+         Print("adjust ls_price(",ls_tgt_price," to at least ",i_min_ls_pt,"pt below(",ls_price,")");
       } else {
          ls_price=ls_tgt_price;
       }
@@ -216,9 +216,9 @@ void OnTick()
       double price,ls_price;
       price=Ask;
       int ls_pt=(int)NormalizeDouble((ls_tgt_price-price)/Point,0);
-      if (ls_pt<g_min_ls_pt) {
-         ls_price=NormalizeDouble(price+g_min_ls_pt*Point,Digits);
-         Print("adjust ls_price(",ls_tgt_price," to at least ",g_min_ls_pt,"pt above(",ls_price,")");
+      if (ls_pt<i_min_ls_pt) {
+         ls_price=NormalizeDouble(price+i_min_ls_pt*Point,Digits);
+         Print("adjust ls_price(",ls_tgt_price," to at least ",i_min_ls_pt,"pt above(",ls_price,")");
       } else {
          ls_price=ls_tgt_price;
       }
