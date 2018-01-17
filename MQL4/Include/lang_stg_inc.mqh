@@ -238,6 +238,51 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
 //| return value: short break mid,up(within last 2 bars):+10
 //|               short break mid,down(within last 2 bars):-10
 
+   /*
+   if (arg_last_cross==0 && arg_last_ma_cross_shift>0) {   //search the last cross bar shift and ma touch count
+      if (cur_ret>=10 || cur_ret<=-10) {
+         arg_last_ma_cross_shift=cur_bar_shift;
+         arg_last_ma_touch_cnt=0;
+      } else if (cur_ret!=0) {
+         for (int i=1;i<100;i++) {
+            int bar_shift=cur_bar_shift+i;
+            int bar_shift2=bar_shift+1;
+            int touch_status[2];
+            double short_ma,middle_ma;
+            int ret=getMAStatus2(PERIOD_CURRENT,bar_shift,touch_status,short_ma,middle_ma);
+            int touch_status2[2];
+            double short_ma2,middle_ma2;
+            int ret2=getMAStatus2(PERIOD_CURRENT,bar_shift2,touch_status2,short_ma2,middle_ma2);
+
+            int short_ma_touch=touch_status[0];
+            int middle_ma_touch=touch_status[1];
+            int short_ma_touch2=touch_status2[0];
+            int middle_ma_touch2=touch_status2[1];
+
+            if ((cur_ret>0 && ret>=10) || (cur_ret<0 && ret<=-10)) {
+               arg_last_ma_cross_shift=bar_shift;
+               break;
+            }
+            
+            if (cur_ret>0 && (ret==4 || ret==5)) {    //short ma is above mid ma,mid ma is up
+               if (short_ma_touch==3) {               //current bar is positive and under touch short ma
+                  if (MathAbs(short_ma_touch2)>=3) {  //last bar is above or under touch short ma
+                     arg_last_ma_touch_cnt+=1;
+                  }
+               }
+            }
+            if (cur_ret<0 && (ret==-4 || ret==-5)) {  //short ma is below mid ma,mid ma is down
+               if (short_ma_touch==-1) {              //current bar is negative and high touch short ma
+                  if (MathAbs(short_ma_touch2)<=1) {  //last bar is below or high touch short ma
+                     arg_last_ma_touch_cnt+=1;
+                  }
+               }
+            }
+         }
+      }
+   }
+   */
+   
    if (cur_ret>=10 && arg_last_cross!=1) {   //short ma up cross mid ma
       arg_last_cross=1;
       return 1;

@@ -32,8 +32,8 @@ double         signalBuffer[];
 input int   i_type=0;
    
 //global
-int g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
-int g_adx_status=0;  //1,above 40(default);-1,below 40(default)
+int      g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
+int      g_adx_status=0;  //1,above 40(default);-1,below 40(default)
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -88,7 +88,7 @@ int OnCalculate(const int rates_total,
       Print("1:st=",st);
    }
    for(int i=st-skip_first_bars;i>0;i--) {
-      int touch_status[2];
+      //int touch_status[2];
       double ls_price=0;
       if (i_type==0) {
          signalBuffer[i]=isTrendStgOpen(i,g_ma_cross,ls_price);
