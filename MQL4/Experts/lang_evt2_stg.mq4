@@ -24,6 +24,7 @@ datetime g_start_dt;
 bool     g_start=false;
 double   g_price[2],g_ls_price[2];
 double   g_price_range;
+int      g_order_cnt=0;
 
 //--------------------------------
 
@@ -127,6 +128,7 @@ void OnTick()
    if (g_start && (now-g_start_dt)>i_time_ped) {   //timeover
       Print("news time over, avoid to open order");
       g_start=false;
+      g_order_cnt=0;
    }
    
    if (isPd3>0) {
@@ -148,7 +150,7 @@ void OnTick()
       }
    }
    
-   if (g_start && !has_order) {
+   if (g_start && g_order_cnt==0 && !has_order) {
       double ask_price=Ask;
       double bid_price=Bid;
       double last_bar_open=Open[last_bar_shift];
@@ -179,6 +181,7 @@ void OnTick()
             double tp_tgt_price=bid_price+tp_tgt_pt*Point;
             tp_tgt_price=NormalizeDouble(tp_tgt_price,Digits);
             if (OrderBuy2(0,ls_tgt_price,tp_tgt_price,g_magic2)) {    //open buy rebound order
+               g_order_cnt+=1;
                has_order=true;
             }
          }
@@ -190,6 +193,7 @@ void OnTick()
             ls_tgt_price=NormalizeDouble(ls_tgt_price,Digits);
             int    ls_tgt_pt=(int)NormalizeDouble((ls_tgt_price-ask_price)/Point,0);
             if (OrderSell2(0,ls_tgt_price,-1,g_magic)) {             //open sell break order
+               g_order_cnt+=1;
                has_order=true;
             }
          }
@@ -204,6 +208,7 @@ void OnTick()
             double tp_tgt_price=ask_price-tp_tgt_pt*Point;
             tp_tgt_price=NormalizeDouble(tp_tgt_price,Digits);
             if (OrderSell2(0,ls_tgt_price,tp_tgt_price,g_magic2)) {  //open sell rebound order
+               g_order_cnt+=1;
                has_order=true;
             }
          }
@@ -215,6 +220,7 @@ void OnTick()
             ls_tgt_price=NormalizeDouble(ls_tgt_price,Digits);
             int    ls_tgt_pt=(int)NormalizeDouble((bid_price-ls_tgt_price)/Point,0);
             if (OrderBuy2(0,ls_tgt_price,-1,g_magic)) {    //open buy break order
+               g_order_cnt+=1;
                has_order=true;
             }
          }

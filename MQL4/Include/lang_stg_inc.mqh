@@ -722,6 +722,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
             if (g_debug) Print("ask_price=",tgt_price,",cur_high2_gap_pt(",cur_high2_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
          } else {
             buy_stop_price=range_high[i]+arg_offpt*Point;
+            buy_stop_price=NormalizeDouble(buy_stop_price,Digits);
             if (g_debug) Print("ask_price=",tgt_price,",buy_stop_price=",buy_stop_price);
             break;
          }
@@ -754,6 +755,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
             if (g_debug) Print("bid_price=",tgt_price,",range low(",range_low[i],") is not low enough(gap<",arg_thpt,"pt)");
          } else {
             buy_stop_ls_price=range_low[i]-arg_offpt*Point;
+            buy_stop_ls_price=NormalizeDouble(buy_stop_ls_price,Digits);
             if (g_debug) Print("bid_price=",tgt_price,",buy_stop_ls_price=",buy_stop_ls_price);
             break;
          }
@@ -773,6 +775,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
             if (g_debug) Print("bid_price=",tgt_price,",cur_low2_gap_pt(",cur_low2_gap_pt,") is two narrow(gap<",arg_thpt2,"pt)");
          } else {
             sell_stop_price=range_low[i]-arg_offpt*Point;
+            sell_stop_price=NormalizeDouble(sell_stop_price,Digits);
             if (g_debug) Print("bid_price=",tgt_price,",sell_stop_price=",sell_stop_price);
             break;
          }
@@ -805,6 +808,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
             if (g_debug) Print("ask_price=",tgt_price,",range high(",range_high[i],") is not high enough(gap<",arg_thpt,"pt)");
          } else {
             sell_stop_ls_price=range_high[i]+arg_offpt*Point;
+            sell_stop_ls_price=NormalizeDouble(sell_stop_ls_price,Digits);
             if (g_debug) Print("ask_price=",tgt_price,",sell_stop_ls_price=",sell_stop_ls_price);
             break;
          }
