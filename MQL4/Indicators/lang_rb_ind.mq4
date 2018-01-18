@@ -107,7 +107,7 @@ int OnCalculate(const int rates_total,
    }
 
    //double ls_price=0;
-   double price[4],ls_price[4],tp_price[4][2];
+   double price[4],ls_price[4],tp_price[4][2],lvl_price[3];
    int ls_price_pt[4],tp_price_pt[4][2];
    int high_low_touch_status=0;
    int ret=0;
@@ -125,7 +125,7 @@ int OnCalculate(const int rates_total,
       int arg_short_ma_ped=12,int arg_mid_ma_ped=36
       bool arg_atr_control=true,bool arg_ma_control=true
       */
-      ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+      ret2=getHighLow_Value3(i,high_low_touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,lvl_price,
                            g_ls_pt,g_break_ls_ratio,g_range,0,g_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,
@@ -187,7 +187,9 @@ int OnCalculate(const int rates_total,
          string t2=TimeToStr(Time[i],TIME_MINUTES);
          string t=StringConcatenate("[",t1," ",t2,"]");
          string mail_title=StringConcatenate(str," ",t," hit high low (",ret,"|",ret2,")");
-      
+         
+         wrtOrderMail(Time[i],cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment,lvl_price);
+         
          sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment);
       }
       signalBuffer[i]=ret;

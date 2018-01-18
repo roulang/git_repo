@@ -137,7 +137,7 @@ void OnTick()
       return;
    }
    
-   double price[4],ls_price[4],tp_price[4][2];
+   double price[4],ls_price[4],tp_price[4][2],lvl_price[3];
    int ls_price_pt[4],tp_price_pt[4][2];
    int high_low_touch_status=0;
    int touch_status=0;
@@ -159,7 +159,7 @@ void OnTick()
    int arg_short_ma_ped=12,int arg_mid_ma_ped=36
    bool arg_atr_control=true,bool arg_ma_control=true
    */
-   sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,
+   sign=getHighLow_Value3( last_bar_shift,touch_status,price,ls_price,tp_price,ls_price_pt,tp_price_pt,lvl_price,
                            i_ls_pt,g_break_ls_ratio,g_range,0,i_expand,g_long,
                            i_oc_gap_pt,i_high_low_gap_pt,i_gap2_pt,
                            g_atr_lvl_pt,g_atr_range,

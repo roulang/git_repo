@@ -866,7 +866,7 @@ void getHighLow_Value(int arg_shift,int arg_expand,int arg_range,int arg_long,in
 //+------------------------------------------------------------------+
 int getHighLow_Value3( int arg_shift,int &arg_touch_status,
                         double &arg_price[],double &arg_ls_price[],double &arg_tp_price[][],
-                        int &arg_ls_price_pt[],int &arg_tp_price_pt[][],
+                        int &arg_ls_price_pt[],int &arg_tp_price_pt[][],double &arg_lvl_price[],
                         int arg_lspt=50,double arg_ls_ratio=0.6,
                         int arg_length=20,int arg_th_pt=0,int arg_expand=1,int arg_long=1,
                         int arg_oc_gap_pt=5,int arg_high_low_gap_pt=150,int arg_gap_pt2=20,
@@ -882,6 +882,7 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
    ArrayInitialize(arg_ls_price_pt,0);
    ArrayInitialize(arg_tp_price,0);
    ArrayInitialize(arg_tp_price_pt,0);
+   ArrayInitialize(arg_lvl_price,0);
 
    //--------------------
    //get high low value
@@ -1313,6 +1314,10 @@ int getHighLow_Value3( int arg_shift,int &arg_touch_status,
       Print(t,"faild to get high low price");
       return 0;
    }
+   
+   arg_lvl_price[0]=high_price;
+   arg_lvl_price[1]=base_price;
+   arg_lvl_price[2]=low_price;
    
    double   break_ls_ratio=arg_ls_ratio;
    int      ls_pt=arg_lspt;

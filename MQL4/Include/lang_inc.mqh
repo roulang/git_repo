@@ -83,6 +83,14 @@ const string   g_OrderHisFileName="lang_history_orders.csv";            //histor
 const string   g_OrderHisFileName_all="lang_history_orders_all.csv";    //history order data file(all)
 const string   g_OrderSendFileName="lang_send_orders.csv";              //order data file
 const string   g_NewsFileName="lang_news.ex4.csv";
+const string   g_EUR_RB_OrderFileName="lang_eur_rb_orders.csv";         //order data file
+const string   g_JPY_RB_OrderFileName="lang_jpy_rb_orders.csv";         //order data file
+const string   g_AUD_RB_OrderFileName="lang_aud_rb_orders.csv";         //order data file
+const string   g_NZD_RB_OrderFileName="lang_nzd_rb_orders.csv";         //order data file
+const string   g_CAD_RB_OrderFileName="lang_cad_rb_orders.csv";         //order data file
+const string   g_GBP_RB_OrderFileName="lang_gbp_rb_orders.csv";         //order data file
+const string   g_CHF_RB_OrderFileName="lang_chf_rb_orders.csv";         //order data file
+const string   g_XAU_RB_OrderFileName="lang_xau_rb_orders.csv";       //order data file
 
 datetime CurrentTimeStamp;
 int      g_LockFileH=0;          //lock file handle
@@ -1027,5 +1035,131 @@ bool sendOrderMail(  string arg_title,int arg_cnt,string &arg_msg[],
    }
    
    return mailNotice(mail_title,mail_body);
+   
+}
+//+------------------------------------------------------------------+
+//| arg_otp:order type(OP_BUY,OP_SELL)
+//| arg_price[]:
+//| arg_price_pt[]:
+//| arg_ls_price[]:
+//| arg_ls_price_pt[]:
+//| arg_tp_price[]:
+//| arg_tp_price_pt[]:
+//| arg_lot[]:
+//| arg_comment[]:
+//| arg_msg[]:
+//| arg_cnt:order count
+//|
+//| ->format see below
+//| EUR,time,ped,BUY_RB,price,pt,ls_price,pt,tp_price,pt,lot,comment,high,base,low
+//| EUR,time,ped,BUY_BK,price,pt,ls_price,pt,tp_price,pt,lot,comment,high,base,low
+//+------------------------------------------------------------------+
+bool wrtOrderMail(   datetime arg_dt,int arg_cnt,string &arg_msg[],
+                     double &arg_price[],int &arg_price_pt[],
+                     double &arg_ls_price[],int &arg_ls_price_pt[],
+                     double &arg_tp_price[],int &arg_tp_price_pt[],
+                     double &arg_lot[],string &arg_comment[],double &arg_lvl_price[]
+                  )
+{
+   string mail_body="";
+   string str_fmt="";
+   string temp_string="";
+   int    dgt=Digits;
+   string sym=Symbol();
+   string tm=covDateString(TimeToString(arg_dt),SLASH);
+   string ped=getPeriodTp();
+   
+   if (arg_cnt==0) {
+      Print("Nothing to send.");
+      return false;
+   }
+   
+   
+   for (int i=0;i<arg_cnt;i++) {
+      //msg
+      temp_string=StringConcatenate(sym,",",tm,",",ped,",",arg_msg[i]);
+      StringAdd(mail_body,temp_string);
+
+      str_fmt=StringFormat(",%%.%df,%%.%df,%%.%df,",dgt,dgt,dgt);
+      temp_string=StringFormat(str_fmt,arg_lvl_price[0],arg_lvl_price[1],arg_lvl_price[2]);
+      StringAdd(mail_body,temp_string);
+      
+      //price
+      if (arg_price_pt[i]==0) {
+         str_fmt=StringFormat("%%.%df,%%.%df,%%d,%%.%df,%%d,%%.2f,%%s",dgt,dgt,dgt);
+         temp_string=StringFormat(  str_fmt,arg_price[i],
+                                    arg_ls_price[i],arg_ls_price_pt[i],
+                                    arg_tp_price[i],arg_tp_price_pt[i],
+                                    arg_lot[i],arg_comment[i]
+                                 );
+      } else {
+         str_fmt=StringFormat("%%.%df,%%d,%%.%df,%%d,%%.%df,%%d,%%.2f,%%s",dgt,dgt,dgt);
+         temp_string=StringFormat(  str_fmt,arg_price[i],arg_price_pt[i],
+                                    arg_ls_price[i],arg_ls_price_pt[i],
+                                    arg_tp_price[i],arg_tp_price_pt[i],
+                                    arg_lot[i],arg_comment[i]
+                                 );
+      }
+      StringAdd(mail_body,temp_string);
+      if (i!=arg_cnt-1) {
+         StringAdd(mail_body,"\r\n");
+      }
+   }
+   
+   if (g_debug) {
+      Print("mail_body=",mail_body);
+   }
+   
+   //write file
+   string file_name=NULL;
+   if (StringFind(sym,EURUSD)>=0) {
+      file_name=g_EUR_RB_OrderFileName;
+   }
+   if (StringFind(sym,USDJPY)>=0) {
+      file_name=g_JPY_RB_OrderFileName;
+   }
+   if (StringFind(sym,AUDUSD)>=0) {
+      file_name=g_AUD_RB_OrderFileName;
+   }
+   if (StringFind(sym,NZDUSD)>=0) {
+      file_name=g_NZD_RB_OrderFileName;
+   }
+   if (StringFind(sym,USDCAD)>=0) {
+      file_name=g_CAD_RB_OrderFileName;
+   }
+   if (StringFind(sym,GBPUSD)>=0) {
+      file_name=g_GBP_RB_OrderFileName;
+   }
+   if (StringFind(sym,USDCHF)>=0) {
+      file_name=g_CHF_RB_OrderFileName;
+   }
+   if (StringFind(sym,GOLD)>=0 || StringFind(sym,XAUUSD)>=0) {
+      file_name=g_XAU_RB_OrderFileName;
+   }
+   
+   if (file_name==NULL) return false;
+   
+   Print("write order command to file");
+   ResetLastError();
+   int h=FileOpen(file_name,FILE_READ|FILE_WRITE|FILE_TXT);
+   if(h==INVALID_HANDLE) {
+      Print("Operation FileOpen failed, error: ",GetLastError());
+      return false;
+   }
+
+   ResetLastError();
+   //move to file end to add order record
+   if (!FileSeek(h,0,SEEK_END)) {
+      Print("Operation FileSeek failed, error: ",GetLastError());
+      FileClose(h);
+      return false;
+   }
+   
+   uint ret=FileWrite(h,mail_body);
+
+   FileClose(h);
+
+   if (ret>0) return true;
+   else return false; 
    
 }
