@@ -146,6 +146,7 @@ int OnCalculate(const int rates_total,
          string t_msg[8]={"buy_break","buy_break(2)","buy_rebound","buy_rebound(2)","sell_break","sell_break(2)","sell_rebound","sell_rebound(2)"};
          string t_msg2[8];
          string t_comment[8]={"4","4","3","3","4","4","3","3"};
+         string t_comment2[8];
          double t_price[8],t_tp_price[8],t_ls_price[8],t_lots[8];
          int    t_price_pt[8],t_tp_price_pt[8],t_ls_price_pt[8];
          
@@ -160,7 +161,7 @@ int OnCalculate(const int rates_total,
                t_tp_price[cnt]=tp_price[j][0];
                t_tp_price_pt[cnt]=tp_price_pt[j][0];
                t_lots[cnt]=getVolume(g_equity_percent,MathAbs(t_ls_price_pt[cnt]));
-               //t_comment[cnt]=g_comment;
+               t_comment2[cnt]=t_comment[j*2];
                
                cnt=cnt+1;
             }
@@ -173,7 +174,7 @@ int OnCalculate(const int rates_total,
                t_tp_price[cnt]=tp_price[j][1];
                t_tp_price_pt[cnt]=tp_price_pt[j][1];
                t_lots[cnt]=getVolume(g_equity_percent,MathAbs(t_ls_price_pt[cnt]));
-               //t_comment[cnt]=g_comment;
+               t_comment2[cnt]=t_comment[j*2+1];
       
                cnt=cnt+1;
             }
@@ -188,9 +189,9 @@ int OnCalculate(const int rates_total,
          string t=StringConcatenate("[",t1," ",t2,"]");
          string mail_title=StringConcatenate(str," ",t," hit high low (",ret,"|",ret2,")");
          
-         wrtOrderMail(Time[i],cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment,lvl_price);
+         wrtOrderMail(Time[i],cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment2,lvl_price);
          
-         sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment);
+         sendOrderMail(mail_title,cnt,t_msg2,t_price,t_price_pt,t_ls_price,t_ls_price_pt,t_tp_price,t_tp_price_pt,t_lots,t_comment2);
       }
       signalBuffer[i]=ret;
       //datetime t=Time[i];
