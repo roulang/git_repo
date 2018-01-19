@@ -310,16 +310,18 @@ int isTrendStgOpen(int arg_shift,int &arg_last_cross,double &arg_ls_price)
    int lst_middle_ma_touch=lst_touch_status[1];
 
    if (arg_last_cross==1) {                        //fast ma up cross slow ma
-      if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
+      //if (cur_ret==4 || cur_ret==5) {              //short ma is above mid ma,mid ma is up
+      if (cur_ret==5) {                            //short ma is above mid ma,short/mid ma is up
          if (cur_short_ma_touch==3) {              //current bar is positive and under touch short ma
-            if (MathAbs(lst_short_ma_touch)>=3) {   //last bar is above or under touch short ma
+            if (MathAbs(lst_short_ma_touch)>=3) {  //last bar is above or under touch short ma
                ret=2;
             }
          }
       }
    }
    if (arg_last_cross==-1) {                       //fast ma down cross slow ma
-      if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
+      //if (cur_ret==-4 || cur_ret==-5) {            //short ma is below mid ma,mid ma is down
+      if (cur_ret==-5) {                           //short ma is below mid ma,short/mid ma is down
          if (cur_short_ma_touch==-1) {             //current bar is negative and high touch short ma
             if (MathAbs(lst_short_ma_touch)<=1) {  //last bar is below or high touch short ma
                ret=-2;
