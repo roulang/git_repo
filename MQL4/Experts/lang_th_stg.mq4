@@ -13,15 +13,16 @@
 //--------------------------------
 
 //--- input
-input int i_min_ls_pt=300;
+input int   i_min_ls_pt=300;
+input bool  i_his_order_wrt=false;        //history order write control
 
 //--- global
 int      g_magic=5;        //trend horse
 //bool     g_has_order=false;
 datetime g_orderdt;
 
-int g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
-int g_adx_status=0;  //1,above 40(default);-1,below 40(default)
+//int g_ma_cross=0;    //1,fast ma up cross slow ma;-1,fast ma down cross slow ma
+//int g_adx_status=0;  //1,above 40(default);-1,below 40(default)
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -63,6 +64,13 @@ void OnDeinit(const int reason)
       timer_deinit();
    }
    */
+
+   if (i_his_order_wrt) {
+      if (getFileLock()) {
+         writeOrderHistoryToFile();
+         releaseFileLock();
+      }
+   }
    
 }
 //+------------------------------------------------------------------+
@@ -127,7 +135,8 @@ void OnTick()
    */
 
    double ls_tgt_price;
-   int sign=isTrendStgOpen(last_bar_shift,g_ma_cross,ls_tgt_price);
+   int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price);
+   //| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
    if (sign>=1 && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
@@ -153,8 +162,9 @@ void OnTick()
       has_order=false;
    }
    
+   /*
    //modify buy order
-   if (sign==3 && has_order) {
+   if (sign==2 && has_order) {
       if (FindOrderA(NULL,1,g_magic)) {   //buy order
          //moving stop
          double price,ls_price;
@@ -173,7 +183,7 @@ void OnTick()
    }
 
    //modify sell order
-   if (sign==-3 && has_order) {
+   if (sign==-2 && has_order) {
       if (FindOrderA(NULL,-1,g_magic)) {   //sell order
          //moving stop
          double price,ls_price;
@@ -190,9 +200,10 @@ void OnTick()
          }
       }
    }
-
+   */
+   
    //open buy
-   if (sign==3 && !has_order) {
+   if (sign>=1 && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
       price=Bid;
@@ -211,7 +222,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-3 && !has_order) {
+   if (sign<=-1 && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
       price=Ask;
@@ -238,13 +249,14 @@ bool ifClose(int arg_shift)
       if (OrderCloseA(NULL,0,g_magic)>0) return true;
    }
    */
-   
+   /*
    if (isTrendStgClose(arg_shift,g_adx_status)==1) {   //close buy or sell
       Print("trend close condition met,close buy or sell order");
       bool ret=OrderCloseA(NULL,1,g_magic);
       bool ret2=OrderCloseA(NULL,-1,g_magic);
       if (ret>0 || ret2>0) return true;
    }
+   */
    
    return false;
 }
@@ -254,8 +266,10 @@ void OnTimer()
    if (g_debug) {
       Print("OnTimer()");
    }
-
+   
+   /*
    if (!i_for_test) {
       news_read();
    }
+   */
 }

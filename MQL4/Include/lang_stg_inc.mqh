@@ -1758,3 +1758,62 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
    
    return 0;
 }
+//+------------------------------------------------------------------+
+//| Trend strategy Open (use macd)
+//| date: 2018/2/5
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: -2,sell(open);2,buy(open);-1,fast ma down cross slow ma;1,fast ma up cross slow ma;0:n/a
+//+------------------------------------------------------------------+
+int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_MAIN)
+{
+   int cur_bar_shift=arg_shift;
+   
+   int cur_touch_status[2];
+   double cur_short_ma,cur_middle_ma;
+   int cur_ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,cur_short_ma,cur_middle_ma);
+
+   arg_ls_price=cur_middle_ma;
+   
+   cur_ret=getMACDStatus(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode);   
+   //| return value: 
+   //|   1,break up;
+   //|   -1,break down;
+   //|   2,break up(second bar);
+   //|   -2,break down(second bar);
+   //|   3,keep plus;
+   //|   -3,keep minus;
+   //|   4,keep plus(max);
+   //|   -4,keep minus(min);
+   //|   0,N/A;
+   if (cur_ret==2) {      //macd break up to plus
+      return 2;
+   }
+   if (cur_ret==-2) {     //macd break down to minus
+      return -2;
+   }
+
+   int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd);
+   //return value: 
+   //| return value: fast>slow,same direction,up,5;
+   //|               fast>slow,different direction(fast down,slow up),4;
+   //|               fast>slow,different direction(fast up,slow down),3;
+   //|               fast>slow,same direction(fast down,slow down),2;
+   //|               fast>slow,no direction,1;
+   //| return value: fast<slow,same direction,down,-5;
+   //|               fast<slow,different direction(fast up,slow down),-4;
+   //|               fast<slow,different direction(fast down,slow up),-3;
+   //|               fast<slow,same direction(fast up,slow up),-2;
+   //|               fast<slow,no direction,-1;
+   //|               n/a:0
+   //| return value: fast break slow,up(within last 2 bars):+10  
+   //|               fast break slow,down(within last 2 bars):-10  
+   if (cur_ret2>=10 && cur_ret>=3) {      //fast macd up cross slow macd
+      return 1;
+   }
+   if (cur_ret2<=-10 && cur_ret<=-3) {    //fast macd down cross slow macd
+      return -1;
+   }
+
+   return 0;
+}
