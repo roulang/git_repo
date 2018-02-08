@@ -29,8 +29,8 @@
 double         signalBuffer[];
 
 //input
-input int   i_mode=MODE_MAIN;    //0:Main,1:Signal
-input int   i_type=0;            //0:Open,1:Close
+input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
+input int   i_type=0;               //0:Open,1:Close
 input int   i_fast_pd=12;
 input int   i_slow_pd=26;
 input int   i_singal_pd=9;
