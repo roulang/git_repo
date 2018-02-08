@@ -349,9 +349,15 @@ void getPivotValue(int arg_period,int arg_shift,double &arg_pivot[],int &arg_lar
    int bar_shift=arg_shift;
 
    int larger_sht;
-   int larger_pd=expandPeriod(arg_period,bar_shift,larger_sht,-1,PERIOD_D1);
-   larger_sht=larger_sht+1;
-   if (larger_sht==arg_larger_shift) return;
+   int larger_pd;
+   if (arg_period==PERIOD_D1) {
+      larger_pd=PERIOD_D1;
+      larger_sht=arg_shift;
+   } else {
+      larger_pd=expandPeriod(arg_period,bar_shift,larger_sht,-1,PERIOD_D1);
+      larger_sht=larger_sht+1;
+      if (larger_sht==arg_larger_shift) return;
+   }
    
    double h=iHigh(NULL,larger_pd,larger_sht);
    double l=iLow(NULL,larger_pd,larger_sht);
