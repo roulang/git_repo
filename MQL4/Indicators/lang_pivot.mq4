@@ -131,14 +131,14 @@ int OnCalculate(const int rates_total,
       Print("1:st=",st);
    }
 
-   for(int i=st-1;i>0;i--) {
+   for(int i=st-1;i>=0;i--) {
 
       if (i==st-1) {
          //break
          //Print("here to set breakpoint");
       }
       
-      getPivotValue(PERIOD_CURRENT,i,g_pivot_buf,g_last_shift);
+      getPivotValue(PERIOD_CURRENT,i+1,g_pivot_buf,g_last_shift);
       pivot_Buffer[i]=g_pivot_buf[0];
       high_Buffer[i]=g_pivot_buf[1];
       low_Buffer[i]=g_pivot_buf[2];
