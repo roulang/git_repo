@@ -172,7 +172,7 @@ void OnTick()
    }
    */
    /*
-   if (sign==1 $$ g_ma_cross==0 && has_order) {
+   if (sign==1 && g_ma_cross==0 && has_order) {
       //close all order
       if (OrderCloseA(NULL,0,g_magic)>0) {  //close all order
          Print("close all order");

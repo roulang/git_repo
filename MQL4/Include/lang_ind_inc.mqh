@@ -2010,3 +2010,51 @@ int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
    
    return ret;
 }
+//+------------------------------------------------------------------+
+//| Get Band status (base on 3 continous values)
+//| date: 2018/02/5
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value: 
+//| return value: 1,touch high;2,break high
+//| return value: -1,touch low;-2,break low
+//+------------------------------------------------------------------+
+int getBandStatus(int arg_period,int arg_shift,int arg_pd=12,int arg_deviation=2)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   int sec_lst_bar_shift=arg_shift+2;
+
+   double cur_band_low=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_LOWER,cur_bar_shift);
+   double cur_band_high=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_UPPER,cur_bar_shift);
+   double lst_band_low=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_LOWER,lst_bar_shift);
+   double lst_band_high=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_UPPER,lst_bar_shift);
+   double sec_lst_band_low=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_LOWER,sec_lst_bar_shift);
+   double sec_lst_band_high=iBands(NULL,arg_period,arg_pd,arg_deviation,0,PRICE_CLOSE,MODE_UPPER,sec_lst_bar_shift);
+   
+   double cur_high=High[cur_bar_shift];
+   double cur_low=Low[cur_bar_shift];
+   double cur_close=Close[cur_bar_shift];
+   double lst_high=High[lst_bar_shift];
+   double lst_low=Low[lst_bar_shift];
+   double lst_close=Close[lst_bar_shift];
+   double sec_lst_high=High[sec_lst_bar_shift];
+   double sec_lst_low=Low[sec_lst_bar_shift];
+   double sec_lst_close=Close[sec_lst_bar_shift];
+   int touch_high=0,touch_low=0;
+   int break_high=0,break_low=0;
+   
+   if (cur_high>=cur_band_high || lst_high>=lst_band_high || sec_lst_high>=sec_lst_band_high) touch_high=1;
+   if (cur_close>=cur_band_high || lst_close>=lst_band_high || sec_lst_close>=sec_lst_band_high) break_high=1;
+   if (cur_low<=cur_band_low || lst_low<=lst_band_low || sec_lst_low<=sec_lst_band_low) touch_low=1;
+   if (cur_close<=cur_band_low || lst_close<=lst_band_low || sec_lst_close<=sec_lst_band_low) break_low=1;
+   
+   if (break_high==1 && break_low==0) return 2;
+   if (break_low==1 && break_high==0) return -2;
+   if (touch_high==1 && touch_low==0) return 1;
+   if (touch_low==1 && touch_high==0) return -1;
+   
+   return 0;
+}
