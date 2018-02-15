@@ -1763,9 +1763,10 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //| date: 2018/2/5
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
-//| return value: 3,macd cross up to plus(open buy);-3,macd cross down to minus(open sell);
-//|               2,macd is plus, fast ma up cross slow ma(open buy);-2,macd is minus,fast ma down cross slow ma(open sell);
-//|               1,macd is plus, fast ma down cross slow ma(close buy);-1,macd is minus,fast ma up cross slow ma(close sell);
+//| return value: 4,macd cross up to plus(open buy);-4,macd cross down to minus(open sell);
+//|               3,macd is plus, fast ma up cross slow ma(open buy);-3,macd is minus,fast ma down cross slow ma(open sell);
+//|               2,macd is plus, fast ma down cross slow ma(close buy);-2,macd is minus,fast ma up cross slow ma(close sell);
+//|               1,macd cross up to plus(close sell);-1,macd cross down to minus(close buy);
 //|               0:n/a
 //+------------------------------------------------------------------+
 int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
@@ -1781,7 +1782,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //| return value: 
    //|   1,break up;
    //|   -1,break down;
-   //|   2,break up((break signal upper));
+   //|   2,break up(break signal upper);
    //|   -2,break down(break signal lower);
    //|   3,keep plus;
    //|   -3,keep minus;
@@ -1806,25 +1807,34 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //|               fast break slow,down(within last 2 bars):-10  
    int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd);
 
-   if (cur_ret==2 && cur_ret2==5) {       //macd break up to plus, and macd slow fast are in same up direction
-      return 3;
+   //if (cur_ret==2 && cur_ret2==5) {       //macd break up to plus, and macd slow fast are in same up direction
+   if (cur_ret==2) {       //macd break up to plus (break signal upper)
+      return 4;
    }
-   if (cur_ret==-2 && cur_ret2==-5) {     //macd break down to minus, and macd slow fast are in same down direction
-      return -3;
+   //if (cur_ret==-2 && cur_ret2==-5) {     //macd break down to minus, and macd slow fast are in same down direction
+   if (cur_ret==-2) {      //macd break down to minus (break signal lower)
+      return -4;
    }
 
    if (cur_ret>=3 && cur_ret2>=10) {      //macd is plus, and fast macd up cross slow macd
-      return 2;
+      return 3;
    }
    if (cur_ret>=3 && cur_ret2<=-10) {     //macd is plus, and fast macd down cross slow macd
-      return 1;
+      return 2;
    }
    if (cur_ret<=-3 && cur_ret2<=-10) {    //macd is minus, and fast macd down cross slow macd
-      return -2;
+      return -3;
    }
    if (cur_ret<=-3 && cur_ret2>=10) {     //macd is minus, and fast macd up cross slow macd
-      return -1;
+      return -2;
    }
 
+   if (cur_ret==1) {      //macd break up to plus
+      return 1;
+   }
+   if (cur_ret==-1) {      //macd break down to minus
+      return -1;
+   }
+   
    return 0;
 }
