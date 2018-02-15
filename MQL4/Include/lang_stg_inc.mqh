@@ -1768,7 +1768,7 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //|               1,macd is plus, fast ma down cross slow ma(close buy);-1,macd is minus,fast ma up cross slow ma(close sell);
 //|               0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL)
+int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
 {
    int cur_bar_shift=arg_shift;
    
@@ -1781,14 +1781,14 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //| return value: 
    //|   1,break up;
    //|   -1,break down;
-   //|   2,break up(second bar);
-   //|   -2,break down(second bar);
+   //|   2,break up((break signal upper));
+   //|   -2,break down(break signal lower);
    //|   3,keep plus;
    //|   -3,keep minus;
    //|   4,keep plus(max);
    //|   -4,keep minus(min);
    //|   0,N/A;
-   cur_ret=getMACDStatus(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode);   
+   cur_ret=getMACDStatus(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode,arg_deviation);   
 
    //return value: 
    //| return value: fast>slow,same direction,up,5;

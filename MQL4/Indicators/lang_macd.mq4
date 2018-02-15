@@ -108,30 +108,9 @@ int OnCalculate (const int rates_total,
    for(i=0; i<limit; i++) {
       ExtMacdBuffer[i]=iMA(NULL,0,InpFastEMA,0,MODE_EMA,PRICE_CLOSE,i)-
                     iMA(NULL,0,InpSlowEMA,0,MODE_EMA,PRICE_CLOSE,i);
-      //ExtMacdBuffer[i]=iMACD(NULL,0,InpFastEMA,InpSlowEMA,InpSignalSMA,PRICE_CLOSE,MODE_MAIN,i);
-      //ExtSignalBuffer[i]=iMACD(NULL,0,InpFastEMA,InpSlowEMA,InpSignalSMA,PRICE_CLOSE,MODE_SIGNAL,i);
-
-//--- calculate and write down StdDev
-      //ExtStdDevBuffer[i]=StdDev_Func(i,ExtMacdBuffer,ExtSignalBuffer,InpSignalSMA);
-
-//--- upper line
-      //ExtUpperBuffer[i]=ExtSignalBuffer[i]+InpBandsDeviations*ExtStdDevBuffer[i];
-
-//--- lower line
-      //ExtLowerBuffer[i]=ExtSignalBuffer[i]-InpBandsDeviations*ExtStdDevBuffer[i];
-
-      //ExtSignalBuffer[i]=iMAOnArray(ExtMacdBuffer,i,InpSignalSMA,0,MODE_SMA,i);
-      //iBandsOnArray(ExtSignalBuffer,rates_total,InpSignalSMA,InpBandsDeviations,0,MODE_LOWER,0)>
-//--- middle line
-      //ExtMovingBuffer[i]=SimpleMA(i,InpBandsPeriod,close);
-      //ExtSignalBuffer[i]=SimpleMA(i,InpSignalSMA,ExtMacdBuffer);
-
-
-
    }
 
 //--- signal line counted in the 2-nd buffer
-   //SimpleMAOnBuffer(rates_total,prev_calculated,0,InpSignalSMA,ExtMacdBuffer,ExtSignalBuffer);
    BandOnBuffer(rates_total,prev_calculated,0,InpSignalSMA,ExtMacdBuffer,ExtSignalBuffer,
                 ExtUpperBuffer,ExtLowerBuffer,ExtStdDevBuffer);
 

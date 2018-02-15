@@ -19,6 +19,7 @@ input int   i_fast_pd=12;
 input int   i_slow_pd=26;
 input int   i_singal_pd=9;
 input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
+input double   i_deviation=2;
 
 //--- global
 int      g_magic=5;        //trend horse
@@ -139,7 +140,7 @@ void OnTick()
    */
 
    double ls_tgt_price;
-   int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode);
+   int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
    //| return value: 3,macd cross up to plus(open buy);-3,macd cross down to minus(open sell);
    //|               2,macd is plus, fast ma up cross slow ma(open buy);-2,macd is minus,fast ma down cross slow ma(open sell);
    //|               1,macd is plus, fast ma down cross slow ma(close buy);-1,macd is minus,fast ma up cross slow ma(close sell);

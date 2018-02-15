@@ -29,12 +29,12 @@
 double         signalBuffer[];
 
 //input
-input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
-input int   i_type=0;               //0:Open,1:Close
-input int   i_fast_pd=12;
-input int   i_slow_pd=26;
-input int   i_singal_pd=9;
-   
+input int      i_mode=MODE_SIGNAL;     //0:Main,1:Signal
+input int      i_type=0;               //0:Open,1:Close
+input int      i_fast_pd=12;
+input int      i_slow_pd=26;
+input int      i_singal_pd=9;
+input double   i_deviation=2.0; // Bands Deviations
 //global
 
 //+------------------------------------------------------------------+
@@ -98,7 +98,17 @@ int OnCalculate(const int rates_total,
    }
    for(int i=st-skip_first_bars;i>0;i--) {
       if (i_type==0) {
-         signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode);
+         //signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode);
+         signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
+         /*
+         //debug
+         if (signalBuffer[i]==2 || signalBuffer[i]==-2) {
+            datetime t=Time[i];
+            Print("time=",t);
+            Print("shift=",i);
+            Print("signalBuffer=",signalBuffer[i]);
+         }
+         */
       } else {
          signalBuffer[i]=getMACDStatus2(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd);
       }

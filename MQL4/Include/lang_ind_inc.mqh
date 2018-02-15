@@ -1869,37 +1869,64 @@ int getZigTurn2(  int arg_period,int arg_shift,int &arg_lst_small_upi,int &arg_l
 }
 //+------------------------------------------------------------------+
 //| Get MACD status (base on 3 continous values)
-//| date: 2018/02/5
+//| date: 2018/02/14
 //| arg_period: time period
 //| arg_shift: bar shift
 //| return value: 
 //|   1,break up;
 //|   -1,break down;
-//|   2,break up(second bar);
-//|   -2,break down(second bar);
+//|   2,break up(break signal upper);
+//|   -2,break down(break signal lower);
 //|   3,keep plus;
 //|   -3,keep minus;
 //|   4,keep plus(max);
 //|   -4,keep minus(min);
 //|   0,N/A;
 //+------------------------------------------------------------------+
-int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_MAIN)
+int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
+   string ind_name="lang_macd";
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
    int sec_lst_bar_shift=arg_shift+2;
-   double cur_macd=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,arg_mode,cur_bar_shift);
-   double lst_macd=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,arg_mode,lst_bar_shift);
-   double sec_lst_macd=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,arg_mode,sec_lst_bar_shift);
+   int macd_main_idx=0;
+   int macd_signal_idx=1;
+   int macd_signal_up_idx=2;
+   int macd_signal_low_idx=3;
    
-   if (lst_macd<=0 && cur_macd>0) return 1; 
-   if (lst_macd>=0 && cur_macd<0) return -1; 
+   int macd_idx=macd_signal_idx;
+   if (arg_mode==MODE_MAIN) macd_idx=macd_main_idx;
    
-   if (sec_lst_macd<=0 && lst_macd>=0 && cur_macd>0) return 2;
-   if (sec_lst_macd>=0 && lst_macd<=0 && cur_macd<0) return -2;
+   double cur_macd=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_idx,cur_bar_shift);
+   double lst_macd=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_idx,lst_bar_shift);
+   double sec_lst_macd=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_idx,sec_lst_bar_shift);
+
+   double cur_macd_main=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_main_idx,cur_bar_shift);
+   double lst_macd_main=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_main_idx,lst_bar_shift);
+
+   double cur_macd_up=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_signal_up_idx,cur_bar_shift);
+   double cur_macd_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_signal_low_idx,cur_bar_shift);
+   double lst_macd_up=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_signal_up_idx,lst_bar_shift);
+   double lst_macd_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_signal_low_idx,lst_bar_shift);
    
+   if (lst_macd<=0 && cur_macd>0) {       //break up
+      if (cur_macd_main>=cur_macd_up) {   //break signal upper
+         return 2;
+      } else {
+         return 1;
+      }
+   }
+
+   if (lst_macd>=0 && cur_macd<0) {          //break down
+      if (cur_macd_main<=cur_macd_low) {     //break signal lower
+         return -2;
+      } else {
+         return -1;
+      }
+   }
+
    if (cur_macd>0 && sec_lst_macd<lst_macd && lst_macd>cur_macd) return 4;
    if (cur_macd<0 && sec_lst_macd>lst_macd && lst_macd<cur_macd) return -4;
 
@@ -1932,16 +1959,20 @@ int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
+   string ind_name="lang_macd";
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
    int sec_lst_bar_shift=arg_shift+2;
-   int mode=MODE_MAIN;
-   double cur_macd_fast=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_MAIN,cur_bar_shift);
-   double cur_macd_slow=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_SIGNAL,cur_bar_shift);
-   double lst_macd_fast=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_MAIN,lst_bar_shift);
-   double lst_macd_slow=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_SIGNAL,lst_bar_shift);
-   double sec_lst_macd_fast=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_MAIN,sec_lst_bar_shift);
-   double sec_lst_macd_slow=iMACD(NULL,arg_period,arg_fast_pd,arg_slow_pd,arg_signal_pd,PRICE_CLOSE,MODE_SIGNAL,sec_lst_bar_shift);
+   int macd_main_idx=0;
+   int macd_signal_idx=1;
+   double deviation=2;
+   
+   double cur_macd_fast=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_main_idx,cur_bar_shift);
+   double cur_macd_slow=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_signal_idx,cur_bar_shift);
+   double lst_macd_fast=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_main_idx,lst_bar_shift);
+   double lst_macd_slow=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_signal_idx,lst_bar_shift);
+   double sec_lst_macd_fast=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_main_idx,sec_lst_bar_shift);
+   double sec_lst_macd_slow=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,deviation,macd_signal_idx,sec_lst_bar_shift);
    
    int fast_direction=0;
    if (sec_lst_macd_fast<lst_macd_fast && lst_macd_fast<cur_macd_fast) fast_direction=1;           //fast is up
