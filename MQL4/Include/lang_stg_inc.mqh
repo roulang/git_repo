@@ -1764,9 +1764,9 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
 //| return value: 4,macd cross up to plus(open buy);-4,macd cross down to minus(open sell);
-//|               3,macd is plus, fast ma up cross slow ma(open buy);-3,macd is minus,fast ma down cross slow ma(open sell);
-//|               2,macd is plus, fast ma down cross slow ma(close buy);-2,macd is minus,fast ma up cross slow ma(close sell);
-//|               1,macd cross up to plus(close sell);-1,macd cross down to minus(close buy);
+//|               3,macd cross up to plus(close sell);-3,macd cross down to minus(close buy);
+//|               2,macd is plus, fast ma up cross slow ma(open buy);-2,macd is minus,fast ma down cross slow ma(open sell);
+//|               1,macd is plus, fast ma down cross slow ma(close buy);-1,macd is minus,fast ma up cross slow ma(close sell);
 //|               0:n/a
 //+------------------------------------------------------------------+
 int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
@@ -1805,7 +1805,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //|               n/a:0
    //| return value: fast break slow,up(within last 2 bars):+10  
    //|               fast break slow,down(within last 2 bars):-10  
-   int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd);
+   int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation);
 
    //if (cur_ret==2 && cur_ret2==5) {       //macd break up to plus, and macd slow fast are in same up direction
    if (cur_ret==2) {       //macd break up to plus (break signal upper)
@@ -1816,23 +1816,94 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
       return -4;
    }
 
-   if (cur_ret>=3 && cur_ret2>=10) {      //macd is plus, and fast macd up cross slow macd
+   if (cur_ret==1) {      //macd break up to plus
       return 3;
    }
-   if (cur_ret>=3 && cur_ret2<=-10) {     //macd is plus, and fast macd down cross slow macd
-      return 2;
-   }
-   if (cur_ret<=-3 && cur_ret2<=-10) {    //macd is minus, and fast macd down cross slow macd
+   if (cur_ret==-1) {      //macd break down to minus
       return -3;
    }
-   if (cur_ret<=-3 && cur_ret2>=10) {     //macd is minus, and fast macd up cross slow macd
-      return -2;
+   
+   if (cur_ret>=3 && cur_ret2>=10) {      //macd is plus, and fast macd up cross slow macd
+      return 2;
    }
-
-   if (cur_ret==1) {      //macd break up to plus
+   if (cur_ret>=3 && cur_ret2<=-10) {     //macd is plus, and fast macd down cross slow macd
       return 1;
    }
-   if (cur_ret==-1) {      //macd break down to minus
+   if (cur_ret<=-3 && cur_ret2<=-10) {    //macd is minus, and fast macd down cross slow macd
+      return -2;
+   }
+   if (cur_ret<=-3 && cur_ret2>=10) {     //macd is minus, and fast macd up cross slow macd
+      return -1;
+   }
+
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Trend strategy Open (use macd)
+//| date: 2018/2/5
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: 4,macd is plus,macd fast is above band high;-4,macd is minus,macd fast is below band low;
+//|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
+//|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
+//|               1,macd is plus;-1,macd is minus;
+//|               0:n/a
+//+------------------------------------------------------------------+
+int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
+{
+   int cur_bar_shift=arg_shift;
+   
+   int cur_touch_status[2];
+   double cur_short_ma,cur_middle_ma;
+   int cur_ret=getMAStatus2(PERIOD_CURRENT,cur_bar_shift,cur_touch_status,cur_short_ma,cur_middle_ma);
+
+   arg_ls_price=cur_middle_ma;
+   
+   //| return value: 
+   //|   +1,keep plus;
+   //|   -1,keep minus;
+   //|   +2,keep plus(max);
+   //|   -2,keep minus(min);
+   //|   0,N/A;
+   cur_ret=getMACDStatus3(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode,arg_deviation);   
+
+   //| return value: fast>slow,same direction,up,5;
+   //|               fast>slow,different direction(fast down,slow up),4;
+   //|               fast>slow,different direction(fast up,slow down),3;
+   //|               fast>slow,same direction(fast down,slow down),2;
+   //|               fast>slow,no direction,1;
+   //| return value: fast<slow,same direction,down,-5;
+   //|               fast<slow,different direction(fast up,slow down),-4;
+   //|               fast<slow,different direction(fast down,slow up),-3;
+   //|               fast<slow,same direction(fast up,slow up),-2;
+   //|               fast<slow,no direction,-1;
+   //|               n/a:0
+   //| return value: fast is above slow band upper:+10  
+   //|               fast is below slow band lower:-10  
+   int cur_ret2=getMACDStatus4(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation);
+
+   if (cur_ret>0) {                       //macd is plus
+      if (cur_ret2>=10) {                 //macd fast is above band high
+         return 4;
+      }
+      if (cur_ret2>0) {                   //fast ma is above slow ma
+         return 3;
+      }
+      if (cur_ret2<0) {                   //fast ma is below slow ma
+         return 2;
+      }
+      return 1;
+   }
+   if (cur_ret<0) {                       //macd is minus
+      if (cur_ret2<=-10) {                //macd fast is below band low
+         return -4;
+      }
+      if (cur_ret2<0) {                   //fast ma is below slow ma
+         return -3;
+      }
+      if (cur_ret2>0) {                   //fast ma is above slow ma
+         return -2;
+      }
       return -1;
    }
    
