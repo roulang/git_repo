@@ -1849,7 +1849,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
 //|               1,macd is plus;-1,macd is minus;
 //|               0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
+int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2,int arg_thpt=10)
 {
    int cur_bar_shift=arg_shift;
    
@@ -1882,8 +1882,11 @@ int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //|               fast is below slow band lower:-10  
    int cur_ret2=getMACDStatus4(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation);
 
+   int cur_ret3=getBarStatus(PERIOD_CURRENT,cur_bar_shift,arg_thpt);
+   //| return value: 1,positive bar;-1,negative bar
+   
    if (cur_ret>0) {                       //macd is plus
-      if (cur_ret2>=10) {                 //macd fast is above band high
+      if (cur_ret2>=10 && cur_ret3>0) {                 //macd fast is above band high
          return 4;
       }
       if (cur_ret2>0) {                   //fast ma is above slow ma
@@ -1895,7 +1898,7 @@ int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
       return 1;
    }
    if (cur_ret<0) {                       //macd is minus
-      if (cur_ret2<=-10) {                //macd fast is below band low
+      if (cur_ret2<=-10 && cur_ret3<0) {                //macd fast is below band low
          return -4;
       }
       if (cur_ret2<0) {                   //fast ma is below slow ma

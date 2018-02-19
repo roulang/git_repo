@@ -2147,10 +2147,10 @@ int getMACDStatus4(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
    
    int break_status=0;
 
-   if (cur_macd_fast>=cur_macd_up) {   //above signal upper
+   if (cur_macd_fast>cur_macd_up) {   //above signal upper
       break_status=10;
    }
-   if (cur_macd_fast<=cur_macd_low) {  //below signal lower
+   if (cur_macd_fast<cur_macd_low) {  //below signal lower
       break_status=-10;
    }
    
@@ -2244,6 +2244,36 @@ int getBandStatus(int arg_period,int arg_shift,int arg_pd=12,int arg_deviation=2
    if (break_low==1 && break_high==0) return -2;
    if (touch_high==1 && touch_low==0) return 1;
    if (touch_low==1 && touch_high==0) return -1;
+   
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Get Bar status
+//| date: 2018/02/19
+//| arg_period: time period
+//| arg_shift: bar shift
+//| arg_thpt: thredhold point
+//| return value:
+//| return value: 1,positive bar;-1,negative bar
+//+------------------------------------------------------------------+
+int getBarStatus(int arg_period,int arg_shift,int arg_thpt=0)
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   int sec_lst_bar_shift=arg_shift+2;
+   
+   double cur_open=iOpen(NULL,arg_period,cur_bar_shift);
+   double cur_close=iClose(NULL,arg_period,cur_bar_shift);
+   double gap=arg_thpt*Point;
+   
+   if (cur_close>(cur_open+gap)) {
+      return 1;
+   }
+   if (cur_close<(cur_open-gap)) {
+      return -1;
+   }
    
    return 0;
 }

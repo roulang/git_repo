@@ -140,40 +140,41 @@ void OnTick()
    */
 
    double ls_tgt_price;
-   int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
-//| return value: 4,macd cross up to plus(open buy);-4,macd cross down to minus(open sell);
-//|               3,macd cross up to plus(close sell);-3,macd cross down to minus(close buy);
-//|               2,macd is plus, fast ma up cross slow ma(open buy);-2,macd is minus,fast ma down cross slow ma(open sell);
-//|               1,macd is plus, fast ma down cross slow ma(close buy);-1,macd is minus,fast ma up cross slow ma(close sell);
-//|               0:n/a
-   if (sign>=3 && has_order) {
+   int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
+   //| return value: 4,macd is plus,macd fast is above band high;-4,macd is minus,macd fast is below band low;
+   //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
+   //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
+   //|               1,macd is plus;-1,macd is minus;
+   //|               0:n/a
+   
+   if (sign>=1 && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
       }
    }
-   /*
-   if (sign==1 && has_order) {
+   
+   if (sign==2 && has_order) {
       //close buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
          Print("close buy order");
       }
    }
-   */
-   if (sign<=-3 && has_order) {
+   
+   if (sign<=-1 && has_order) {
       //close opposit buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {   //close buy order
          Print("close opposit(buy) order");
       }
    }
-   /*
-   if (sign==-1 && has_order) {
+   
+   if (sign==-2 && has_order) {
       //close sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close sell order");
       }
    }
-   */
+   
    /*
    if (sign==1 && g_ma_cross==0 && has_order) {
       //close all order
@@ -228,8 +229,7 @@ void OnTick()
    */
    
    //open buy
-   if ((sign==4 || sign==2) && !has_order) {
-   //if (sign==4 && !has_order) {
+   if (sign==4 && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
       price=Bid;
@@ -248,8 +248,7 @@ void OnTick()
    }
    
    //open sell
-   if ((sign==-4 || sign==-2) && !has_order) {
-   //if (sign==-4 && !has_order) {
+   if (sign==-4 && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
       price=Ask;

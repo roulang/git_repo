@@ -99,7 +99,7 @@ int OnCalculate(const int rates_total,
    for(int i=st-skip_first_bars;i>0;i--) {
       if (i_type==0) {
          //signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode);
-         signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
+         signalBuffer[i]=getMACDStatus3(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
          /*
          //debug
          if (signalBuffer[i]==2 || signalBuffer[i]==-2) {
@@ -110,7 +110,7 @@ int OnCalculate(const int rates_total,
          }
          */
       } else {
-         signalBuffer[i]=getMACDStatus2(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd);
+         signalBuffer[i]=getMACDStatus4(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_deviation);
       }
       
       /*
