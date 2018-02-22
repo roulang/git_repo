@@ -1877,6 +1877,8 @@ int getZigTurn2(  int arg_period,int arg_shift,int &arg_lst_small_upi,int &arg_l
 //|   -1,keep minus;
 //|   +2,keep plus(max);
 //|   -2,keep minus(min);
+//|   +10,break to plus;
+//|   -10,break to minus;
 //|   0,N/A;
 //+------------------------------------------------------------------+
 int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2)
@@ -1897,11 +1899,16 @@ int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_p
    double lst_macd=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_idx,lst_bar_shift);
    double sec_lst_macd=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_idx,sec_lst_bar_shift);
 
-   double cur_macd_main=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_main_idx,cur_bar_shift);
-   double lst_macd_main=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,macd_main_idx,lst_bar_shift);
-
    int ret=0;
    
+   if (cur_macd>0 && lst_macd<=0) {    //break to plus
+      ret+=10;
+   }
+
+   if (cur_macd<0 && lst_macd>=0) {    //break to minux
+      ret-=10;
+   }
+
    if (cur_macd>0) {                   //keep plus
       ret+=1;
    }
@@ -1910,10 +1917,10 @@ int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_p
       ret+=-1;
    }
 
-   if (cur_macd>0 && sec_lst_macd<lst_macd && lst_macd>cur_macd) {
+   if (cur_macd>0 && sec_lst_macd<lst_macd && lst_macd>cur_macd) {      //keep plus(max)
       ret+=2;
    }
-   if (cur_macd<0 && sec_lst_macd>lst_macd && lst_macd<cur_macd) {
+   if (cur_macd<0 && sec_lst_macd>lst_macd && lst_macd<cur_macd) {      //keep minus(max)
       ret+=-2;
    }
    

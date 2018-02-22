@@ -48,8 +48,8 @@ int OnInit()
    }
 
    if (i_type==0) {
-      IndicatorSetDouble(INDICATOR_MINIMUM,-4);
-      IndicatorSetDouble(INDICATOR_MAXIMUM,4);
+      IndicatorSetDouble(INDICATOR_MINIMUM,-12);
+      IndicatorSetDouble(INDICATOR_MAXIMUM,12);
    } else {
       IndicatorSetDouble(INDICATOR_MINIMUM,-15);
       IndicatorSetDouble(INDICATOR_MAXIMUM,15);
