@@ -141,7 +141,7 @@ void OnTick()
 
    double ls_tgt_price;
    int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
-   //| return value: 4,macd is plus,macd fast is above band high;-4,macd is minus,macd fast is below band low;
+   //| return value: 4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
    //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
    //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
    //|               1,macd is plus;-1,macd is minus;
@@ -153,28 +153,28 @@ void OnTick()
          Print("close opposit(sell) order");
       }
    }
-   
+   /*
    if (sign==2 && has_order) {
       //close buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
          Print("close buy order");
       }
    }
-   
+   */
    if (sign<=-1 && has_order) {
       //close opposit buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {   //close buy order
          Print("close opposit(buy) order");
       }
    }
-   
+   /*
    if (sign==-2 && has_order) {
       //close sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close sell order");
       }
    }
-   
+   */
    /*
    if (sign==1 && g_ma_cross==0 && has_order) {
       //close all order
