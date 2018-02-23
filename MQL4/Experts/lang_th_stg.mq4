@@ -20,6 +20,7 @@ input int   i_slow_pd=26;
 input int   i_singal_pd=9;
 input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
 input double   i_deviation=2;
+input datetime i_inspect_dt=D'2017.02.07 12:00';
 
 //--- global
 int      g_magic=5;        //trend horse
@@ -141,7 +142,8 @@ void OnTick()
 
    double ls_tgt_price;
    int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
-   //| return value: 5,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+   //| return value: 6,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+   //|               5,macd break to plus;-5,macd break to minus;
    //|               4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
    //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
    //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
@@ -189,6 +191,13 @@ void OnTick()
       has_order=false;
    }
    
+   //debug
+   if (now==i_inspect_dt) {
+      Print("1.time=",now);
+      Print("1.sign=",sign);
+      Print("1.has_order=",has_order);
+   }
+   
    /*
    //modify buy order
    if (sign==2 && has_order) {
@@ -230,7 +239,7 @@ void OnTick()
    */
    
    //open buy
-   if (sign>0 && !has_order) {
+   if (sign>=5 && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
       price=Bid;
@@ -249,7 +258,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign<0 && !has_order) {
+   if (sign<=-5 && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
       price=Ask;
