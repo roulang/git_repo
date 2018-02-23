@@ -1763,7 +1763,8 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //| date: 2018/2/5
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
-//| return value: 5,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+//| return value: 6,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+//|               5,macd break to plus;-5,macd break to minus;
 //|               4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
 //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
 //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
@@ -1808,32 +1809,38 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    int cur_ret3=getBarStatus(PERIOD_CURRENT,cur_bar_shift,arg_thpt);
    //| return value: 1,positive bar;-1,negative bar
    
-   if (cur_ret>0) {                       //macd is plus
-      if (cur_ret>=10 && cur_ret2>=10) {   //macd break to plus,macd fast is above range high
+   if (cur_ret>0) {                          //macd is plus
+      if (cur_ret>=10 && cur_ret2>=10) {     //macd break to plus,macd fast is above range high
+         return 6;
+      }
+      if (cur_ret>=10) {                     //macd break to plus
          return 5;
       }
-      if (cur_ret2>=10 && cur_ret3>0) {   //macd fast is above range high, positive bar
+      if (cur_ret2>=10 && cur_ret3>0) {      //macd fast is above range high, positive bar
          return 4;
       }
-      if (cur_ret2>0) {                   //fast ma is above slow ma
+      if (cur_ret2>0) {                      //fast ma is above slow ma
          return 3;
       }
-      if (cur_ret2<0) {                   //fast ma is below slow ma
+      if (cur_ret2<0) {                      //fast ma is below slow ma
          return 2;
       }
       return 1;
    }
-   if (cur_ret<0) {                       //macd is minus
-      if (cur_ret<=-10 && cur_ret2<=-10) {  //mack break to minus,macd fast is below range low
+   if (cur_ret<0) {                          //macd is minus
+      if (cur_ret<=-10 && cur_ret2<=-10) {   //mack break to minus,macd fast is below range low
+         return -6;
+      }
+      if (cur_ret<=-10) {                    //mack break to minus
          return -5;
       }
-      if (cur_ret2<=-10 && cur_ret3<0) {  //macd fast is below range low, negative bar
+      if (cur_ret2<=-10 && cur_ret3<0) {     //macd fast is below range low, negative bar
          return -4;
       }
-      if (cur_ret2<0) {                   //fast ma is below slow ma
+      if (cur_ret2<0) {                      //fast ma is below slow ma
          return -3;
       }
-      if (cur_ret2>0) {                   //fast ma is above slow ma
+      if (cur_ret2>0) {                      //fast ma is above slow ma
          return -2;
       }
       return -1;

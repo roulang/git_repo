@@ -140,8 +140,9 @@ void OnTick()
    */
 
    double ls_tgt_price;
-   int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
-   //| return value: 4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
+   int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation);
+   //| return value: 5,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+   //|               4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
    //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;
    //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
    //|               1,macd is plus;-1,macd is minus;
@@ -229,7 +230,7 @@ void OnTick()
    */
    
    //open buy
-   if (sign==4 && !has_order) {
+   if (sign>0 && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
       price=Bid;
@@ -248,7 +249,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-4 && !has_order) {
+   if (sign<0 && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
       price=Ask;
