@@ -30,6 +30,7 @@ input int InpSignalSMA=9;  // Signal SMA Period
 
 input int      InpBandsShift=0;        // Bands Shift
 input double   InpBandsDeviations=2.0; // Bands Deviations
+input int      InpRangeRatio=1;
 
 //--- indicator buffers
 double    ExtMacdBuffer[];
@@ -126,7 +127,7 @@ int OnCalculate (const int rates_total,
 //--- signal line counted in the 2-nd buffer
    BandOnBuffer(rates_total,prev_calculated,0,InpSignalSMA,ExtMacdBuffer,ExtSignalBuffer,
                 ExtUpperBuffer,ExtLowerBuffer,ExtStdDevBuffer);
-   RangeOnBuffer(rates_total,prev_calculated,0,InpSignalSMA,ExtMacdBuffer,ExtSignalBuffer,
+   RangeOnBuffer(rates_total,prev_calculated,0,InpSignalSMA*InpRangeRatio,ExtMacdBuffer,ExtSignalBuffer,
                 ExtUpperBuffer2,ExtLowerBuffer2);
 
 //--- done

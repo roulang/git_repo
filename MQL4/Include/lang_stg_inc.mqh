@@ -1771,7 +1771,7 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //|               1,macd is plus;-1,macd is minus;
 //|               0:n/a
 //+------------------------------------------------------------------+
-int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2,int arg_thpt=0)
+int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2,int arg_range_ratio=1,int arg_thpt=0)
 {
    int cur_bar_shift=arg_shift;
    
@@ -1789,7 +1789,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //|   +10,break to plus;
    //|   -10,break to minus;
    //|   0,N/A;
-   cur_ret=getMACDStatus(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode,arg_deviation);   
+   cur_ret=getMACDStatus(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_mode,arg_deviation,arg_range_ratio);
 
    //| return value: fast>slow,same direction,up,5;
    //|               fast>slow,different direction(fast down,slow up),4;
@@ -1804,7 +1804,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    //|               n/a:0
    //| return value: fast is above slow range upper:+10  
    //|               fast is below slow range lower:-10  
-   int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation);
+   int cur_ret2=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation,arg_range_ratio);
 
    int cur_ret3=getBarStatus(PERIOD_CURRENT,cur_bar_shift,arg_thpt);
    //| return value: 1,positive bar;-1,negative bar
@@ -1816,7 +1816,8 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
       if (cur_ret>=10) {                     //macd break to plus
          return 5;
       }
-      if (cur_ret2>=10 && cur_ret3>0) {      //macd fast is above range high, positive bar
+      //if (cur_ret2>=10 && cur_ret3>0) {    //macd fast is above range high, positive bar
+      if (cur_ret2>=10) {                    //macd fast is above range high
          return 4;
       }
       if (cur_ret2>0) {                      //fast ma is above slow ma
@@ -1834,7 +1835,8 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
       if (cur_ret<=-10) {                    //mack break to minus
          return -5;
       }
-      if (cur_ret2<=-10 && cur_ret3<0) {     //macd fast is below range low, negative bar
+      //if (cur_ret2<=-10 && cur_ret3<0) {   //macd fast is below range low, negative bar
+      if (cur_ret2<=-10) {                   //macd fast is below range low
          return -4;
       }
       if (cur_ret2<0) {                      //fast ma is below slow ma
