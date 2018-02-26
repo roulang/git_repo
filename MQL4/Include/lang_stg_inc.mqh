@@ -1763,7 +1763,7 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
 //| date: 2018/2/5
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
-//| return value: 6,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
+//| return value: 6,macd break to plus,macd fast is above range high;-6,macd break to minus,macd fast is below range low;
 //|               5,macd break to plus;-5,macd break to minus;
 //|               4,macd is plus,macd fast is above range high;-4,macd is minus,macd fast is below range low;
 //|               3,macd is plus,fast ma is above slow ma;-3,macd is minus,fast ma is below slow ma;

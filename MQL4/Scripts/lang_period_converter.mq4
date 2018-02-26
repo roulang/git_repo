@@ -15,7 +15,7 @@ int       ExtHandle=-1;
 //| script program start function                                    |
 //+------------------------------------------------------------------+
 void OnStart()
-  {
+{
    datetime time0;
    ulong    last_fpos=0;
    long     last_volume=0;
@@ -59,36 +59,31 @@ void OnStart()
    //--- normalize open time
    rate.time=Time[start_pos]/periodseconds;
    rate.time*=periodseconds;
-   for(i=start_pos-1; i>=0; i--)
-     {
+   for(i=start_pos-1; i>=0; i--) {
       if(IsStopped())
          break;
       time0=Time[i];
       //--- history may be updated
-      if(i==0)
-        {
+      if(i==0) {
          //--- modify index if history was updated
          if(RefreshRates())
             i=iBarShift(NULL,0,time0);
-        }
+      }
       //---
-      if(time0>=rate.time+periodseconds || i==0)
-        {
-         if(i==0 && time0<rate.time+periodseconds)
-           {
+      if(time0>=rate.time+periodseconds || i==0) {
+         if(i==0 && time0<rate.time+periodseconds) {
             rate.tick_volume+=(long)Volume[0];
             if(rate.low>Low[0])
                rate.low=Low[0];
             if(rate.high<High[0])
                rate.high=High[0];
             rate.close=Close[0];
-           }
+         }
          last_fpos=FileTell(ExtHandle);
          last_volume=(long)Volume[i];
          FileWriteStruct(ExtHandle,rate);
          cnt++;
-         if(time0>=rate.time+periodseconds)
-           {
+         if(time0>=rate.time+periodseconds) {
             rate.time=time0/periodseconds;
             rate.time*=periodseconds;
             rate.open=Open[i];
@@ -96,20 +91,19 @@ void OnStart()
             rate.high=High[i];
             rate.close=Close[i];
             rate.tick_volume=last_volume;
-           }
-        }
-       else
-        {
+         }
+     } else {
          rate.tick_volume+=(long)Volume[i];
          if(rate.low>Low[i])
             rate.low=Low[i];
          if(rate.high<High[i])
             rate.high=High[i];
          rate.close=Close[i];
-        }
-     } 
+     }
+   } 
    FileFlush(ExtHandle);
    PrintFormat("%d record(s) written",cnt);
+
 //--- collect incoming ticks
    datetime last_time=LocalTime()-5;
    long     chart_id=0;
@@ -188,18 +182,17 @@ void OnStart()
       Sleep(50); 
      }      
 //---
-  }
+}
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
-  {
+{
 //---
-   if(ExtHandle>=0)
-     {
+   if(ExtHandle>=0) {
       FileClose(ExtHandle);
       ExtHandle=-1;
-     }
+   }
 //---
-  }
+}
 //+------------------------------------------------------------------+

@@ -22,7 +22,8 @@ input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
 input double   i_deviation=2;
 input int   i_range_ratio=1;
 //input datetime i_inspect_dt=D'2017.02.07 12:00';
-input int   i_filter=0;
+input int   i_open_filter=0;
+input int   i_close_filter=0;
 
 //--- global
 int      g_magic=5;        //trend horse
@@ -151,8 +152,26 @@ void OnTick()
    //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
    //|               1,macd is plus;-1,macd is minus;
    //|               0:n/a
+
+   int open=0;          //1:open buy;-1:open sell
+   if (i_open_filter==0) {          //base
+      if (sign>0) open=1;
+      if (sign<0) open=-1;
+   } else if (i_open_filter==1) {   //macd break 0
+      if (sign>=5) open=1;
+      if (sign<=-5) open=-1;
+   } else if (i_open_filter==2) {   //macd break range, above 0
+      if (sign==6 || sign==4) open=1;
+      if (sign==-6 || sign==-4) open=-1;
+   }
    
-   if (sign>=1 && has_order) {
+   int close=0;         //1:close buy;-1:close sell
+   if (i_close_filter==0) {         //base
+      if (sign>0) close=-1;
+      if (sign<0) close=1;
+   }
+   
+   if (close==-1 && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
@@ -166,7 +185,7 @@ void OnTick()
       }
    }
    */
-   if (sign<=-1 && has_order) {
+   if (close==1 && has_order) {
       //close opposit buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {   //close buy order
          Print("close opposit(buy) order");
@@ -241,15 +260,6 @@ void OnTick()
       }
    }
    */
-   
-   int open=0;
-   if (i_filter==0) {
-      if (sign>=5) open=1;
-      if (sign<=-5) open=-1;
-   } else if (i_filter==1) {
-      if (sign==6 || sign==4) open=1;
-      if (sign==-6 || sign==-4) open=-1;
-   }
    
    //open buy
    if (open==1 && !has_order) {
