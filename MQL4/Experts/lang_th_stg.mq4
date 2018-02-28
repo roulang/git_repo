@@ -166,9 +166,12 @@ void OnTick()
    }
    
    int close=0;         //1:close buy;-1:close sell
-   if (i_close_filter==0) {         //base
+   if (i_close_filter==0) {            //base
       if (sign>0) close=-1;
       if (sign<0) close=1;
+   } else if (i_close_filter==1) {     //macd fast break low (reverse)
+      if (sign==2 || sign<0) close=1;
+      if (sign==-2 || sign>0) close=-1;
    }
    
    if (close==-1 && has_order) {
