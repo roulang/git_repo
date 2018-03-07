@@ -1943,7 +1943,9 @@ int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_p
 //|               fast<slow,no direction,-1;
 //|               n/a:0
 //| return value: fast is above slow range upper:+10  
-//|               fast is below slow ramnge lower:-10  
+//|               fast is below slow range lower:-10  
+//|               fast is above slow band upper:+20  
+//|               fast is below slow band lower:-20  
 //+------------------------------------------------------------------+
 int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,double arg_deviation=2,int arg_range_ratio=1)
 {
@@ -1971,7 +1973,11 @@ int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
    double cur_macd_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalR_low_idx,cur_bar_shift);
    double lst_macd_up=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalR_up_idx,lst_bar_shift);
    double lst_macd_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalR_low_idx,lst_bar_shift);
-   
+
+   double cur_macd_band_up=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalB_up_idx,cur_bar_shift);
+   double cur_macd_band_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalB_low_idx,cur_bar_shift);
+   double lst_macd_band_up=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalB_up_idx,lst_bar_shift);
+   double lst_macd_band_low=iCustom(NULL,arg_period,ind_name,arg_fast_pd,arg_slow_pd,arg_signal_pd,0,arg_deviation,arg_range_ratio,macd_signalB_low_idx,lst_bar_shift);
    
    int fast_direction=0;
    if (sec_lst_macd_fast<lst_macd_fast && lst_macd_fast<cur_macd_fast) fast_direction=1;           //fast is up
@@ -1984,10 +1990,17 @@ int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
    int break_status=0;
 
    if (cur_macd_fast>cur_macd_up) {   //above signal upper
-      break_status=10;
+      break_status+=10;
    }
    if (cur_macd_fast<cur_macd_low) {  //below signal lower
-      break_status=-10;
+      break_status-=10;
+   }
+
+   if (cur_macd_fast>cur_macd_band_up) {   //above signal band upper
+      break_status+=20;
+   }
+   if (cur_macd_fast<cur_macd_band_low) {  //below signal band lower
+      break_status-=20;
    }
    
    int ret=0;

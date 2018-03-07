@@ -144,6 +144,7 @@ void OnTick()
    */
 
    double ls_tgt_price;
+   /*
    int sign=isTrendStgOpen2(last_bar_shift,ls_tgt_price,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
    //| return value: 6,macd break to plus,macd fast is above range high;-5,macd break to minus,macd fast is below range low;
    //|               5,macd break to plus;-5,macd break to minus;
@@ -152,28 +153,64 @@ void OnTick()
    //|               2,macd is plus,fast ma is below slow ma;-2,macd is minus,fast ma is below slow ma;
    //|               1,macd is plus;-1,macd is minus;
    //|               0:n/a
+   */
+   int macd_status=0,bar_status=0;
+
+   int sign2=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,MODE_MAIN,i_deviation,i_range_ratio);
+   
+   int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
+   //| return value: 1,macd is plus;-1,macd is minus;
+   //| return value: arg_macd_status
+   //|               fast>slow,same direction,up,5;
+   //|               fast>slow,different direction(fast down,slow up),4;
+   //|               fast>slow,different direction(fast up,slow down),3;
+   //|               fast>slow,same direction(fast down,slow down),2;
+   //|               fast>slow,no direction,1;
+   //|               -----------
+   //|               fast<slow,same direction,down,-5;
+   //|               fast<slow,different direction(fast up,slow down),-4;
+   //|               fast<slow,different direction(fast down,slow up),-3;
+   //|               fast<slow,same direction(fast up,slow up),-2;
+   //|               fast<slow,no direction,-1;
+   //|               -----------
+   //|               fast is above slow range upper:+10  
+   //|               fast is below slow range lower:-10  
+   //|               fast is above slow band upper:+20  
+   //|               fast is below slow band lower:-20  
+   //|               -----------
+   //|               n/a:0
+   //| return value: arg_bar_status
+   //|               1,positive bar;-1,negative bar
 
    int open=0;          //1:open buy;-1:open sell
    if (i_open_filter==0) {          //base
-      if (sign>0) open=1;
-      if (sign<0) open=-1;
-   } else if (i_open_filter==1) {   //macd break 0
-      if (sign>=5) open=1;
-      if (sign<=-5) open=-1;
-   } else if (i_open_filter==2) {   //macd break range, above 0
-      if (sign==6 || sign==4) open=1;
-      if (sign==-6 || sign==-4) open=-1;
+      if (sign>0 && sign2>0) open=1;                    //macd is plus
+      if (sign<0 && sign2<0) open=-1;                   //macd is minus
+   } else if (i_open_filter==1) {   //add filter
+      if (sign>0 && macd_status>0) open=1;   //macd is plus, fast>slow
+      if (sign<0 && macd_status<0) open=-1;  //macd is minus, fast<slow
+   } else if (i_open_filter==2) {   //add filter
+      if (sign>0 && macd_status>=10 && macd_status<30) open=1;       //
+      if (sign<0 && macd_status<=-10 && macd_status>-30) open=-1;    //
+   } else if (i_open_filter==3) {   //add filter
+      if (sign>0 && macd_status>=20 && macd_status<30) open=1;       //
+      if (sign<0 && macd_status<=-20 && macd_status>-30) open=-1;    //
+   } else if (i_open_filter==4) {   //add filter
+      if (sign>0 && macd_status>=30) open=1;       //
+      if (sign<0 && macd_status<=-30) open=-1;     //
+   } else if (i_open_filter==5) {   //add filter
+      if (sign>0 && bar_status>0) open=1;
+      if (sign<0 && bar_status<0) open=-1;
    }
-   
+
    int close=0;         //1:close buy;-1:close sell
-   if (i_close_filter==0) {            //base
-      if (sign>0) close=-1;
-      if (sign<0) close=1;
-   } else if (i_close_filter==1) {     //macd fast break low (reverse)
-      if (sign==2 || sign<0) close=1;
-      if (sign==-2 || sign>0) close=-1;
+   if (i_close_filter==0) {         //base
+      if (sign>0) close=-1;                  //macd is plus
+      if (sign<0) close=1;                   //macd is minus
+   }else if (i_close_filter==1) {
+      if (sign2>0) close=-1;                  //macd is plus
+      if (sign2<0) close=1;                   //macd is minus
    }
-   
    if (close==-1 && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
