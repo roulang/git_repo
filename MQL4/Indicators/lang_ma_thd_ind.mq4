@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                lang_macd_ind.mq4 |
+//|                                              lang_ma_thd_ind.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -9,12 +9,11 @@
 #property strict
 
 #include <lang_ind_inc.mqh>
-//#include <lang_stg_inc.mqh>
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -4
-#property indicator_maximum 4
+#property indicator_minimum -2
+#property indicator_maximum 2
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
@@ -29,15 +28,7 @@
 double         signalBuffer[];
 
 //input
-input int      i_mode=MODE_SIGNAL;     //0:Main,1:Signal
-input int      i_type=0;               //0:Open,1:Close
-input int      i_fast_pd=12;
-input int      i_slow_pd=26;
-input int      i_singal_pd=9;
-input double   i_deviation=2.0; // Bands Deviations
-input int      i_range_ratio=1;
-
-//global
+input int      i_expand=0;          //0:current(not expand),1:expand one level,2:expand two level
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -49,19 +40,9 @@ int OnInit()
       //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
 
-   if (i_type==0) {
-      IndicatorSetDouble(INDICATOR_MINIMUM,-12);
-      IndicatorSetDouble(INDICATOR_MAXIMUM,12);
-   } else {
-      IndicatorSetDouble(INDICATOR_MINIMUM,-15);
-      IndicatorSetDouble(INDICATOR_MAXIMUM,15);
-   }
 //--- indicator buffers mapping
    SetIndexBuffer(0,signalBuffer);
-   
-   //SetIndexArrow(0,SYMBOL_ARROWUP);
-
-   
+      
 //---
    return(INIT_SUCCEEDED);
 }
@@ -92,41 +73,30 @@ int OnCalculate(const int rates_total,
    int limit=Bars-1;
 
    //1:skip last bar
-   int skip_first_bars=2;
-   int st=uncal_bars+skip_first_bars;
+   int st=uncal_bars+1;
    if (st>limit) st=limit;
    if(g_debug) {
       Print("1:st=",st);
    }
+   int skip_first_bars=0;
    for(int i=st-skip_first_bars;i>0;i--) {
-      if (i_type==0) {
-         signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
-         /*
-         //debug
-         if (signalBuffer[i]==2 || signalBuffer[i]==-2) {
-            datetime t=Time[i];
-            Print("time=",t);
-            Print("shift=",i);
-            Print("signalBuffer=",signalBuffer[i]);
-         }
-         */
-      } else {
-         double macd_slow,macd_fast;
-         signalBuffer[i]=getMACDStatus2(PERIOD_CURRENT,i,macd_slow,macd_fast,i_slow_pd,i_fast_pd,i_singal_pd,i_deviation,i_range_ratio);
+      double ma1,ma2,ma3;
+      int pd=PERIOD_CURRENT;
+      int bar_shift=i;
+      if   (i_expand==1) {  //expand to larger period
+         pd=expandPeriod(PERIOD_CURRENT,i,bar_shift,0);
       }
+      int signal=getMAStatus(pd,bar_shift,ma1,ma2,ma3);
       
+      signalBuffer[i]=signal;
       /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.18 19:00");
+      datetime t1=StringToTime("2018.01.12 12:00");
       if (t==t1) {
          Print("time=",t);
          Print("shift=",i);
-         Print("g_high_low=");
-         PrintTwoDimArray(g_high_low);
-         for (int j=0;j<ArraySize(g_touch_highlow);j++) {
-            Print("g_touch_highlow[",j,"]=",g_touch_highlow[j]);
-         }
+         Print("signalBuffer[i]=",signalBuffer[i]);
       }
       */
       

@@ -1758,6 +1758,7 @@ int isQuickShootClose(int arg_shift,int arg_thrd_pt=20)
    
    return 0;
 }
+/*
 //+------------------------------------------------------------------+
 //| Trend strategy Open (use macd)
 //| date: 2018/2/5
@@ -1850,12 +1851,14 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
    
    return 0;
 }
+*/
 //+------------------------------------------------------------------+
 //| Trend strategy Open (use macd)
 //| date: 2018/3/1
 //| arg_shift: bar shift
 //| &arg_ls_price: lose stop price(for return)
-//| return value: 1,macd is plus;-1,macd is minus;
+//| return value: +10,macd is break plus;-10,macd is break minus;
+//|               1,macd is plus;-1,macd is minus;
 //| return value: arg_macd_status
 //|               fast>slow,same direction,up,5;
 //|               fast>slow,different direction(fast down,slow up),4;
@@ -1878,7 +1881,7 @@ int isTrendStgOpen2(int arg_shift,double &arg_ls_price,int arg_slow_pd=26,int ar
 //| return value: arg_bar_status
 //|               1,positive bar;-1,negative bar
 //+------------------------------------------------------------------+
-int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int &arg_macd_status,int &arg_bar_status,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2,int arg_range_ratio=1,int arg_thpt=0)
+int isTrendStgOpen3(int arg_shift,double &arg_ls_price,double &arg_macd_slow,double &arg_macd_fast,double &arg_macd_range,int &arg_macd_status,int &arg_bar_status,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,int arg_mode=MODE_SIGNAL,double arg_deviation=2,int arg_range_ratio=1,int arg_thpt=0)
 {
    int cur_bar_shift=arg_shift;
    
@@ -1913,17 +1916,23 @@ int isTrendStgOpen3(int arg_shift,double &arg_ls_price,int &arg_macd_status,int 
    //|               fast is below slow range lower:-10  
    //|               fast is above slow band upper:+20  
    //|               fast is below slow band lower:-20  
-   arg_macd_status=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation,arg_range_ratio);
+   arg_macd_status=getMACDStatus2(PERIOD_CURRENT,cur_bar_shift,arg_macd_slow,arg_macd_fast,arg_macd_range,arg_slow_pd,arg_fast_pd,arg_signal_pd,arg_deviation,arg_range_ratio);
 
    arg_bar_status=getBarStatus(PERIOD_CURRENT,cur_bar_shift,arg_thpt);
    //| return value: 1,positive bar;-1,negative bar
 
    int ret=0;
+   if (cur_ret>10) {
+      ret+=10;
+   }
    if (cur_ret>0) {                          //macd is plus
-      ret=1;
+      ret+=1;
+   }
+   if (cur_ret<-10) {
+      ret+=-10;
    }
    if (cur_ret<0) {                          //macd is minus
-      ret=-1;
+      ret+=-1;
    }
 
    return ret;

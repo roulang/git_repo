@@ -21,7 +21,8 @@ input int   i_singal_pd=9;
 input int   i_mode=MODE_SIGNAL;     //0:Main,1:Signal
 input double   i_deviation=2;
 input int   i_range_ratio=1;
-//input datetime i_inspect_dt=D'2017.02.07 12:00';
+input double   i_macd_gap=0.0020;
+input datetime i_inspect_dt=D'2016.11.30 04:00';
 input int   i_open_filter=0;
 input int   i_close_filter=0;
 
@@ -155,11 +156,14 @@ void OnTick()
    //|               0:n/a
    */
    int macd_status=0,bar_status=0;
-
-   int sign2=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,MODE_MAIN,i_deviation,i_range_ratio);
+   double macd_slow=0,macd_fast=0,macd_range=0;
+   //fast
+   int sign2=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_slow,macd_fast,macd_range,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,MODE_MAIN,i_deviation,i_range_ratio);
    
-   int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
-   //| return value: 1,macd is plus;-1,macd is minus;
+   //slow
+   int sign=isTrendStgOpen3(last_bar_shift,ls_tgt_price,macd_slow,macd_fast,macd_range,macd_status,bar_status,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
+   //| return value: +10,macd is break plus;-10,macd is break minus;
+   //|               1,macd is plus;-1,macd is minus;
    //| return value: arg_macd_status
    //|               fast>slow,same direction,up,5;
    //|               fast>slow,different direction(fast down,slow up),4;
@@ -183,35 +187,86 @@ void OnTick()
    //|               1,positive bar;-1,negative bar
 
    int open=0;          //1:open buy;-1:open sell
+   int open2=0;          //1:open buy;-1:open sell
    if (i_open_filter==0) {          //base
-      if (sign>0 && sign2>0) open=1;                    //macd is plus
-      if (sign<0 && sign2<0) open=-1;                   //macd is minus
+      if (sign>0 && sign2>0) open=1;                    //slow and fast macd is plus
+      if (sign<0 && sign2<0) open=-1;                   //slow and fast macd is minus
    } else if (i_open_filter==1) {   //add filter
-      if (sign>0 && macd_status>0) open=1;   //macd is plus, fast>slow
-      if (sign<0 && macd_status<0) open=-1;  //macd is minus, fast<slow
+      if (sign>0 && sign2>0 && macd_status>0) open=1;   //slow and fast macd is plus, fast>slow
+      if (sign<0 && sign2<0 && macd_status<0) open=-1;  //slow and fast macd is minus, fast<slow
    } else if (i_open_filter==2) {   //add filter
-      if (sign>0 && macd_status>=10 && macd_status<30) open=1;       //
-      if (sign<0 && macd_status<=-10 && macd_status>-30) open=-1;    //
+      if (sign>0 && sign2>0 && ((macd_status<10 && macd_status>=4) || (macd_status<20 && macd_status>=14) || (macd_status<30 && macd_status>=24) || macd_status>=34)) open=1;         //macd is plus, fast>slow, same direction
+      if (sign<0 && sign2<0 && ((macd_status>-10 && macd_status<=-4) || (macd_status>-20 && macd_status<=-14) || (macd_status>-30 && macd_status<=-24) || macd_status<=-34)) open=-1;  //macd is minus, fast<slow, same direction
    } else if (i_open_filter==3) {   //add filter
-      if (sign>0 && macd_status>=20 && macd_status<30) open=1;       //
-      if (sign<0 && macd_status<=-20 && macd_status>-30) open=-1;    //
+      //if (sign>0 && sign2>0 && ((macd_status>=15 && macd_status<20) || macd_status>=35)) open=1;         //slow and fast macd is plus, fast>slow+upper range
+      //if (sign<0 && sign2<0 && ((macd_status<=-15 && macd_status>-20) || macd_status<=-35)) open=-1;     //slow and fast macd is minus, fast<slow-lower range
+      if (sign>0 && sign2>0 && ((macd_status>=10 && macd_status<20) || macd_status>=30)) open=1;         //slow and fast macd is plus, fast>slow+upper range
+      if (sign<0 && sign2<0 && ((macd_status<=-10 && macd_status>-20) || macd_status<=-30)) open=-1;     //slow and fast macd is minus, fast<slow-lower range
    } else if (i_open_filter==4) {   //add filter
-      if (sign>0 && macd_status>=30) open=1;       //
-      if (sign<0 && macd_status<=-30) open=-1;     //
+      if (sign>0 && sign2>0 && ((macd_status>=20 && macd_status<30) || macd_status>=30)) open=1;       //slow and fast macd is plus, fast>slow+upper band
+      if (sign<0 && sign2<0 && ((macd_status<=-20 && macd_status>-30) || macd_status<=-30)) open=-1;    //slow and fast macd is minus, fast<slow-lower band
    } else if (i_open_filter==5) {   //add filter
-      if (sign>0 && bar_status>0) open=1;
-      if (sign<0 && bar_status<0) open=-1;
+      if (sign>0 && sign2>0 && macd_status>=30) open=1;        //slow and fast macd is plus, fast>slow+upper range, fast>slow+upper band
+      if (sign<0 && sign2<0 && macd_status<=-30) open=-1;      //slow and fast macd is minus, fast<slow-lower range, fast<slow-lower band
+   } else if (i_open_filter==6) {   //add filter
+      if (sign>0 && sign2>0 && bar_status>0) open=1;
+      if (sign<0 && sign2<0 && bar_status<0) open=-1;
+   } else if (i_open_filter==7) {   //add filter
+      if (sign>0 && sign2>0 && macd_status>=10) open=1;        //slow and fast macd is plus, fast>slow+upper band or fast>slow+upper range
+      if (sign<0 && sign2<0 && macd_status<=-10) open=-1;      //slow and fast macd is minus, fast<slow-lower band or fast<slow-lower range
+   } else if (i_open_filter==8) {   //add filter
+      if (sign>0 && sign2>0 && macd_fast>MathAbs(i_macd_gap)) open=1;                    //slow and fast macd is plus
+      if (sign<0 && sign2<0 && macd_fast<-MathAbs(i_macd_gap)) open=-1;                   //slow and fast macd is minus
+   } else if (i_open_filter==9) {   //add filter
+      if (macd_status>=30) macd_status-=30;
+      if (macd_status>=20) macd_status-=20;
+      if (macd_status>=10) macd_status-=10;
+      if (macd_status<=-30) macd_status+=30;
+      if (macd_status<=-20) macd_status+=20;
+      if (macd_status<=-10) macd_status+=10;
+      if (sign>0 && sign2>0 && macd_status==5 && macd_fast>MathAbs(i_macd_gap)) open=1;                    //slow and fast macd is plus
+      if (sign<0 && sign2<0 && macd_status==-5 && macd_fast<-MathAbs(i_macd_gap)) open=-1;                   //slow and fast macd is minus      
+   } else if (i_open_filter==10) {   //add filter
+      if (macd_status>=30) macd_status-=30;
+      if (macd_status>=20) macd_status-=20;
+      if (macd_status>=10) macd_status-=10;
+      if (macd_status<=-30) macd_status+=30;
+      if (macd_status<=-20) macd_status+=20;
+      if (macd_status<=-10) macd_status+=10;
+      if (sign>0 && sign2>0 && macd_status>0 && macd_fast>MathAbs(i_macd_gap)) open=1;                    //slow and fast macd is plus
+      if (sign<0 && sign2<0 && macd_status<0 && macd_fast<-MathAbs(i_macd_gap)) open=-1;                   //slow and fast macd is minus      
+      if (sign>10 && sign2>0) open2=1;                       //slow and fast macd is plus
+      if (sign<-10 && sign2<0) open2=-1;                     //slow and fast macd is minus
+   } else if (i_open_filter==11) {   //add filter
+      //if (sign>0 && sign2>0 && ((macd_status>=15 && macd_status<20) || macd_status>=35)) open=1;         //slow and fast macd is plus, fast>slow+upper range
+      //if (sign<0 && sign2<0 && ((macd_status<=-15 && macd_status>-20) || macd_status<=-35)) open=-1;     //slow and fast macd is minus, fast<slow-lower range
+      //if (sign>0 && sign2>0 && ((macd_status>=10 && macd_status<20) || macd_status>=30)) open=1;         //slow and fast macd is plus, fast>slow+upper range
+      //if (sign<0 && sign2<0 && ((macd_status<=-10 && macd_status>-20) || macd_status<=-30)) open=-1;     //slow and fast macd is minus, fast<slow-lower range
+      if (sign>0 && sign2>0 && MathAbs(macd_range)<=MathAbs(i_macd_gap)) open=1;         //slow and fast macd is plus, fast>slow+upper range
+      if (sign<0 && sign2<0 && MathAbs(macd_range)<=MathAbs(i_macd_gap)) open=-1;     //slow and fast macd is minus, fast<slow-lower range
    }
 
    int close=0;         //1:close buy;-1:close sell
+   int close2=0;         //1:close buy;-1:close sell
    if (i_close_filter==0) {         //base
-      if (sign>0) close=-1;                  //macd is plus
-      if (sign<0) close=1;                   //macd is minus
-   }else if (i_close_filter==1) {
-      if (sign2>0) close=-1;                  //macd is plus
-      if (sign2<0) close=1;                   //macd is minus
+      if (sign>0) close=-1;                  //slow macd is plus
+      if (sign<0) close=1;                   //slow macd is minus
+   }else if (i_close_filter==1) {   //
+      if (sign2>0) close=-1;                  //fast macd is plus
+      if (sign2<0) close=1;                   //fast macd is minus
+   }else if (i_close_filter==2) {   //
+      if (macd_status>=30) macd_status-=30;
+      if (macd_status>=20) macd_status-=20;
+      if (macd_status>=10) macd_status-=10;
+      if (macd_status<=-30) macd_status+=30;
+      if (macd_status<=-20) macd_status+=20;
+      if (macd_status<=-10) macd_status+=10;
+      //if (sign>0 || (sign<0 && sign2<0 && macd_status>=-2)) close=-1;    //
+      //if (sign<0 || (sign>0 && sign2>0 && macd_status<=2)) close2=1;     //
+      if (sign>0 || (sign<0 && sign2<0 && macd_status>0)) close=-1;    //
+      if (sign<0 || (sign>0 && sign2>0 && macd_status<0)) close2=1;     //
    }
-   if (close==-1 && has_order) {
+   if ((close==-1 || close2==-1) && has_order) {
       //close opposit sell order
       if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
          Print("close opposit(sell) order");
@@ -225,7 +280,7 @@ void OnTick()
       }
    }
    */
-   if (close==1 && has_order) {
+   if ((close==1 || close2==1) && has_order) {
       //close opposit buy order
       if (OrderCloseA(NULL,1,g_magic)>0) {   //close buy order
          Print("close opposit(buy) order");
@@ -252,14 +307,19 @@ void OnTick()
       has_order=false;
    }
    
-   /*
+   
    //debug
    if (now==i_inspect_dt) {
       Print("1.time=",now);
       Print("1.sign=",sign);
+      Print("1.sign2=",sign2);
+      Print("1.macd_fast=",macd_fast);
+      Print("1.macd_slow=",macd_slow);
+      Print("1.macd_range=",macd_range);
+      Print("1.macd_status=",macd_status);
       Print("1.has_order=",has_order);
    }
-   */
+   
    
    /*
    //modify buy order
@@ -302,7 +362,7 @@ void OnTick()
    */
    
    //open buy
-   if (open==1 && !has_order) {
+   if ((open==1 || open2==1) && !has_order) {
       Print("Open buy order,",now);
       double price,ls_price;
       price=Bid;
@@ -321,7 +381,7 @@ void OnTick()
    }
    
    //open sell
-   if (open==-1 && !has_order) {
+   if ((open==-1 ||open2==-1) && !has_order) {
       Print("Open sell order,",now);
       double price,ls_price;
       price=Ask;

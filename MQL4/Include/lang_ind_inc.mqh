@@ -137,7 +137,6 @@ int getMAPeriod(int arg_timeperiod,int arg_type=0)
    
    return ret;
 }
-
 //+------------------------------------------------------------------+
 //| Time Period function
 //| arg_period: 
@@ -1115,7 +1114,71 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
    }
    return 0;
 }
+//+------------------------------------------------------------------+
+//| Get MA status (base on 3 continous values)
+//| date: 2018/05/01
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value: short>mid>long,1;
+//|               short<mid<long,-1;
+//|               n/a:0
+//+------------------------------------------------------------------+
+int getMAStatus ( int arg_period,int arg_shift,
+                  double &arg_short_ma,double &arg_mid_ma,double &arg_long_ma,
+                  int arg_thrd_pt=0,
+                  int arg_short_ma_ped=0,int arg_mid_ma_ped=0,int arg_long_ma_ped=0 
+                )
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   double gap=arg_thrd_pt*Point;
+   
+   int short_pd=5;      //short ma period
+   int mid_pd=10;       //middle ma period
+   int long_pd=20;      //long ma period
 
+   int cur_bar_shift=arg_shift;
+   int lst_bar_shift=arg_shift+1;
+   int sec_lst_bar_shift=arg_shift+2;
+   
+   double cur_close_price=iClose(NULL,arg_period,cur_bar_shift);
+   double lst_close_price=iClose(NULL,arg_period,lst_bar_shift);
+   double sec_lst_close_price=iClose(NULL,arg_period,sec_lst_bar_shift);
+
+   double cur_open_price=iOpen(NULL,arg_period,cur_bar_shift);
+   double lst_open_price=iOpen(NULL,arg_period,lst_bar_shift);
+   double sec_lst_open_price=iOpen(NULL,arg_period,sec_lst_bar_shift);
+
+   double cur_short_ma=iMA(NULL,arg_period,short_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+   double cur_mid_ma=iMA(NULL,arg_period,mid_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+   double cur_long_ma=iMA(NULL,arg_period,long_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
+
+   double lst_short_ma=iMA(NULL,arg_period,short_pd,0,MODE_SMA,PRICE_CLOSE,lst_bar_shift);
+   double lst_mid_ma=iMA(NULL,arg_period,mid_pd,0,MODE_SMA,PRICE_CLOSE,lst_bar_shift);
+   double lst_long_ma=iMA(NULL,arg_period,long_pd,0,MODE_SMA,PRICE_CLOSE,lst_bar_shift);
+
+   double sec_lst_short_ma=iMA(NULL,arg_period,short_pd,0,MODE_SMA,PRICE_CLOSE,sec_lst_bar_shift);
+   double sec_lst_mid_ma=iMA(NULL,arg_period,mid_pd,0,MODE_SMA,PRICE_CLOSE,sec_lst_bar_shift);
+   double sec_lst_long_ma=iMA(NULL,arg_period,long_pd,0,MODE_SMA,PRICE_CLOSE,sec_lst_bar_shift);
+   
+   int cur_ma_status=0,lst_ma_status=0,sec_lst_ma_status=0;
+   if (cur_short_ma>(cur_mid_ma+gap) && cur_mid_ma>(cur_long_ma+gap)) cur_ma_status=1;
+   if (lst_short_ma>(lst_mid_ma+gap) && lst_mid_ma>(lst_long_ma+gap)) lst_ma_status=1;
+   if (sec_lst_short_ma>(sec_lst_mid_ma+gap) && sec_lst_mid_ma>(sec_lst_long_ma+gap)) sec_lst_ma_status=1;
+
+   if (cur_short_ma<(cur_mid_ma-gap) && cur_mid_ma<(cur_long_ma-gap)) cur_ma_status=-1;
+   if (lst_short_ma<(lst_mid_ma-gap) && lst_mid_ma<(lst_long_ma-gap)) lst_ma_status=-1;
+   if (sec_lst_short_ma<(sec_lst_mid_ma-gap) && sec_lst_mid_ma<(sec_lst_long_ma-gap)) sec_lst_ma_status=-1;
+
+   arg_short_ma=cur_short_ma;
+   arg_mid_ma=cur_mid_ma;
+   arg_long_ma=cur_long_ma;
+   
+   if (cur_ma_status==1 && lst_ma_status==1) return 1;   
+   if (cur_ma_status==-1 && lst_ma_status==-1) return -1;   
+   
+   return 0;
+}
 //+------------------------------------------------------------------+
 //| Get MA status (base on 3 continous values)
 //| date: 2017/10/20
@@ -1947,7 +2010,7 @@ int getMACDStatus(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_p
 //|               fast is above slow band upper:+20  
 //|               fast is below slow band lower:-20  
 //+------------------------------------------------------------------+
-int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,double arg_deviation=2,int arg_range_ratio=1)
+int getMACDStatus2(int arg_period,int arg_shift,double &arg_macd_slow,double &arg_macd_fast,double &arg_macd_range,int arg_slow_pd=26,int arg_fast_pd=12,int arg_signal_pd=9,double arg_deviation=2,int arg_range_ratio=1)
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
@@ -2046,6 +2109,10 @@ int getMACDStatus2(int arg_period,int arg_shift,int arg_slow_pd=26,int arg_fast_
          ret=break_status-1;
    }
    
+   arg_macd_fast=cur_macd_fast;
+   arg_macd_slow=cur_macd_slow;
+   arg_macd_range=cur_macd_up;
+   
    return ret;
 }
 //+------------------------------------------------------------------+
@@ -2094,6 +2161,109 @@ int getBandStatus(int arg_period,int arg_shift,int arg_pd=12,int arg_deviation=2
    if (touch_high==1 && touch_low==0) return 1;
    if (touch_low==1 && touch_high==0) return -1;
    
+   return 0;
+}
+//+------------------------------------------------------------------+
+//| Get Band status
+//| date: 2018/05/03
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value: body in up half band,not touch band high and center,2;
+//|               body in up half band,high leg touch band high,3;
+//|               body in up half band,low leg touch band center,1;
+//| return value: body in low half band,not touch band low and center,-2;
+//|               body in low half band,low leg touch band low,-3;
+//|               body in low half band,high leg touch band center,-1;
+//|               n/a:0
+//+------------------------------------------------------------------+
+int getBandStatus2 ( int arg_period,int arg_shift,
+                     double &arg_d2_low,double &arg_d2_high,double &arg_d4_low,double &arg_d4_high,
+                     double &arg_ma,
+                     int arg_pd=10, 
+                     int arg_thrd_pt=0
+                   )
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   double th_gap=arg_thrd_pt*Point;
+   
+   int cur_bar_shift=arg_shift;
+   int bar_status=0;
+   
+   double cur_close_price=iClose(NULL,arg_period,cur_bar_shift);
+   double cur_open_price=iOpen(NULL,arg_period,cur_bar_shift);
+   double cur_high_price=iHigh(NULL,arg_period,cur_bar_shift);
+   double cur_low_price=iLow(NULL,arg_period,cur_bar_shift);
+   
+   double oc_gap=cur_open_price-cur_close_price;
+   double cur_high=cur_high_price,cur_low=cur_low_price;
+   double cur_sub_high,cur_sub_low;
+   if (oc_gap>0) {
+      bar_status=1;   //negative bar
+      cur_sub_high=cur_open_price;
+      cur_sub_low=cur_close_price;
+   } else {
+      cur_sub_high=cur_close_price;
+      cur_sub_low=cur_open_price;
+   }
+      
+   int dev=2,dev2=4;
+   double cur_band_low=iBands(NULL,arg_period,arg_pd,dev2,0,PRICE_CLOSE,MODE_LOWER,cur_bar_shift);
+   double cur_band_high=iBands(NULL,arg_period,arg_pd,dev2,0,PRICE_CLOSE,MODE_UPPER,cur_bar_shift);
+   double cur_band_sub_low=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_LOWER,cur_bar_shift);
+   double cur_band_sub_high=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_UPPER,cur_bar_shift);
+   double cur_band_center=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_MAIN,cur_bar_shift);
+
+   arg_d4_low=cur_band_low;
+   arg_d4_high=cur_band_high;
+   arg_d2_low=cur_band_sub_low;
+   arg_d2_high=cur_band_sub_high;
+   arg_ma=cur_band_center;
+
+   double bar_p[4],band_p[3];
+   bar_p[0]=cur_high_price;
+   bar_p[1]=cur_sub_high;
+   bar_p[2]=cur_sub_low;
+   bar_p[3]=cur_low;
+   band_p[0]=cur_band_sub_high;
+   band_p[1]=cur_band_center;
+   band_p[2]=cur_band_sub_low;
+   
+   int line_status[3];
+   line_status[0]=line_status[1]=line_status[2]=0;
+   //| <<band line>>
+   //|     (above) 2
+   //|  |  (high)  1
+   //| [ ] (open)  0
+   //| [ ] (close) 0
+   //|  |  (low)   -1
+   //|     (below) -2
+   for (int i=0;i<3;i++) {
+      if (band_p[i]>bar_p[0]) line_status[i]=2;
+      else if (band_p[i]>=bar_p[1]) line_status[i]=1;
+      else if (band_p[i]>bar_p[2]) line_status[i]=0;
+      else if (band_p[i]>=bar_p[3]) line_status[i]=-1;
+      else line_status[i]=-2;
+   }
+   
+   if (line_status[0]==-2 || line_status[0]==-1) return 0;
+   if (line_status[2]==2 || line_status[2]==1) return 0;
+
+   if ((line_status[0]==0 || line_status[0]==1) && line_status[1]==-2 && line_status[2]==-2) return 3;
+   if ((line_status[2]==0 || line_status[2]==-1) && line_status[1]==2 && line_status[0]==2) return -3;
+
+   if (line_status[0]==2 && line_status[1]==-2) return 2;
+   if (line_status[2]==-2 && line_status[1]==2) return -2;
+
+   if (((line_status[1]==0 && bar_status==0) || line_status[1]==-1) && line_status[0]==2 && line_status[2]==-2) return 1;
+   if (((line_status[1]==0 && bar_status==1) || line_status[1]==1) && line_status[0]==2 && line_status[2]==-2) return -1;
+
+   if ((line_status[0]==0 || line_status[0]==1) && (line_status[1]==0 || line_status[1]==-1) && bar_status==1) return 4;
+   if ((line_status[2]==0 || line_status[2]==-1) && (line_status[1]==0 || line_status[1]==1) && bar_status==0) return -4;
+
+   if ((line_status[0]==0 || line_status[0]==1) && (line_status[1]==0 || line_status[1]==-1) && bar_status==0) return 3;
+   if ((line_status[2]==0 || line_status[2]==-1) && (line_status[1]==0 || line_status[1]==1) && bar_status==1) return -3;
+
    return 0;
 }
 //+------------------------------------------------------------------+

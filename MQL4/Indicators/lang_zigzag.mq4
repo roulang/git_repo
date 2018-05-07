@@ -16,57 +16,57 @@
 //--- plot up
 #property indicator_label1  "s_low"    //short low
 #property indicator_type1   DRAW_ARROW
-#property indicator_color1  clrSpringGreen
-//#property indicator_color1  clrBlack
+//#property indicator_color1  clrSpringGreen
+#property indicator_color1  clrNONE
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 //--- plot down
 #property indicator_label2  "s_high"   //short high
 #property indicator_type2   DRAW_ARROW
-#property indicator_color2  clrRed
-//#property indicator_color2  clrBlack
+//#property indicator_color2  clrRed
+#property indicator_color2  clrNONE
 #property indicator_style2  STYLE_SOLID
 #property indicator_width2  1
 //--- plot inner
 #property indicator_label3  "inner"    //inner
 #property indicator_type3   DRAW_ARROW
 //#property indicator_color3  clrYellow
-#property indicator_color3  clrBlack
+#property indicator_color3  clrNONE
 #property indicator_style3  STYLE_SOLID
 #property indicator_width3  1
 //--- plot outter
 #property indicator_label4  "outter"   //outter
 #property indicator_type4   DRAW_ARROW
 //#property indicator_color4  clrYellow
-#property indicator_color4  clrBlack
+#property indicator_color4  clrNONE
 #property indicator_style4  STYLE_SOLID
 #property indicator_width4  1
 //--- plot midup
 #property indicator_label5  "m_low"    //mid low
 #property indicator_type5   DRAW_ARROW
-#property indicator_color5  clrSpringGreen
-//#property indicator_color5  clrBlack
+//#property indicator_color5  clrSpringGreen
+#property indicator_color5  clrNONE
 #property indicator_style5  STYLE_SOLID
 #property indicator_width5  1
 //--- plot middown
 #property indicator_label6  "m_high"   //mid high
 #property indicator_type6   DRAW_ARROW
-#property indicator_color6  clrRed
-//#property indicator_color6  clrBlack
+//#property indicator_color6  clrRed
+#property indicator_color6  clrNONE
 #property indicator_style6  STYLE_SOLID
 #property indicator_width6  1
 //--- plot longup
 #property indicator_label7  "l_low"    //long low
 #property indicator_type7   DRAW_ARROW
-#property indicator_color7  clrSpringGreen
-//#property indicator_color7  clrBlack
+//#property indicator_color7  clrSpringGreen
+#property indicator_color7  clrNONE
 #property indicator_style7  STYLE_SOLID
 #property indicator_width7  1
 //--- plot longdown
 #property indicator_label8  "l_high"   //long high
 #property indicator_type8   DRAW_ARROW
-#property indicator_color8  clrRed
-//#property indicator_color8  clrBlack
+//#property indicator_color8  clrRed
+#property indicator_color8  clrNONE
 #property indicator_style8  STYLE_SOLID
 #property indicator_width8  1
 //--- plot last up idx
