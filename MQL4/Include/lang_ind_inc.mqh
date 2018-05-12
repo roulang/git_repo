@@ -1125,17 +1125,17 @@ int getHighLowTouchStatus(int arg_shift,int arg_thpt,int arg_lengh,double &arg_z
 //+------------------------------------------------------------------+
 int getMAStatus ( int arg_period,int arg_shift,
                   double &arg_short_ma,double &arg_mid_ma,double &arg_long_ma,
-                  int arg_thrd_pt=0,
-                  int arg_short_ma_ped=0,int arg_mid_ma_ped=0,int arg_long_ma_ped=0 
+                  int arg_short_ma_ped=5,int arg_mid_ma_ped=10,int arg_long_ma_ped=20,
+                  int arg_thrd_pt=0
                 )
 {
    if (arg_period==PERIOD_CURRENT) arg_period=Period();
    
-   double gap=arg_thrd_pt*Point;
+   //double gap=arg_thrd_pt*Point;
    
-   int short_pd=5;      //short ma period
-   int mid_pd=10;       //middle ma period
-   int long_pd=20;      //long ma period
+   int short_pd=arg_short_ma_ped;      //short ma period
+   int mid_pd=arg_mid_ma_ped;          //middle ma period
+   int long_pd=arg_long_ma_ped;        //long ma period
 
    int cur_bar_shift=arg_shift;
    int lst_bar_shift=arg_shift+1;
@@ -1149,6 +1149,22 @@ int getMAStatus ( int arg_period,int arg_shift,
    double lst_open_price=iOpen(NULL,arg_period,lst_bar_shift);
    double sec_lst_open_price=iOpen(NULL,arg_period,sec_lst_bar_shift);
 
+   double cur_high_price=iHigh(NULL,arg_period,cur_bar_shift);
+   double cur_low_price=iLow(NULL,arg_period,cur_bar_shift);
+
+   double oc_gap=cur_open_price-cur_close_price;
+   double cur_high=cur_high_price,cur_low=cur_low_price;
+   double cur_sub_high,cur_sub_low;
+   int bar_status=0;
+   if (oc_gap>0) {
+      bar_status=1;   //negative bar
+      cur_sub_high=cur_open_price;
+      cur_sub_low=cur_close_price;
+   } else {
+      cur_sub_high=cur_close_price;
+      cur_sub_low=cur_open_price;
+   }
+
    double cur_short_ma=iMA(NULL,arg_period,short_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
    double cur_mid_ma=iMA(NULL,arg_period,mid_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
    double cur_long_ma=iMA(NULL,arg_period,long_pd,0,MODE_SMA,PRICE_CLOSE,cur_bar_shift);
@@ -1161,18 +1177,65 @@ int getMAStatus ( int arg_period,int arg_shift,
    double sec_lst_mid_ma=iMA(NULL,arg_period,mid_pd,0,MODE_SMA,PRICE_CLOSE,sec_lst_bar_shift);
    double sec_lst_long_ma=iMA(NULL,arg_period,long_pd,0,MODE_SMA,PRICE_CLOSE,sec_lst_bar_shift);
    
-   int cur_ma_status=0,lst_ma_status=0,sec_lst_ma_status=0;
-   if (cur_short_ma>(cur_mid_ma+gap) && cur_mid_ma>(cur_long_ma+gap)) cur_ma_status=1;
-   if (lst_short_ma>(lst_mid_ma+gap) && lst_mid_ma>(lst_long_ma+gap)) lst_ma_status=1;
-   if (sec_lst_short_ma>(sec_lst_mid_ma+gap) && sec_lst_mid_ma>(sec_lst_long_ma+gap)) sec_lst_ma_status=1;
-
-   if (cur_short_ma<(cur_mid_ma-gap) && cur_mid_ma<(cur_long_ma-gap)) cur_ma_status=-1;
-   if (lst_short_ma<(lst_mid_ma-gap) && lst_mid_ma<(lst_long_ma-gap)) lst_ma_status=-1;
-   if (sec_lst_short_ma<(sec_lst_mid_ma-gap) && sec_lst_mid_ma<(sec_lst_long_ma-gap)) sec_lst_ma_status=-1;
-
    arg_short_ma=cur_short_ma;
    arg_mid_ma=cur_mid_ma;
    arg_long_ma=cur_long_ma;
+
+   int cur_ma_status=0,lst_ma_status=0,sec_lst_ma_status=0;
+   //if (cur_short_ma>cur_mid_ma && cur_mid_ma>cur_long_ma) cur_ma_status=1;
+   //if (lst_short_ma>lst_mid_ma && lst_mid_ma>lst_long_ma) lst_ma_status=1;
+   //if (sec_lst_short_ma>sec_lst_mid_ma && sec_lst_mid_ma>sec_lst_long_ma) sec_lst_ma_status=1;
+   if (cur_short_ma>cur_long_ma && cur_mid_ma>cur_long_ma) cur_ma_status=1;
+   if (lst_short_ma>lst_long_ma && lst_mid_ma>lst_long_ma) lst_ma_status=1;
+   if (sec_lst_short_ma>sec_lst_long_ma && sec_lst_mid_ma>sec_lst_long_ma) sec_lst_ma_status=1;
+
+   //if (cur_short_ma<cur_mid_ma && cur_mid_ma<cur_long_ma) cur_ma_status=-1;
+   //if (lst_short_ma<lst_mid_ma && lst_mid_ma<lst_long_ma) lst_ma_status=-1;
+   //if (sec_lst_short_ma<sec_lst_mid_ma && sec_lst_mid_ma<sec_lst_long_ma) sec_lst_ma_status=-1;
+   if (cur_short_ma<cur_long_ma && cur_mid_ma<cur_long_ma) cur_ma_status=-1;
+   if (lst_short_ma<lst_long_ma && lst_mid_ma<lst_long_ma) lst_ma_status=-1;
+   if (sec_lst_short_ma<sec_lst_long_ma && sec_lst_mid_ma<sec_lst_long_ma) sec_lst_ma_status=-1;
+
+   int short_ma_slop=0,mid_ma_slop=0,long_ma_slop=0;
+   int short_ma_slop2=0,mid_ma_slop2=0,long_ma_slop2=0;
+   short_ma_slop=(int)NormalizeDouble((cur_short_ma-lst_short_ma)/Point,0);
+   short_ma_slop2=(int)NormalizeDouble((lst_short_ma-sec_lst_short_ma)/Point,0);
+   mid_ma_slop=(int)NormalizeDouble((cur_mid_ma-lst_mid_ma)/Point,0);
+   mid_ma_slop2=(int)NormalizeDouble((lst_mid_ma-sec_lst_mid_ma)/Point,0);
+   long_ma_slop=(int)NormalizeDouble((cur_long_ma-lst_long_ma)/Point,0);
+   long_ma_slop2=(int)NormalizeDouble((lst_long_ma-sec_lst_long_ma)/Point,0);
+
+   if (MathAbs(long_ma_slop2)<=arg_thrd_pt || MathAbs(long_ma_slop)<=arg_thrd_pt || 
+       long_ma_slop2*long_ma_slop<0)
+       return 0;
+   
+   double bar_p[4],ma_p[3];
+   bar_p[0]=cur_high_price;
+   bar_p[1]=cur_sub_high;
+   bar_p[2]=cur_sub_low;
+   bar_p[3]=cur_low;
+   ma_p[0]=cur_short_ma;
+   ma_p[1]=cur_mid_ma;
+   ma_p[2]=cur_long_ma;
+
+   int line_status[3];
+   line_status[0]=line_status[1]=line_status[2]=0;
+   //| <<ma line>>
+   //|     (above) 2
+   //|  |  (high)  1
+   //| [ ] (open)  0
+   //| [ ] (close) 0
+   //|  |  (low)   -1
+   //|     (below) -2
+   for (int i=0;i<3;i++) {
+      if (ma_p[i]>bar_p[0]) line_status[i]=2;
+      else if (ma_p[i]>=bar_p[1]) line_status[i]=1;
+      else if (ma_p[i]>bar_p[2]) line_status[i]=0;
+      else if (ma_p[i]>=bar_p[3]) line_status[i]=-1;
+      else line_status[i]=-2;
+   }
+
+   if (line_status[2]==0) return 0;
    
    if (cur_ma_status==1 && lst_ma_status==1) return 1;   
    if (cur_ma_status==-1 && lst_ma_status==-1) return -1;   
@@ -2246,8 +2309,10 @@ int getBandStatus2 ( int arg_period,int arg_shift,
       else line_status[i]=-2;
    }
    
-   if (line_status[0]==-2 || line_status[0]==-1) return 0;
-   if (line_status[2]==2 || line_status[2]==1) return 0;
+   if (line_status[1]==0 && line_status[0]==2 && line_status[2]==-2) return 0;
+
+   if (line_status[0]==-2 || line_status[0]==-1) return 4;
+   if (line_status[2]==2 || line_status[2]==1) return -4;
 
    if ((line_status[0]==0 || line_status[0]==1) && line_status[1]==-2 && line_status[2]==-2) return 3;
    if ((line_status[2]==0 || line_status[2]==-1) && line_status[1]==2 && line_status[0]==2) return -3;
@@ -2255,11 +2320,14 @@ int getBandStatus2 ( int arg_period,int arg_shift,
    if (line_status[0]==2 && line_status[1]==-2) return 2;
    if (line_status[2]==-2 && line_status[1]==2) return -2;
 
-   if (((line_status[1]==0 && bar_status==0) || line_status[1]==-1) && line_status[0]==2 && line_status[2]==-2) return 1;
-   if (((line_status[1]==0 && bar_status==1) || line_status[1]==1) && line_status[0]==2 && line_status[2]==-2) return -1;
+   //if (((line_status[1]==0 && bar_status==0) || line_status[1]==-1) && line_status[0]==2 && line_status[2]==-2) return 1;
+   //if (((line_status[1]==0 && bar_status==1) || line_status[1]==1) && line_status[0]==2 && line_status[2]==-2) return -1;
+   if (line_status[1]==-1 && line_status[0]==2 && line_status[2]==-2) return 1;
+   if (line_status[1]==1 && line_status[0]==2 && line_status[2]==-2) return -1;
 
-   if ((line_status[0]==0 || line_status[0]==1) && (line_status[1]==0 || line_status[1]==-1) && bar_status==1) return 4;
-   if ((line_status[2]==0 || line_status[2]==-1) && (line_status[1]==0 || line_status[1]==1) && bar_status==0) return -4;
+
+   if ((line_status[0]==0 || line_status[0]==1) && (line_status[1]==0 || line_status[1]==-1) && bar_status==1) return 5;
+   if ((line_status[2]==0 || line_status[2]==-1) && (line_status[1]==0 || line_status[1]==1) && bar_status==0) return -5;
 
    if ((line_status[0]==0 || line_status[0]==1) && (line_status[1]==0 || line_status[1]==-1) && bar_status==0) return 3;
    if ((line_status[2]==0 || line_status[2]==-1) && (line_status[1]==0 || line_status[1]==1) && bar_status==1) return -3;

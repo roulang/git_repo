@@ -1938,3 +1938,68 @@ int isTrendStgOpen3(int arg_shift,double &arg_ls_price,double &arg_macd_slow,dou
    return ret;
 
 }
+//+------------------------------------------------------------------+
+//| Trend strategy Open
+//| date: 2018/5/9
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: +2,open buy;-2,open sell;
+//|               1,stay open;-1,stay close;
+//|               0,N/A
+//+------------------------------------------------------------------+
+int isTrendStgOpen4( int arg_shift,double &arg_ls_price,int &arg_last_band_st,
+                     int arg_long_pd=20,int arg_mid_pd=10,int arg_short_pd=5
+                   )
+{
+   int bar_shift=arg_shift;
+   
+   double short_ma,mid_ma,long_ma;
+   int ma_st=getMAStatus(PERIOD_CURRENT,bar_shift,short_ma,mid_ma,long_ma,arg_short_pd,arg_mid_pd,arg_long_pd);
+   //expand to larger period
+   int exp_bar_shift;
+   int pd=expandPeriod(PERIOD_CURRENT,bar_shift,exp_bar_shift,0);
+   int ma_st2=getMAStatus(pd,exp_bar_shift,short_ma,mid_ma,long_ma,arg_short_pd,arg_mid_pd,arg_long_pd);
+   //| return value: short>mid>long,1;
+   //|               short<mid<long,-1;
+   //|               n/a:0
+   //+------------------------------------------------------------------+
+   
+   double d2_low,d2_high,d4_low,d4_high,d0_ma;
+   int band_st=getBandStatus2(PERIOD_CURRENT,bar_shift,d2_low,d2_high,d4_low,d4_high,d0_ma,arg_mid_pd);
+   //| return value: body in up half band,not touch band high and center,2;
+   //|               body in up half band,high leg touch band high,3;
+   //|               body in up half band,low leg touch band center,1;
+   //| return value: body in low half band,not touch band low and center,-2;
+   //|               body in low half band,low leg touch band low,-3;
+   //|               body in low half band,high leg touch band center,-1;
+   //|               n/a:0
+
+   int last_band_st=arg_last_band_st;
+   if (ma_st2==1) {      //large period's trend is up
+      arg_ls_price=d4_low;
+      if (band_st==3 || band_st<0) {
+         arg_last_band_st=band_st;
+      }
+      if (band_st==5 && ma_st==1) return 2;
+      if ((band_st==1 || band_st==0) && last_band_st==3 && ma_st==1) {
+         return 2;
+      }
+      return 1;
+   }
+   if (ma_st2==-1) {     //large period's trend is down
+      arg_ls_price=d4_high;
+      if (band_st==-3 || band_st>0) {
+         arg_last_band_st=band_st;
+      }
+      if (band_st==-5 && ma_st==-1) return -2;
+      if ((band_st==-1 || band_st==0) && last_band_st==-3 && ma_st==-1) {
+         return -2;
+      }
+      return -1;
+   }
+   
+   arg_ls_price=0;
+   arg_last_band_st=0;
+   return 0;
+
+}

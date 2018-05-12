@@ -12,8 +12,8 @@
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -4
-#property indicator_maximum 4
+#property indicator_minimum -5
+#property indicator_maximum 5
 #property indicator_buffers 1
 #property indicator_plots   1
 //--- plot signal
