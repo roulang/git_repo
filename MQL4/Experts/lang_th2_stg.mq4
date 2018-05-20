@@ -41,7 +41,7 @@ int OnInit()
    }
    
    ea_init();
-   //g_magic+=Period();
+   g_magic+=Period();
    
    if (!i_for_test) {
       if (!timer_init(SEC_H1)) return(INIT_FAILED);
