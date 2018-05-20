@@ -27,6 +27,13 @@
 //--- indicator buffers
 double         signalBuffer[];
 
+//input
+input int i_short_pd=5;
+input int i_mid_pd=10;
+input int i_long_pd=20;
+input int i_exp_pd=0;
+
+//global
 int g_last_band_st=0;
 
 //+------------------------------------------------------------------+
@@ -83,7 +90,7 @@ int OnCalculate(const int rates_total,
    int skip_first_bars=0;
    for(int i=st-skip_first_bars;i>0;i--) {
       double ls_p;
-      int signal=isTrendStgOpen4(i,ls_p,g_last_band_st);
+      int signal=isTrendStgOpen4(i,ls_p,g_last_band_st,i_exp_pd,i_long_pd,i_mid_pd,i_short_pd);
       
       //signalBuffer[i]=macd_status;
       signalBuffer[i]=signal;

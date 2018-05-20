@@ -1948,6 +1948,7 @@ int isTrendStgOpen3(int arg_shift,double &arg_ls_price,double &arg_macd_slow,dou
 //|               0,N/A
 //+------------------------------------------------------------------+
 int isTrendStgOpen4( int arg_shift,double &arg_ls_price,int &arg_last_band_st,
+                     int arg_exp_pd=0,
                      int arg_long_pd=20,int arg_mid_pd=10,int arg_short_pd=5
                    )
 {
@@ -1957,7 +1958,7 @@ int isTrendStgOpen4( int arg_shift,double &arg_ls_price,int &arg_last_band_st,
    int ma_st=getMAStatus(PERIOD_CURRENT,bar_shift,short_ma,mid_ma,long_ma,arg_short_pd,arg_mid_pd,arg_long_pd);
    //expand to larger period
    int exp_bar_shift;
-   int pd=expandPeriod(PERIOD_CURRENT,bar_shift,exp_bar_shift,0);
+   int pd=expandPeriod(PERIOD_CURRENT,bar_shift,exp_bar_shift,arg_exp_pd);
    int ma_st2=getMAStatus(pd,exp_bar_shift,short_ma,mid_ma,long_ma,arg_short_pd,arg_mid_pd,arg_long_pd);
    //| return value: short>mid>long,1;
    //|               short<mid<long,-1;

@@ -667,7 +667,44 @@ bool FindOrderA(string symbol, int type, int magic)
    }
    return false;
 }
+bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_sell_cnt)
+{
+   string cur;
+   if (arg_symbol==NULL) cur=Symbol();
+   else cur=arg_symbol;
+   
+   int t=OrdersTotal();
+   int b_cnt,s_cnt;
+   b_cnt=s_cnt=0;
+   for(int i=t-1;i>=0;i--) {
+      bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
+      if (ret==true) {
+         //Print("1=",OrderSymbol(),",2=",OrderType(),",3=",OrderComment(),",4=",OrderMagicNumber());
+         //if((type==0 && StringCompare(OrderSymbol(),cur)==0 && OrderMagicNumber()==magic) ||
+         //   (type==1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUY && OrderMagicNumber()==magic) ||
+         //   (type==2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_BUYSTOP && OrderMagicNumber()==magic) ||
+         //   (type==-1 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELL && OrderMagicNumber()==magic) ||
+         //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
+         if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,1)) {
+            b_cnt+=1;
+         }
+         if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,-1)) {
+            s_cnt+=1;
+         }
+      } else {
+         int check=GetLastError(); 
+         if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
+      }
+   }
+   
+   arg_buy_cnt=b_cnt;
+   arg_sell_cnt=s_cnt;
 
+   if ((b_cnt+s_cnt)>0) return true;
+   
+   return false;
+
+}
 //+------------------------------------------------------------------+
 //| moving stop function
 //| type:1 buy,-1 sell
@@ -990,7 +1027,26 @@ bool isSameOrder(string arg_order_symbol, int arg_order_magic, string arg_order_
    
    return false;
 }
+int file_read()
+{
+   string cur=Symbol();
+   string fn=StringConcatenate("lang_",cur);
+   int ret=0;
+   int h=FileOpen(fn,FILE_TXT|FILE_SHARE_READ);
+   if(h!=INVALID_HANDLE) {
+      if (!FileIsEnding(h)) {
+         //read int
+         string s=FileReadString(h);
+         ret=(int)StringToInteger(s);
+      }
+      FileClose(h);
+   } else {
+      Print("Operation FileOpen failed, error: ",ErrorDescription(GetLastError()));
+      FileClose(h);
+   }
 
+   return ret;
+}
 //+------------------------------------------------------------------+
 // ea_init: ea init
 //+------------------------------------------------------------------+
