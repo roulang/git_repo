@@ -119,7 +119,7 @@ void OnTick()
    //debug
    if (i_debug) {
       datetime t=Time[last_bar_shift];
-      Print("time=",t,"signal=",sign,",com=",g_com);
+      Print("time=",t,",signal=",sign,",com=",g_com);
    }
    
    
@@ -142,16 +142,17 @@ void OnTick()
    
    int buy_order_cnt,sell_order_cnt;
    buy_order_cnt=sell_order_cnt=0;
-   if (!FindOrderCnt(NULL,g_magic,buy_order_cnt,sell_order_cnt)) {
+   double order_pft=0;
+   if (!FindOrderCnt(NULL,g_magic,buy_order_cnt,sell_order_cnt,order_pft)) {
       has_order=false;
    }
    if (i_debug) {
       datetime t=Time[last_bar_shift];
-      Print("time=",t,"b_cnt=",buy_order_cnt,",s_cnt=",sell_order_cnt);
+      Print("time=",t,",b_cnt=",buy_order_cnt,",s_cnt=",sell_order_cnt,",profit=",order_pft);
    }
 
    //open buy
-   if (sign==2 && g_com>0) {
+   if (sign==2 && g_com>0 && order_pft>=0) {
       ls_tgt_price=d4_low;
       Print("Open buy order,",now);
       double price,price2,ls_price;
@@ -169,7 +170,8 @@ void OnTick()
          }
          */
          if (i_order_cnt>buy_order_cnt) {
-            double tp_price=price2+(i_order_cnt-buy_order_cnt)*ls_pt*Point;
+            //double tp_price=price2+(i_order_cnt-buy_order_cnt)*ls_pt*Point;
+            double tp_price=price2+(buy_order_cnt+1)*ls_pt*Point;
             if (OrderBuy2(0,ls_price,tp_price,g_magic)) {
                Print("buy order opened for ",buy_order_cnt);
             }
@@ -180,7 +182,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-2 && g_com<0) {
+   if (sign==-2 && g_com<0 && order_pft>=0) {
       ls_tgt_price=d4_high;
       Print("Open sell order,",now);
       double price,price2,ls_price;
@@ -199,7 +201,8 @@ void OnTick()
          }
          */
          if (i_order_cnt>sell_order_cnt) {
-            double tp_price=price2-(i_order_cnt-sell_order_cnt)*ls_pt*Point;
+            //double tp_price=price2-(i_order_cnt-sell_order_cnt)*ls_pt*Point;
+            double tp_price=price2-(sell_order_cnt+1)*ls_pt*Point;
             if (OrderSell2(0,ls_price,tp_price,g_magic)) {
                Print("sell order opened for ",sell_order_cnt);
             }

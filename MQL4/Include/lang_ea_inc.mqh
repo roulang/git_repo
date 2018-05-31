@@ -667,7 +667,7 @@ bool FindOrderA(string symbol, int type, int magic)
    }
    return false;
 }
-bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_sell_cnt)
+bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_sell_cnt, double &arg_ord_pft)
 {
    string cur;
    if (arg_symbol==NULL) cur=Symbol();
@@ -676,6 +676,8 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
    int t=OrdersTotal();
    int b_cnt,s_cnt;
    b_cnt=s_cnt=0;
+   double b_pft,s_pft;
+   b_pft=s_pft=0;
    for(int i=t-1;i>=0;i--) {
       bool ret=OrderSelect(i,SELECT_BY_POS,MODE_TRADES);
       if (ret==true) {
@@ -687,9 +689,13 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
          //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,1)) {
             b_cnt+=1;
+            b_pft=OrderProfit();
+            if (b_pft>=0) b_pft=0;
          }
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,-1)) {
             s_cnt+=1;
+            s_pft=OrderProfit();
+            if (s_pft>=0) s_pft=0;
          }
       } else {
          int check=GetLastError(); 
@@ -699,7 +705,10 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
    
    arg_buy_cnt=b_cnt;
    arg_sell_cnt=s_cnt;
-
+   arg_ord_pft=0;
+   if (b_pft<0) arg_ord_pft=b_pft;
+   if (s_pft<0) arg_ord_pft=s_pft;
+      
    if ((b_cnt+s_cnt)>0) return true;
    
    return false;
