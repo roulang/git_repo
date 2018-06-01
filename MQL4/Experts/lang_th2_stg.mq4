@@ -81,6 +81,7 @@ void OnTick()
    int cur_bar_shift=0;
    int last_bar_shift=1;
    datetime now=Time[cur_bar_shift];
+   int weekday=TimeDayOfWeek(now);
 
    if (ifClose(cur_bar_shift)) {
       Print("closed all order");
@@ -151,8 +152,9 @@ void OnTick()
       Print("time=",t,",b_cnt=",buy_order_cnt,",s_cnt=",sell_order_cnt,",profit=",order_pft);
    }
 
+
    //open buy
-   if (sign==2 && g_com>0 && order_pft>=0) {
+   if (sign==2 && g_com>0 && order_pft>=0 && weekday!=1) {
       ls_tgt_price=d4_low;
       Print("Open buy order,",now);
       double price,price2,ls_price;
@@ -182,7 +184,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-2 && g_com<0 && order_pft>=0) {
+   if (sign==-2 && g_com<0 && order_pft>=0 && weekday!=1) {
       ls_tgt_price=d4_high;
       Print("Open sell order,",now);
       double price,price2,ls_price;
