@@ -5,7 +5,9 @@ function cot_dao(){
 
 	this.retrieve = function(id, params, callback){
 		var cots = [];
-		db.all('select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, Dealer_Positions_Long_All c from cot where rowid = ?', [id], function(err, rows, fields) {
+		db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
+			Dealer_Positions_Long_All c from cot where b like '%JAPANESE YEN%' and \
+			rowid = ?", [id], function(err, rows, fields) {
 			if (err) throw err;
 		    for(var i=0; i<rows.length; i++){
 				//var cot = new Cot(rows[i].As_of_Date_In_Form_YYMMDD, rows[i].Market_and_Exchange_Names, rows[i].Dealer_Positions_Long_All);
@@ -19,7 +21,9 @@ function cot_dao(){
 	
 	this.list = function(id, params, callback){
 		var cots = [];
-		db.all('select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, Dealer_Positions_Long_All c from cot', function(err, rows, fields) {
+		db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
+			Dealer_Positions_Long_All c from cot where b like '%JAPANESE YEN%'", 
+			function(err, rows, fields) {
 			if (err) throw err;
 		    for(var i=0; i<rows.length; i++){
 				//var cot = new Cot(rows[i].As_of_Date_In_Form_YYMMDD, rows[i].Market_and_Exchange_Names, rows[i].Dealer_Positions_Long_All);
