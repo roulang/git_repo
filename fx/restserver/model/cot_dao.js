@@ -1,7 +1,7 @@
 ﻿var Cot = require('./cot').cot, sqlite3 = require('sqlite3');
 
 function cot_dao(){
-	var db = new sqlite3.Database("D:/rou/sync/db/abc.db");
+	var db = new sqlite3.Database("D:/rou/sync/workspace/fx/db/abc.db");
 
 	this.retrieve = function(id, params, callback){
 		var cots = [];

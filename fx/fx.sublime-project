@@ -1,0 +1,14 @@
+{
+	"folders":
+	[
+		{
+			"path": "echarts"
+		},
+		{
+			"path": "python"
+		},
+		{
+			"path": "restserver"
+		}
+	]
+}
