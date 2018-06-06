@@ -10,7 +10,8 @@
 </head>
 <body>
     <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
-    <div id="main" style="width: 1200px;height:400px;"></div>
+    <div id="main" style="width: 1200px;height:300px;"></div>
+    <div id="main2" style="width: 1200px;height:300px;"></div>
 	<script type="text/javascript">
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
@@ -35,10 +36,46 @@
 		myChart.showLoading();
 		
 		// 异步加载数据
-		$.getJSON("http://localhost:8899/resources/cot", function(data) {
+		$.getJSON("http://localhost:8899/resources/cot/507", function(data) {
 			myChart.hideLoading();
 			// 填入数据
 			myChart.setOption({
+				xAxis: {
+					data: data.catg
+				},
+				series: [{
+					// 根据名字对应到相应的系列
+					name: '销量',
+					data: data.data
+				}]
+			});
+		});
+        var myChart2 = echarts.init(document.getElementById('main2'));
+		myChart2.setOption({
+			title: {
+				text: '异步数据加载示例'
+			},
+			tooltip: {},
+			legend: {
+				data:['销量']
+			},
+			xAxis: {
+				data: []
+			},
+			yAxis: {},
+			series: [{
+				name: '销量',
+				type: 'bar',
+				data: []
+			}]
+		});
+		myChart2.showLoading();
+		
+		// 异步加载数据
+		$.getJSON("http://localhost:8899/resources/cot/508", function(data) {
+			myChart2.hideLoading();
+			// 填入数据
+			myChart2.setOption({
 				xAxis: {
 					data: data.catg
 				},

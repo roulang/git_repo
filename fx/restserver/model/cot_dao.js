@@ -1,4 +1,6 @@
-﻿var cur = ['CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE',
+﻿//48 [1,2,3,4,5,6,7]
+var curs = [
+'CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE',
 'SWISS FRANC - CHICAGO MERCANTILE EXCHANGE',
 'BRITISH POUND STERLING - CHICAGO MERCANTILE EXCHANGE',
 'JAPANESE YEN - CHICAGO MERCANTILE EXCHANGE',
@@ -45,7 +47,27 @@
 'BITCOIN - CHICAGO MERCANTILE EXCHANGE',
 'U.S. DOLLAR INDEX - ICE FUTURES U.S.',
 'VIX FUTURES - CBOE FUTURES EXCHANGE',
-'BLOOMBERG COMMODITY INDEX - CHICAGO BOARD OF TRADE'];
+'BLOOMBERG COMMODITY INDEX - CHICAGO BOARD OF TRADE'
+];
+//16 [7,8,9,10,11,12,15,16]
+var pats = [
+'Dealer_Positions_Long_All',
+'Dealer_Positions_Short_All',
+'Dealer_Positions_Spread_All',
+'Asset_Mgr_Positions_Long_All',
+'Asset_Mgr_Positions_Short_All',
+'Asset_Mgr_Positions_Spread_All',
+'Lev_Money_Positions_Long_All',
+'Lev_Money_Positions_Short_All',
+'Lev_Money_Positions_Spread_All',
+'Other_Rept_Positions_Long_All',
+'Other_Rept_Positions_Short_All',
+'Other_Rept_Positions_Spread_All',
+'Tot_Rept_Positions_Long_All',
+'Tot_Rept_Positions_Short_All',
+'NonRept_Positions_Long_All',
+'NonRept_Positions_Short_All'
+];
 
 var Cot = require('./cot').cot, sqlite3 = require('sqlite3');
 
@@ -57,9 +79,24 @@ function cot_dao(){
 		var cots = {};
 		var catgs = [];
 		var data = [];
-		db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
-			Dealer_Positions_Long_All c from cot where b = ? \
-			and a = ?", [cur[3], id], 
+		var n = parseInt(id);
+		var pat = n%100;
+		var cur = parseInt(n/100);
+		//console.log("cur=");
+		//console.log(cur);
+		//console.log("pat=");
+		//console.log(pat);
+		var sql = '';
+		if (cur>0 && pat>0) {
+			sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
+			pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
+			//console.log("sql=");
+			//console.log(sql);
+		}
+		//db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
+		//	Dealer_Positions_Long_All c from cot where b = ? \
+		//	and a = ?", [cur[3], id],
+		db.all(sql, [], 
 			function(err, rows, fields) {
 				if (err) throw err;
 			    for(var i=0; i<rows.length; i++){
