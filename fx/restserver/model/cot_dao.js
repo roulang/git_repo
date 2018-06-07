@@ -68,6 +68,14 @@ var pats = [
 'NonRept_Positions_Long_All',
 'NonRept_Positions_Short_All'
 ];
+//16 [1,2,3,4,5]
+var pats2 = [
+'Dealer_Positions_Long_All c1, Dealer_Positions_Short_All c2',
+'Asset_Mgr_Positions_Long_All c1, Asset_Mgr_Positions_Short_All c2',
+'Lev_Money_Positions_Long_All c1, Lev_Money_Positions_Short_All c2',
+'Other_Rept_Positions_Long_All c1, Other_Rept_Positions_Short_All c2',
+'NonRept_Positions_Long_All c1, NonRept_Positions_Short_All c2'
+]
 
 var Cot = require('./cot').cot, sqlite3 = require('sqlite3');
 
@@ -78,7 +86,9 @@ function cot_dao(){
 		//var cots = [];
 		var cots = {};
 		var catgs = [];
-		var data = [];
+		var data = {};
+		var d1 = [];
+		var d2 = [];
 		var n = parseInt(id);
 		var pat = n%100;
 		var cur = parseInt(n/100);
@@ -88,10 +98,12 @@ function cot_dao(){
 		//console.log(pat);
 		var sql = '';
 		if (cur>0 && pat>0) {
+			//sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
+			//pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
 			sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
-			pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
-			//console.log("sql=");
-			//console.log(sql);
+			pats2[pat-1] + " from cot where b = '" + curs[cur-1] + "' order by a";
+			console.log("sql=");
+			console.log(sql);
 		}
 		//db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
 		//	Dealer_Positions_Long_All c from cot where b = ? \
@@ -104,8 +116,12 @@ function cot_dao(){
 					//var cot = new Cot(rows[i].a, rows[i].b, rows[i].c);
 					//cots.push(cot);
 					catgs.push(rows[i].a);
-					data.push(rows[i].c);
+					//data.push(rows[i].c);
+					d1.push(rows[i].c1);
+					d2.push(-rows[i].c2);
 				}
+				data['1'] = d1;
+				data['2'] = d2;
 				cots['catg'] = catgs;
 				cots['data'] = data;
 				callback(cots);
@@ -114,30 +130,6 @@ function cot_dao(){
 		);
 	};
 	
-	this.list = function(id, params, callback){
-		//var cots = [];
-		var cots = {};
-		var catgs = [];
-		var data = [];
-		db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
-			Dealer_Positions_Long_All c from cot where b like '%JAPANESE YEN%' \
-			Order by a asc", 
-			function(err, rows, fields) {
-				if (err) throw err;
-			    for(var i=0; i<rows.length; i++){
-					//var cot = new Cot(rows[i].As_of_Date_In_Form_YYMMDD, rows[i].Market_and_Exchange_Names, rows[i].Dealer_Positions_Long_All);
-					//var cot = new Cot(rows[i].a, rows[i].b, rows[i].c);
-					//cots.push(cot);
-					catgs.push(rows[i].a);
-					data.push(rows[i].c);
-				}
-				cots['catg'] = catgs;
-				cots['data'] = data;
-				callback(cots);
-				db.close();
-			}
-		);
-	};
 }
 
 exports.dao = cot_dao;

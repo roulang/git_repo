@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+	<!-- <script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script> -->
+    <script src="echarts.common.min.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script> -->
+    <script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width: 1200px;height:200px;"></div>
+    <div id="main2" style="width: 1200px;height:200px;"></div>
+    <div id="main3" style="width: 1200px;height:200px;"></div>
+	<script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+		myChart.setOption({
+			title: {
+				text: 'Lev_Money'
+			},
+			legend: {
+				data:['LONG','SHORT']
+			},
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+			tooltip: {
+				trigger: 'axis'
+			},
+			xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+				data: []
+			},
+			yAxis: {},
+			series: [
+			{
+				name: 'LONG',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			},
+			{
+				name: 'SHORT',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			}
+			]
+		});
+		myChart.showLoading();
+		// 异步加载数据
+		$.getJSON("http://localhost:8899/resources/cot/503", function(data) {
+			myChart.hideLoading();
+			// 填入数据
+			myChart.setOption({
+				xAxis: {
+					data: data.catg
+				},
+				series: [
+				{
+					// 根据名字对应到相应的系列
+					name: 'LONG',
+					data: data.data['1']
+				},
+				{
+					// 根据名字对应到相应的系列
+					name: 'SHORT',
+					data: data.data['2']
+				}
+				]
+			});
+		});
+        // 基于准备好的dom，初始化echarts实例
+        var myChart2 = echarts.init(document.getElementById('main2'));
+		myChart2.setOption({
+			title: {
+				text: 'Other_Rept'
+			},
+			legend: {
+				data:['LONG','SHORT']
+			},
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+			tooltip: {
+				trigger: 'axis'
+			},
+			xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+				data: []
+			},
+			yAxis: {},
+			series: [
+			{
+				name: 'LONG',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			},
+			{
+				name: 'SHORT',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			}
+			]
+		});
+		myChart2.showLoading();
+		// 异步加载数据
+		$.getJSON("http://localhost:8899/resources/cot/504", function(data) {
+			myChart2.hideLoading();
+			// 填入数据
+			myChart2.setOption({
+				xAxis: {
+					data: data.catg
+				},
+				series: [
+				{
+					// 根据名字对应到相应的系列
+					name: 'LONG',
+					data: data.data['1']
+				},
+				{
+					// 根据名字对应到相应的系列
+					name: 'SHORT',
+					data: data.data['2']
+				}
+				]
+			});
+		});
+        // 基于准备好的dom，初始化echarts实例
+        var myChart3 = echarts.init(document.getElementById('main3'));
+		myChart3.setOption({
+			title: {
+				text: 'NonRept'
+			},
+			legend: {
+				data:['LONG','SHORT']
+			},
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+			tooltip: {
+				trigger: 'axis'
+			},
+			xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+				data: []
+			},
+			yAxis: {},
+			series: [
+			{
+				name: 'LONG',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			},
+			{
+				name: 'SHORT',
+				type: 'bar',
+				stack: 'TOT',
+				data: []
+			}
+			]
+		});
+		myChart3.showLoading();
+		// 异步加载数据
+		$.getJSON("http://localhost:8899/resources/cot/505", function(data) {
+			myChart3.hideLoading();
+			// 填入数据
+			myChart3.setOption({
+				xAxis: {
+					data: data.catg
+				},
+				series: [
+				{
+					// 根据名字对应到相应的系列
+					name: 'LONG',
+					data: data.data['1']
+				},
+				{
+					// 根据名字对应到相应的系列
+					name: 'SHORT',
+					data: data.data['2']
+				}
+				]
+			});
+		});
+    </script>
+</body>
+</html>
