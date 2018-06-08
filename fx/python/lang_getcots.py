@@ -31,7 +31,7 @@ k = ['Market_and_Exchange_Names', 'As_of_Date_In_Form_YYMMDD', 'Report_Date_as_M
      'Foo1', 'Foo2', 'FutOnly_or_Combined']
 
 # from file
-# f = open('C:/Users/lang/Desktop/FX/FinFutYY_1.txt')
+# f = open('C:/Users/lang/Desktop/FX/FinFut16_1.txt')
 # r = csv.reader(f)
 
 # for real
@@ -59,6 +59,7 @@ f2.close()
 f = open('FinFutWk.txt', 'r')
 r = csv.reader(f)
 
+
 n = 0
 cots = []
 for row in r:
@@ -80,10 +81,10 @@ f.close()
 for i in range(len(cots)):
     for k2 in (cots[i].keys()):
         print(i, ':', k2, '->', cots[i][k2])
+
+
+exit()
 '''
-
-# exit()
-
 # for real
 
 con = sqlite3.connect('D:/rou/sync/workspace/fx/db/abc.db')

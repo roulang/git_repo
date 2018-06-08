@@ -75,7 +75,7 @@ var pats2 = [
 'Lev_Money_Positions_Long_All c1, Lev_Money_Positions_Short_All c2',
 'Other_Rept_Positions_Long_All c1, Other_Rept_Positions_Short_All c2',
 'NonRept_Positions_Long_All c1, NonRept_Positions_Short_All c2'
-]
+];
 
 var Cot = require('./cot').cot, sqlite3 = require('sqlite3');
 
