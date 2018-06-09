@@ -1,4 +1,4 @@
-﻿//48 [1,2,3,4,5,6,7]
+﻿//48 [1,2,3,4,5,6,11]
 var curs = [
 'CANADIAN DOLLAR - CHICAGO MERCANTILE EXCHANGE',
 'SWISS FRANC - CHICAGO MERCANTILE EXCHANGE',
@@ -101,9 +101,9 @@ function cot_dao(){
 			//sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
 			//pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
 			sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
-			pats2[pat-1] + " from cot where b = '" + curs[cur-1] + "' order by a";
-			console.log("sql=");
-			console.log(sql);
+			pats2[pat-1] + " from cot where b = '" + curs[cur-1] + "' order by a desc limit 50";
+			//console.log("sql=");
+			//console.log(sql);
 		}
 		//db.all("select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, \
 		//	Dealer_Positions_Long_All c from cot where b = ? \
@@ -111,7 +111,7 @@ function cot_dao(){
 		db.all(sql, [], 
 			function(err, rows, fields) {
 				if (err) throw err;
-			    for(var i=0; i<rows.length; i++){
+			    for(var i=rows.length-1; i>=0; i--){
 					//var cot = new Cot(rows[i].As_of_Date_In_Form_YYMMDD, rows[i].Market_and_Exchange_Names, rows[i].Dealer_Positions_Long_All);
 					//var cot = new Cot(rows[i].a, rows[i].b, rows[i].c);
 					//cots.push(cot);
