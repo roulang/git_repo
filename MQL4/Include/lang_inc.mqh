@@ -51,7 +51,6 @@ struct s_News
    datetime dt;      //date
    double for_rate;  //rate change (0:not rate,1:is rate)
 }; 
-
 struct s_Order
 {
    int      tic;        //ticket
@@ -69,7 +68,14 @@ struct s_Order
    int      mag;        //magic number
    int      ped;        //period   
 };
-
+struct s_Price
+{
+   int      ped;
+   double   open;
+   double   close;
+   double   high;
+   double   low;
+};
 //input
 input bool     i_for_test=false;
 
@@ -632,7 +638,88 @@ int news_read()
 
    return cnt;
 }
+int usd_news_read(s_News &arg_news[])
+{
+   int cnt=0;
+   int time_offset=getClientServerOffset();
+   //Print("time_offset=",time_offset);
+   string fn="lang_usd_news.ex4.csv";
+   int h=FileOpen(fn,FILE_CSV|FILE_SHARE_READ,',');
+   if(h!=INVALID_HANDLE) {
+      //read record count
+      while(!FileIsEnding(h)) {
+         string s;
+         s=FileReadString(h);    //1
+         if(g_debug) Print(s);
+         s=FileReadString(h);    //2
+         if(g_debug) Print(s);
+         s=FileReadString(h);    //3
+         if(g_debug) Print(s);
+         s=FileReadString(h);    //4
+         if(g_debug) Print(s);
+         cnt++;
+      }
+      
+      ArrayResize(arg_news,cnt);
+      cnt=0;
+      //move to file's head
+      if (FileSeek(h,0,SEEK_SET)) {
+         while(!FileIsEnding(h)) {
+            arg_news[cnt].dt=FileReadDatetime(h)-time_offset*SEC_H1;
+            if(g_debug) Print(arg_news[cnt].dt);
+            arg_news[cnt].cur=FileReadString(h);
+            if(g_debug) Print(arg_news[cnt].cur);
+            arg_news[cnt].cur=FileReadString(h);
+            if(g_debug) Print(arg_news[cnt].cur);
+            arg_news[cnt].cur=FileReadString(h);
+            if(g_debug) Print(arg_news[cnt].cur);
+            cnt++;
+         }
+      }
+      
+      FileClose(h);
+   } else {
+      Print("Operation FileOpen failed, error: ",ErrorDescription(GetLastError()));
+      FileClose(h);
+   }
 
+   return cnt;
+}
+int news_impact_write(s_News &arg_news[], s_Price &arg_prices[])
+{
+   int cnt=0;
+   int time_offset=getClientServerOffset();
+   //Print("time_offset=",time_offset);
+   string cur=Symbol();
+   string fn="lang_usd_news_imp_" + cur + ".ex4.csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV,',');
+   if(h==INVALID_HANDLE) {
+      Print("Operation FileOpen failed, error: ",GetLastError());
+      return 0;
+   }
+
+   ResetLastError();
+   for(int i=0;i<ArraySize(arg_news);i++) {
+      string dts=covDateString(TimeToString(arg_news[i].dt+time_offset*SEC_H1),SLASH);
+      if (arg_prices[i].open==0) continue;
+      int    ped=arg_prices[i].ped;
+      string ops=dToStr(cur,arg_prices[i].open);
+      string cls=dToStr(cur,arg_prices[i].close);
+      string highs=dToStr(cur,arg_prices[i].high);
+      string lows=dToStr(cur,arg_prices[i].low);
+      uint ret=FileWrite(h,dts,cur,ped,ops,cls,highs,lows);
+      if (ret<=0) {
+         Print("Operation FileWrite failed, error: ",GetLastError());
+         FileClose(h);
+         return 0;
+      }
+      cnt++;
+   }
+
+   FileClose(h);
+   
+   return cnt;
+}
 //+------------------------------------------------------------------+
 //| Timer function
 //| argSec: timer seconds

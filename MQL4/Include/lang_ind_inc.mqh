@@ -2364,3 +2364,22 @@ int getBarStatus(int arg_period,int arg_shift,int arg_thpt=0)
    
    return 0;
 }
+bool getOHCLfromTime(datetime arg_st_dt, s_Price &arg_price, int arg_bar_cnt=60)
+{
+   arg_price.ped=arg_bar_cnt;
+   arg_price.open=arg_price.close=arg_price.high=arg_price.low=0;
+   int ped=PERIOD_M1;
+   int ed_bar_shift=iBarShift(NULL,ped,arg_st_dt);
+   if (ed_bar_shift<arg_bar_cnt) {
+      return false;
+   }
+   int st_bar_shift=ed_bar_shift-arg_bar_cnt+1;
+   arg_price.open=iOpen(NULL,ped,ed_bar_shift);
+   arg_price.close=iClose(NULL,ped,st_bar_shift);
+   int high_shift=iHighest(NULL,ped,MODE_HIGH,arg_bar_cnt,st_bar_shift);
+   arg_price.high=iHigh(NULL,ped,high_shift);
+   int low_shift=iLowest(NULL,ped,MODE_LOW,arg_bar_cnt,st_bar_shift);
+   arg_price.low=iLow(NULL,ped,low_shift);
+   
+   return true;
+}
