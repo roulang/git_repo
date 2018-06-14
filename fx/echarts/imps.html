@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+	<!-- <script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script> -->
+    <script src="echarts.common.min.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script> -->
+    <script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+	<div id="row" style="display:flex;flex-direction:row;">
+		<div id="col1" style="display:flex;flex-direction:column;">
+		    <div id="eur" style="width: 400px;height:150px;"></div>
+		    <div id="jpy" style="width: 400px;height:150px;"></div>
+		    <div id="aud" style="width: 400px;height:150px;"></div>
+	    </div>
+		<div id="col2" style="display:flex;flex-direction:column;">
+		    <div id="nzd" style="width: 400px;height:150px;"></div>
+		    <div id="cad" style="width: 400px;height:150px;"></div>
+		    <div id="gbp" style="width: 400px;height:150px;"></div>
+	    </div>
+		<div id="col3" style="display:flex;flex-direction:column;">
+		    <div id="chf" style="width: 400px;height:150px;"></div>
+	    </div>
+	</div>
+	<script type="text/javascript">
+        //eur
+        var myChart_eur = echarts.init(document.getElementById('eur'));
+		myChart_eur.setOption({
+			title: { text: 'EUR', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_eur.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/1", function(data) {
+			myChart_eur.hideLoading();
+			myChart_eur.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+        //jpy
+        var myChart_jpy = echarts.init(document.getElementById('jpy'));
+		myChart_jpy.setOption({
+			title: { text: 'JPY', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_jpy.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/2", function(data) {
+			myChart_jpy.hideLoading();
+			myChart_jpy.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+		//aud
+        var myChart_aud = echarts.init(document.getElementById('aud'));
+		myChart_aud.setOption({
+			title: { text: 'AUD', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_aud.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/3", function(data) {
+			myChart_aud.hideLoading();
+			myChart_aud.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+		//nzd
+        var myChart_nzd = echarts.init(document.getElementById('nzd'));
+		myChart_nzd.setOption({
+			title: { text: 'NZD', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_nzd.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/4", function(data) {
+			myChart_nzd.hideLoading();
+			myChart_nzd.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+		//cad
+        var myChart_cad = echarts.init(document.getElementById('cad'));
+		myChart_cad.setOption({
+			title: { text: 'CAD', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_cad.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/4", function(data) {
+			myChart_cad.hideLoading();
+			myChart_cad.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+		//gbp
+        var myChart_gbp = echarts.init(document.getElementById('gbp'));
+		myChart_gbp.setOption({
+			title: { text: 'GBP', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_gbp.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/5", function(data) {
+			myChart_gbp.hideLoading();
+			myChart_gbp.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+		//chf
+        var myChart_chf = echarts.init(document.getElementById('chf'));
+		myChart_chf.setOption({
+			title: { text: 'CHF', textStyle: {fontSize: 14} }, legend: { data:['DF_OC','DF_HL'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'DF_OC', type: 'bar', data: [] }, { name: 'DF_HL', type: 'bar', data: [] } ]
+		});
+		myChart_chf.showLoading();
+		$.getJSON("http://localhost:8899/resources/imp/6", function(data) {
+			myChart_chf.hideLoading();
+			myChart_chf.setOption( { xAxis: { data: data.catg }, series: [ { name: 'DF_OC', data: data.data['diff_oc'] }, { name: 'DF_HL', data: data.data['diff_hl'] } ] });
+		});
+    </script>
+</body>
+</html>

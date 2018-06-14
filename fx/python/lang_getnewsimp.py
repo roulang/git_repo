@@ -8,7 +8,10 @@ import sqlite3
 k = ['dtm', 'cur', 'ped', 'open_p', 'close_p', 'high_p', 'low_p']
 fn = ['EURUSD', 'USDJPY', 'AUDUSD', 'NZDUSD', 'GBPUSD', 'USDCAD', 'USDCHF']
 
-pt = "C:/Users/lang/AppData/Roaming/MetaQuotes/Terminal/50CA3DFB510CC5A8F28B48D1BF2A5702/MQL4/Files/"
+clt_dev = '50CA3DFB510CC5A8F28B48D1BF2A5702'
+clt_test = '2010C2441A263399B34F537D91A53AC9'
+
+pt = "C:/Users/lang/AppData/Roaming/MetaQuotes/Terminal/" + clt_test + "/MQL4/Files/"
 
 imps = []
 for j in range(len(fn)):

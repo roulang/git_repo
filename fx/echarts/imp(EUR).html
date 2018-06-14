@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!-- 引入 ECharts 文件 -->
+	<!-- <script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script> -->
+    <script src="echarts.common.min.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script> -->
+    <script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="main" style="width: 1200px;height:300px;"></div>
+	<script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+		myChart.setOption({
+			title: {
+				text: 'EUR'
+			},
+			legend: {
+				data:['DF_OC','DF_HL']
+			},
+		    grid: {
+		        left: '3%',
+		        right: '4%',
+		        bottom: '3%',
+		        containLabel: true
+		    },
+			tooltip: {
+				trigger: 'axis'
+			},
+			xAxis: {
+		        type: 'category',
+		        boundaryGap: false,
+				data: []
+			},
+			yAxis: {},
+			series: [
+			{
+				name: 'DF_OC',
+				type: 'bar',
+				data: []
+			},
+			{
+				name: 'DF_HL',
+				type: 'bar',
+				data: []
+			}
+			]
+		});
+		myChart.showLoading();
+		// 异步加载数据
+		$.getJSON("http://localhost:8899/resources/imp/1", function(data) {
+			myChart.hideLoading();
+			// 填入数据
+			myChart.setOption({
+				xAxis: {
+					data: data.catg
+				},
+				series: [
+				{
+					// 根据名字对应到相应的系列
+					name: 'DF_OC',
+					data: data.data['diff_oc']
+				},
+				{
+					// 根据名字对应到相应的系列
+					name: 'DF_HL',
+					data: data.data['diff_hl']
+				}
+				]
+			});
+		});
+    </script>
+</body>
+</html>
