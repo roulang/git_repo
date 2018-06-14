@@ -47,7 +47,7 @@ int OnInit()
       if (!timer_init(SEC_H1)) return(INIT_FAILED);
    }
    
-   //news_read();
+   news_impact();
    
    
    return(INIT_SUCCEEDED);
@@ -234,6 +234,6 @@ void OnTimer()
 
    if (!i_for_test) {
       g_com=file_read();
-      //news_read();
+      news_impact();
    }
 }

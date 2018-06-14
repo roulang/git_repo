@@ -1056,6 +1056,28 @@ int file_read()
 
    return ret;
 }
+int news_impact()
+{
+   //news impact write
+   s_News usd_news[];
+   //g_debug=true;
+   int ret=usd_news_read(usd_news);
+   Print("usd_news_read=",ret);
+
+   //getOHCLfromTime
+   int n=ArraySize(usd_news);
+   s_Price relate_prices[];
+   ArrayResize(relate_prices,n);
+   for (int i=0;i<n;i++) {
+      getOHCLfromTime(usd_news[i].dt,relate_prices[i]);
+   }
+
+   //news_impact_write
+   ret=news_impact_write(usd_news,relate_prices);
+   Print("news_impact_write=",ret);
+   
+   return ret;
+}
 //+------------------------------------------------------------------+
 // ea_init: ea init
 //+------------------------------------------------------------------+

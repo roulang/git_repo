@@ -8,7 +8,7 @@ import datetime
 import sqlite3
 
 fmt = '%m-%d-%Y %I:%M%p'
-fmt2 = '%Y.%m.%d %H:%M:%S'
+fmt2 = '%Y-%m-%d %H:%M:%S'
 cmt_gmt_offset = datetime.timedelta(hours=8)
 
 # for test

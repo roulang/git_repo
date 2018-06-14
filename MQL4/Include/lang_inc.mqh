@@ -24,6 +24,7 @@
 
 #define SLASH  "/"
 #define DOT    "."
+#define DASH  "-"
 
 //datetime
 #define SEC_H1 3600
@@ -700,7 +701,7 @@ int news_impact_write(s_News &arg_news[], s_Price &arg_prices[])
 
    ResetLastError();
    for(int i=0;i<ArraySize(arg_news);i++) {
-      string dts=covDateString(TimeToString(arg_news[i].dt+time_offset*SEC_H1),SLASH);
+      string dts=covDateString2(TimeToString(arg_news[i].dt+time_offset*SEC_H1),DASH);
       if (arg_prices[i].open==0) continue;
       int    ped=arg_prices[i].ped;
       string ops=dToStr(cur,arg_prices[i].open);
@@ -759,7 +760,21 @@ string covDateString(string arg_date_str,string arg_pat)
    }
    return s;
 }
-
+//+------------------------------------------------------------------+
+//| Convert Date format string
+//| 2017.01.01 <-> 2017/01/01
+//+------------------------------------------------------------------+
+string covDateString2(string arg_date_str,string arg_pat)
+{
+   string s=arg_date_str;
+   int p=0;
+   if (StringFind(s,DOT)>=0) {     //convert "." to "/"
+      p=StringReplace(s,DOT,DASH);
+   } else if (StringFind(s,SLASH)>=0) {
+      p=StringReplace(s,SLASH,DASH);
+   }
+   return s;
+}
 void PrintTwoDimArray(double &arg_array[][])
 {
    for (int i=0;i<ArrayRange(arg_array,0);i++) {
