@@ -47,11 +47,11 @@ function imp_dao(){
 	};
 	this.list = function(id, params, callback){
 		var imps = [];
-		db.all('select dtm,title,cur,open_p,close_p,high_p,low_p from cur_str order by dtm desc, cur', 
+		db.all('select dtm,title,cur,ped,open_p,close_p,high_p,low_p from cur_str order by dtm desc, ped, cur', 
 			function(err, rows, fields) {
 			if (err) throw err;
 		    for(var i=0; i<rows.length; i++){
-				var imp = new Imp(rows[i].dtm, rows[i].title, rows[i].cur, rows[i].open_p, rows[i].close_p, rows[i].high_p, rows[i].low_p);
+				var imp = new Imp(rows[i].dtm, rows[i].title, rows[i].cur, rows[i].ped, rows[i].open_p, rows[i].close_p, rows[i].high_p, rows[i].low_p);
 				imps.push(imp);
 			}
 			callback(imps);
