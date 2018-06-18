@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+	<script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
+ 
+</head>
+<body>
+	<script type="text/javascript">
+		$(document).ready( function () {
+		    $('#myTable').DataTable( {
+    			ajax: {
+    				url: 'http://127.0.0.1:8899/resources/imp/',
+    				dataSrc: ''
+    			},
+    			columns: [
+			        { data: "dtm" },
+			        { data: "title" },
+			        { data: "cur" },
+			        { data: "open_p" },
+			        { data: "close_p" },
+			        { data: "high_p" },
+			        { data: "low_p" },
+			        { data: "diff_oc" },
+			        { data: "diff_hl" }
+    			]
+			} );
+		} );
+    </script>
+	<table id="myTable" class="display">
+	    <thead>
+	        <tr>
+	            <th>dtm</th>
+	            <th>title</th>
+	            <th>cur</th>
+	            <th>open_p</th>
+	            <th>close_p</th>
+	            <th>high_p</th>
+	            <th>low_p</th>
+	            <th>diff_oc</th>
+	            <th>diff_hl</th>
+	        </tr>
+	    </thead>
+        <tfoot>
+            <tr>
+	            <th>dtm</th>
+	            <th>title</th>
+	            <th>cur</th>
+	            <th>open_p</th>
+	            <th>close_p</th>
+	            <th>high_p</th>
+	            <th>low_p</th>
+	            <th>diff_oc</th>
+	            <th>diff_hl</th>
+	        </tr>
+	    </tfoot>
+	</table> 
+</body>
+</html>

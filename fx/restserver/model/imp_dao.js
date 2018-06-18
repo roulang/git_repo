@@ -21,7 +21,7 @@ function imp_dao(){
 		if (n>0) {
 			//sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
 			//pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
-			sql = "select dtm,title,cur,open_p,close_p,high_p,low_p from cur_str where cur = '" + curs[n-1][0] + "' order by dtm";
+			sql = "select dtm,title,cur,open_p,close_p,high_p,low_p from cur_str where cur = '" + curs[n-1][0] + "' order by dtm desc";
 			//console.log("sql=");
 			//console.log(sql);
 		}
@@ -45,7 +45,19 @@ function imp_dao(){
 			}
 		);
 	};
-	
+	this.list = function(id, params, callback){
+		var imps = [];
+		db.all('select dtm,title,cur,open_p,close_p,high_p,low_p from cur_str order by dtm desc, cur', 
+			function(err, rows, fields) {
+			if (err) throw err;
+		    for(var i=0; i<rows.length; i++){
+				var imp = new Imp(rows[i].dtm, rows[i].title, rows[i].cur, rows[i].open_p, rows[i].close_p, rows[i].high_p, rows[i].low_p);
+				imps.push(imp);
+			}
+			callback(imps);
+			db.close();
+		});
+	};
 }
 
 exports.dao = imp_dao;
