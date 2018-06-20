@@ -106,7 +106,7 @@ int      g_TimerSecond=SEC_H1*1;
 int      g_news_bef=SEC_H1*2;     //2 hr before news
 int      g_news_aft=SEC_H1*2;     //2 hr after news
 int      g_srv_tz_offset=24;
-int      g_server_timezone_offset=2;   //summer time(5-10)=3,not summer time(11-4)=2
+//int      g_server_timezone_offset=2;   //summer time(5-10)=3,not summer time(11-4)=2
 
 //+------------------------------------------------------------------+
 // isNewBar: check new bar
@@ -810,9 +810,11 @@ int getServerGMTOffset(void)
 }
 int getClientServerOffset(void)
 {
+   /*
    if (MathAbs(g_server_timezone_offset)<24) {
       g_srv_tz_offset=g_server_timezone_offset;
    }
+   */
    int clt_offset=-TimeGMTOffset()/SEC_H1;
    //Print("clt_offset=",clt_offset);
    int srv_offset=getServerGMTOffset();
