@@ -32,7 +32,7 @@ for el in tree.findall('event'):
             evt[ch.tag] = ch.text
     evts.append(evt)
 
-con = sqlite3.connect('D:/rou/sync/workspace/fx/db/abc.db')
+con = sqlite3.connect('C:/rou/db/abc.db')
 # con = sqlite3.connect(":memory:")
 
 '''

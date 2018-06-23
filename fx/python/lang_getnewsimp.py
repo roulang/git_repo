@@ -38,7 +38,7 @@ for j in range(len(fn)):
 
     f.close()
 
-con = sqlite3.connect('D:/rou/sync/workspace/fx/db/abc.db')
+con = sqlite3.connect('C:/rou/db/abc.db')
 # con = sqlite3.connect(":memory:")
 
 print("writing ", len(imps), " records.")

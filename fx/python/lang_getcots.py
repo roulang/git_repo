@@ -87,7 +87,7 @@ exit()
 '''
 # for real
 
-con = sqlite3.connect('D:/rou/sync/workspace/fx/db/abc.db')
+con = sqlite3.connect('C:/rou/db/abc.db')
 # con = sqlite3.connect(":memory:")
 
 for i in range(len(cots)):
