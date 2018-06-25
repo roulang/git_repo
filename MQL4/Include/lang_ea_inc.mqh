@@ -1060,7 +1060,7 @@ int news_impact()
 {
    //news impact read
    s_News usd_news[];
-   int ret=usd_news_read(usd_news);
+   int ret=news_read2(usd_news);
    Print("usd_news_read=",ret);
 
    //getOHCLfromTime
@@ -1068,6 +1068,8 @@ int news_impact()
    s_Price relate_prices[];
    ArrayResize(relate_prices,n);
    for (int i=0;i<n;i++) {
+      relate_prices[i].open=relate_prices[i].close=relate_prices[i].high=relate_prices[i].low=0;
+      if (! isNewsRelated(NULL, usd_news[i].cur)) continue;
       getOHCLfromTime(usd_news[i].dt,relate_prices[i]);
       Print("dt=",usd_news[i].dt, " ,open=", relate_prices[i].open, ", close=", relate_prices[i].close, " ,high=", relate_prices[i].high, ", low=", relate_prices[i].low);
    }

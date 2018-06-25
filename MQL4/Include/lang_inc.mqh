@@ -639,7 +639,7 @@ int news_read()
 
    return cnt;
 }
-int usd_news_read(s_News &arg_news[])
+int news_read2(s_News &arg_news[])
 {
    int cnt=0;
    int time_offset=getClientServerOffset();
@@ -666,14 +666,17 @@ int usd_news_read(s_News &arg_news[])
       //move to file's head
       if (FileSeek(h,0,SEEK_SET)) {
          while(!FileIsEnding(h)) {
-            arg_news[cnt].dt=FileReadDatetime(h)-time_offset*SEC_H1;
+            string s;
+            arg_news[cnt].dt=FileReadDatetime(h)-time_offset*SEC_H1; //1
             if(g_debug) Print(arg_news[cnt].dt);
-            arg_news[cnt].cur=FileReadString(h);
+            //arg_news[cnt].cur=FileReadString(h);
+            //if(g_debug) Print(arg_news[cnt].cur);
+            s=FileReadString(h);    //2
+            arg_news[cnt].cur=FileReadString(h);   //3
             if(g_debug) Print(arg_news[cnt].cur);
-            arg_news[cnt].cur=FileReadString(h);
-            if(g_debug) Print(arg_news[cnt].cur);
-            arg_news[cnt].cur=FileReadString(h);
-            if(g_debug) Print(arg_news[cnt].cur);
+            //arg_news[cnt].cur=FileReadString(h);
+            //if(g_debug) Print(arg_news[cnt].cur);
+            s=FileReadString(h);    //4
             cnt++;
          }
       }
@@ -785,10 +788,12 @@ void PrintTwoDimArray(double &arg_array[][])
 }
 int getServerGMTOffset(void)
 {
+   /*
    if (MathAbs(g_srv_tz_offset)<24) {
       return g_srv_tz_offset;
    }   
-
+   */
+   
    datetime srv_t=TimeCurrent();
    //Print("srv_t=",srv_t);
    datetime gmt=TimeGMT();
@@ -1024,21 +1029,22 @@ int isNewsPd3(string symbol,int shift)
    return 0;
 }
 
-bool isNewsRelated(string arg_symbol,string arg_currency)
+bool isNewsRelated(string arg_symbol,string arg_country)
 {
    string cur;
    if (arg_symbol==NULL) cur=Symbol();
    else cur=arg_symbol;
    
    /*
-   if(i_skip_jpychf_usd_relate && StringCompare(arg_currency,"USD")==0) {   //USD currency
+   if(i_skip_jpychf_usd_relate && StringCompare(arg_country,"USD")==0) {   //USD currency
       if(StringFind(cur,"JPY")>=0 || StringFind(cur,"CHF")>=0)    //exclude JPY and CHF
          return false;
       return true;
    }
    */
    
-   if(StringFind(cur,arg_currency)>=0 || (StringCompare(arg_currency,"USD")==0 && StringFind(cur,"GOLD")>=0))
+   //if(StringFind(cur,arg_country)>=0 || (StringCompare(arg_country,"USD")==0 && StringFind(cur,"GOLD")>=0))
+   if(StringCompare(arg_country,"USD")==0 || StringFind(cur,arg_country)>=0)
       return true;
    
    return false;

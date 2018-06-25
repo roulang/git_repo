@@ -1,7 +1,8 @@
 ﻿var curs = {'EURUSD':1, 'USDJPY':-1, 'AUDUSD':1, 'NZDUSD':1, 'USDCAD':-1, 'GBPUSD':1, 'USDCHF':-1};
 
-function imp(dtm, title, cur, ped, open_p, close_p, high_p, low_p){
+function imp(dtm, country, title, cur, ped, open_p, close_p, high_p, low_p){
 	this.dtm = dtm;
+	this.country = country;
 	this.title = title;
 	this.cur = cur;
 	this.ped = ped;

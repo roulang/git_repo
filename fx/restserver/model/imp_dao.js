@@ -7,7 +7,7 @@ var curs = [
 var Imp = require('./imp').imp, sqlite3 = require('sqlite3');
 
 function imp_dao(){
-	var db = new sqlite3.Database("D:/rou/sync/workspace/fx/db/abc.db");
+	var db = new sqlite3.Database("C:/rou/db/abc.db");
 
 	this.retrieve = function(id, params, callback){
 		//var cots = [];
@@ -21,7 +21,7 @@ function imp_dao(){
 		if (n>0) {
 			//sql = "select As_of_Date_In_Form_YYMMDD a, Market_and_Exchange_Names b, " +
 			//pats[pat-1] + " c from cot where b = '" + curs[cur-1] + "' order by a";
-			sql = "select dtm,title,cur,open_p,close_p,high_p,low_p from cur_str where cur = '" + curs[n-1][0] + "' order by dtm desc";
+			sql = "select dtm,country,title,cur,open_p,close_p,high_p,low_p from cur_str where cur = '" + curs[n-1][0] + "' order by dtm desc";
 			//console.log("sql=");
 			//console.log(sql);
 		}
@@ -47,11 +47,11 @@ function imp_dao(){
 	};
 	this.list = function(id, params, callback){
 		var imps = [];
-		db.all('select dtm,title,cur,ped,open_p,close_p,high_p,low_p from cur_str order by dtm desc, ped, cur', 
+		db.all('select dtm,country,title,cur,ped,open_p,close_p,high_p,low_p from cur_str order by dtm desc, country, ped, cur', 
 			function(err, rows, fields) {
 			if (err) throw err;
 		    for(var i=0; i<rows.length; i++){
-				var imp = new Imp(rows[i].dtm, rows[i].title, rows[i].cur, rows[i].ped, rows[i].open_p, rows[i].close_p, rows[i].high_p, rows[i].low_p);
+				var imp = new Imp(rows[i].dtm, rows[i].country, rows[i].title, rows[i].cur, rows[i].ped, rows[i].open_p, rows[i].close_p, rows[i].high_p, rows[i].low_p);
 				imps.push(imp);
 			}
 			callback(imps);

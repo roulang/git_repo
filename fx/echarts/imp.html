@@ -10,19 +10,33 @@
 </head>
 <body>
 	<script type="text/javascript">
+		$.fn.dataTable.ext.search.push(
+		    function( settings, data, dataIndex ) {
+		        var cty = $('#cty').val();
+		        var c = data[1]; // use data for the country column
+		        if (!cty || c == cty)
+		        {
+		            return true;
+		        }
+		        return false;
+		    }
+		);
 		$(document).ready( function () {
-		    $('#myTable').DataTable( {
+		    var table = 
+		    $('#myTable').DataTable({
     			ajax: {
     				url: 'http://127.0.0.1:8899/resources/imp/',
     				dataSrc: ''
     			},
 				order: [
 					[ 0, "desc" ],
-					[ 8, "desc" ]
+					[ 1, "asc" ],
+					[ 9, "desc" ]
 				],
 				pageLength : 50,
     			columns: [
 			        { data: "dtm" },
+			        { data: "country" },
 			        { data: "title" },
 			        { data: "cur" },
 			        { data: "ped" },
@@ -33,13 +47,24 @@
 			        { data: "diff_oc" },
 			        { data: "diff_hl" }
     			]
-			} );
-		} );
+			});
+			// Event listener to the two range filtering inputs to redraw on input
+		    $('#cty').keyup( function() {
+		        table.draw();
+		    });
+		});
     </script>
+    <table cellspacing="5" cellpadding="5" border="0">
+    	<tbody><tr>
+    		<td>Country:</td>
+    		<td><input id="cty" name="cty" type="text"></td>
+    	</tr></tbody>
+    </table>
 	<table id="myTable" class="cell-border">
 	    <thead>
 	        <tr>
 	            <th>date time</th>
+	            <th>country</th>
 	            <th>events</th>
 	            <th>currency</th>
 	            <th>period</th>
@@ -54,6 +79,7 @@
         <tfoot>
             <tr>
 	            <th>date time</th>
+	            <th>country</th>
 	            <th>events</th>
 	            <th>currency</th>
 	            <th>period</th>
