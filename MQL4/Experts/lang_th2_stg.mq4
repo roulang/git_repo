@@ -13,7 +13,7 @@
 //--------------------------------
 
 //--- input
-input int   i_order_cnt=1;
+input int   i_order_cnt=3;
 input int   i_min_ls_pt=200;
 input int   i_short_pd=5;
 input int   i_mid_pd=10;

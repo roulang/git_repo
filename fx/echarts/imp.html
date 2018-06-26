@@ -49,16 +49,26 @@
     			]
 			});
 			// Event listener to the two range filtering inputs to redraw on input
-		    $('#cty').keyup( function() {
+		    $('#cty').change( function() {
 		        table.draw();
 		    });
 		});
     </script>
     <table cellspacing="5" cellpadding="5" border="0">
-    	<tbody><tr>
-    		<td>Country:</td>
-    		<td><input id="cty" name="cty" type="text"></td>
-    	</tr></tbody>
+    	<tbody>
+    		<tr><td>Country:</td>
+    		<td><select id="cty" name="cty2">
+		        <option value="" selected>-</option>
+		        <option value="USD">USD</option>
+		        <option value="EUR">EUR</option>
+		        <option value="JPY">JPY</option>
+		        <option value="AUD">AUD</option>
+		        <option value="NZD">NZD</option>
+		        <option value="CAD">CAD</option>
+		        <option value="GBP">GBP</option>
+		        <option value="CHF">CHF</option>
+    		</select></td></tr>
+    	</tbody>
     </table>
 	<table id="myTable" class="cell-border">
 	    <thead>
