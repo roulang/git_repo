@@ -31,7 +31,7 @@
 				order: [
 					[ 0, "desc" ],
 					[ 1, "asc" ],
-					[ 9, "desc" ]
+					[ 11, "desc" ]
 				],
 				pageLength : 50,
     			columns: [
@@ -44,6 +44,8 @@
 			        { data: "close_p" },
 			        { data: "high_p" },
 			        { data: "low_p" },
+			        { data: "diff_oc2" },
+			        { data: "diff_hl2" },
 			        { data: "diff_oc" },
 			        { data: "diff_hl" }
     			]
@@ -58,7 +60,7 @@
     	<tbody>
     		<tr><td>Country:</td>
     		<td><select id="cty" name="cty2">
-		        <option value="" selected>-</option>
+		        <option value="" selected>ALL</option>
 		        <option value="USD">USD</option>
 		        <option value="EUR">EUR</option>
 		        <option value="JPY">JPY</option>
@@ -84,6 +86,8 @@
 	            <th>low</th>
 	            <th>oc gap</th>
 	            <th>hl gap</th>
+	            <th>oc gap(%)</th>
+	            <th>hl gap(%)</th>
 	        </tr>
 	    </thead>
         <tfoot>
@@ -99,6 +103,8 @@
 	            <th>low</th>
 	            <th>oc gap</th>
 	            <th>hl gap</th>
+	            <th>oc gap(%)</th>
+	            <th>hl gap(%)</th>
 	        </tr>
 	    </tfoot>
 	</table> 
