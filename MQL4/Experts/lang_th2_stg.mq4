@@ -24,7 +24,7 @@ input bool  i_debug=true;
 //--- global
 int      g_magic=6;        //trend rebound
 //datetime g_orderdt;
-int      g_com=0;
+int      g_com=0;    //1:buy,2:sell,0:N/A
 
 int g_last_band_st=0;
 
@@ -124,7 +124,7 @@ void OnTick()
    }
    
    
-   if (sign>=0 || g_com>=0) {
+   if (sign>=0 || g_com==1) {
       //close sell order
       if(FindOrderA(NULL,-1,g_magic)) {  //found sell order
          if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
@@ -132,7 +132,7 @@ void OnTick()
          }
       }
    }
-   if (sign<=0 || g_com<=0) {
+   if (sign<=0 || g_com==2) {
       //close buy order
       if(FindOrderA(NULL,1,g_magic)) {  //found buy order
          if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
@@ -154,7 +154,7 @@ void OnTick()
 
 
    //open buy
-   if (sign==2 && g_com>0 && order_pft>=0 && weekday!=1) {
+   if (sign==2 && g_com==1 && order_pft>=0 && weekday!=1) {
       ls_tgt_price=d4_low;
       Print("Open buy order,",now);
       double price,price2,ls_price;
@@ -184,7 +184,7 @@ void OnTick()
    }
    
    //open sell
-   if (sign==-2 && g_com<0 && order_pft>=0 && weekday!=1) {
+   if (sign==-2 && g_com==2 && order_pft>=0 && weekday!=1) {
       ls_tgt_price=d4_high;
       Print("Open sell order,",now);
       double price,price2,ls_price;

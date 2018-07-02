@@ -1974,7 +1974,21 @@ int isTrendStgOpen4( int arg_shift,double &arg_ls_price,int &arg_last_band_st,
    //|               body in low half band,low leg touch band low,-3;
    //|               body in low half band,high leg touch band center,-1;
    //|               n/a:0
-
+   
+   /*
+   //debug
+   string cur=Symbol();
+   datetime t=Time[arg_shift];
+   datetime t1=StringToTime("2018.06.29 04:00");
+   datetime t2=StringToTime("2018.06.29 08:00");
+   datetime t3=StringToTime("2018.06.29 12:00");
+   if (cur=="NZDUSD" && (t==t1 || t==t2 || t==t3)) {
+      Print("time=",t,",shift=",arg_shift);
+      Print("ma_st=",ma_st,",ma_st2=",ma_st2);
+      Print("last_band_st=",arg_last_band_st,",band_st=",band_st);
+   }
+   */
+   
    int last_band_st=arg_last_band_st;
    if (ma_st2==1) {      //large period's trend is up
       arg_ls_price=d4_low;
