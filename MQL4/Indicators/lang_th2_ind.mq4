@@ -96,14 +96,16 @@ int OnCalculate(const int rates_total,
       signalBuffer[i]=signal;
       
       //debug
+      /*
+      string cur=Symbol();
       datetime t=Time[i];
-      datetime t1=StringToTime("2018.04.9 08:00");
-      if (t==t1) {
-         Print("time=",t);
-         Print("shift=",i);
-         Print("signalBuffer[i]=",signalBuffer[i]);
+      datetime t1=StringToTime("2018.06.29 04:00");
+      datetime t2=StringToTime("2018.06.29 08:00");
+      datetime t3=StringToTime("2018.06.29 12:00");
+      if (cur=="NZDUSD" && (t==t1 || t==t2 || t==t3)) {
+         Print("time=",t,",shift=",i,",signalBuffer[i]=",signalBuffer[i]);
       }
-      
+      */
       
    }
 

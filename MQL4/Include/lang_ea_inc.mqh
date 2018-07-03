@@ -689,13 +689,15 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
          //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,1)) {
             b_cnt+=1;
-            b_pft=OrderProfit();
-            if (b_pft>=0) b_pft=0;
+            if (OrderProfit()<0) {
+               b_pft=OrderProfit();
+            }
          }
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,-1)) {
             s_cnt+=1;
-            s_pft=OrderProfit();
-            if (s_pft>=0) s_pft=0;
+            if (OrderProfit()<0) {
+               s_pft=OrderProfit();
+            }
          }
       } else {
          int check=GetLastError(); 

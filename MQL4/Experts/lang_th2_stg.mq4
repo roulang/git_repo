@@ -146,6 +146,11 @@ void OnTick()
    double order_pft=0;
    if (!FindOrderCnt(NULL,g_magic,buy_order_cnt,sell_order_cnt,order_pft)) {
       has_order=false;
+   } else {
+      //moving stop set to nonrisk
+      if (movingStop3(NULL,g_magic,last_bar_shift)) {
+         Print("moving stop!");
+      }
    }
    if (i_debug) {
       datetime t=Time[last_bar_shift];
