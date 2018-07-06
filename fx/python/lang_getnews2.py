@@ -58,7 +58,7 @@ for i in range(len(evts)):
     dt += cmt_gmt_offset
     dt2_str = dt.strftime(fmt2)
     evts[i]['dtm'] = dt2_str
-    evts[i]['key'] = evts[i].get('country') + ' ' + dt2_str
+    evts[i]['key'] = evts[i].get('country') + ' ' + dt2_str + ' ' + evts[i]['impact']
     keys = ','.join(evts[i].keys())
     question_marks = ','.join(list('?' * len(evts[i])))
     values = tuple(evts[i].values())
