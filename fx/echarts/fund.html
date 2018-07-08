@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="3600" >
+	<script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.18/css/jquery.dataTables.css">
+	<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.js"></script>
+	<STYLE> BODY { font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif; } </STYLE>
+</head>
+<body>
+	<script type="text/javascript">
+		$.fn.dataTable.ext.search.push(
+		    function( settings, data, dataIndex ) {
+		        var tp = $('#tp').val();
+		        var t = data[2]; // use data for the type column
+		        if (!tp || t == tp)
+		        {
+		            return true;
+		        }
+		        return false;
+		    }
+		);
+		$(document).ready( function () {
+		    var table = 
+		    $('#myTable').DataTable({
+    			ajax: {
+    				url: 'http://127.0.0.1:8899/resources/fund/',
+    				dataSrc: ''
+    			},
+				order: [
+					[ 2, "asc" ],
+					[ 0, "asc" ]
+				],
+				pageLength : 50,
+    			columns: [
+			        { data: "code" },
+			        { data: "name2" },
+			        { data: "type" },
+			        { data: "mgr" },
+			        { data: "com" },
+			        { data: "st" },
+			        { data: "trace" }
+    			]
+			});
+			// Event listener to the two range filtering inputs to redraw on input
+		    $('#tp').change( function() {
+		        table.draw();
+		    });
+		});
+    </script>
+    <table cellspacing="5" cellpadding="5" border="0">
+    	<tbody>
+    		<tr><td>类型:</td>
+    		<td><select id="tp" name="tp2">
+		        <option value="" selected>ALL</option>
+		        <option value="ETF-场内">ETF-场内</option>
+		        <option value="QDII">QDII</option>
+		        <option value="QDII-ETF">QDII-ETF</option>
+		        <option value="QDII-指数">QDII-指数</option>
+		        <option value="保本型">保本型</option>
+		        <option value="债券型">债券型</option>
+		        <option value="债券指数">债券指数</option>
+		        <option value="分级杠杆">分级杠杆</option>
+		        <option value="固定收益">固定收益</option>
+		        <option value="定开债券">定开债券</option>
+		        <option value="混合-FOF">混合-FOF</option>
+		        <option value="混合型">混合型</option>
+		        <option value="理财型">理财型</option>
+		        <option value="联接基金">联接基金</option>
+		        <option value="股票型">股票型</option>
+		        <option value="股票指数">股票指数</option>
+		        <option value="货币型">货币型</option>
+    		</select></td></tr>
+    	</tbody>
+    </table>
+	<table id="myTable" class="cell-border">
+	    <thead>
+	        <tr>
+	            <th>code</th>
+	            <th>name</th>
+	            <th>type</th>
+	            <th>manager</th>
+	            <th>company</th>
+	            <th>start from</th>
+	            <th>trace</th>
+	        </tr>
+	    </thead>
+        <tfoot>
+            <tr>
+	            <th>code</th>
+	            <th>name</th>
+	            <th>type</th>
+	            <th>manager</th>
+	            <th>company</th>
+	            <th>start from</th>
+	            <th>trace</th>
+	        </tr>
+	    </tfoot>
+	</table> 
+</body>
+</html>
