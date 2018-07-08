@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="3600" >    
+    <!-- 引入 ECharts 文件 -->
+	<script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script>
+    <!-- <script src="echarts.common.min.js"></script> -->
+    <script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- <script src="jquery-3.3.1.min.js"></script> -->
+</head>
+<body>
+	<div id="row" style="display:flex;flex-direction:row;">
+		<div id="col1" style="display:flex;flex-direction:column;">
+		    <div id="oil1" style="width: 300px;height:150px;"></div>
+		    <div id="oil2" style="width: 300px;height:150px;"></div>
+		    <div id="gold1" style="width: 300px;height:150px;"></div>
+		    <div id="gold2" style="width: 300px;height:150px;"></div>
+	    </div>
+		<div id="col2" style="display:flex;flex-direction:column;">
+		    <div id="sp5001" style="width: 300px;height:150px;"></div>
+		    <div id="sp5002" style="width: 300px;height:150px;"></div>
+		    <div id="ns1001" style="width: 300px;height:150px;"></div>
+		    <div id="ns1002" style="width: 300px;height:150px;"></div>
+	    </div>
+		<div id="col3" style="display:flex;flex-direction:column;">
+		    <div id="10Bond1" style="width: 300px;height:150px;"></div>
+		    <div id="10Bond2" style="width: 300px;height:150px;"></div>
+		    <div id="2Bond1" style="width: 300px;height:150px;"></div>
+		    <div id="2Bond2" style="width: 300px;height:150px;"></div>
+	    </div>
+	</div>
+	<script type="text/javascript">
+        //oil1
+        var myChart_oil1 = echarts.init(document.getElementById('oil1'));
+		myChart_oil1.setOption({
+			title: { text: 'oil(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_oil1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot2/18101", function(data) {
+			myChart_oil1.hideLoading();
+			myChart_oil1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //oil2
+        var myChart_oil2 = echarts.init(document.getElementById('oil2'));
+		myChart_oil2.setOption({
+			title: { text: 'oil(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_oil2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot2/18102", function(data) {
+			myChart_oil2.hideLoading();
+			myChart_oil2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//gold1
+        var myChart_gold1 = echarts.init(document.getElementById('gold1'));
+		myChart_gold1.setOption({
+			title: { text: 'Gold(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_gold1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot2/19901", function(data) {
+			myChart_gold1.hideLoading();
+			myChart_gold1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //gold2
+        var myChart_gold2 = echarts.init(document.getElementById('gold2'));
+		myChart_gold2.setOption({
+			title: { text: 'Gold(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_gold2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot2/19902", function(data) {
+			myChart_gold2.hideLoading();
+			myChart_gold2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//sp5001
+        var myChart_sp5001 = echarts.init(document.getElementById('sp5001'));
+		myChart_sp5001.setOption({
+			title: { text: 'SP500(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_sp5001.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/1603", function(data) {
+			myChart_sp5001.hideLoading();
+			myChart_sp5001.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //sp5002
+        var myChart_sp5002 = echarts.init(document.getElementById('sp5002'));
+		myChart_sp5002.setOption({
+			title: { text: 'SP500(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_sp5002.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/1605", function(data) {
+			myChart_sp5002.hideLoading();
+			myChart_sp5002.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//ns1001
+        var myChart_ns1001 = echarts.init(document.getElementById('ns1001'));
+		myChart_ns1001.setOption({
+			title: { text: 'NS100(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_ns1001.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/2503", function(data) {
+			myChart_ns1001.hideLoading();
+			myChart_ns1001.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //ns1002
+        var myChart_ns1002 = echarts.init(document.getElementById('ns1002'));
+		myChart_ns1002.setOption({
+			title: { text: 'NS100(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_ns1002.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/2505", function(data) {
+			myChart_ns1002.hideLoading();
+			myChart_ns1002.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//10Bond1
+        var myChart_10Bond1 = echarts.init(document.getElementById('10Bond1'));
+		myChart_10Bond1.setOption({
+			title: { text: '10Bond(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_10Bond1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/3703", function(data) {
+			myChart_10Bond1.hideLoading();
+			myChart_10Bond1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //10Bond2
+        var myChart_10Bond2 = echarts.init(document.getElementById('10Bond2'));
+		myChart_10Bond2.setOption({
+			title: { text: '10Bond(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_10Bond2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/3705", function(data) {
+			myChart_10Bond2.hideLoading();
+			myChart_10Bond2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//2Bond1
+        var myChart_2Bond1 = echarts.init(document.getElementById('2Bond1'));
+		myChart_2Bond1.setOption({
+			title: { text: '2Bond(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_2Bond1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/3603", function(data) {
+			myChart_2Bond1.hideLoading();
+			myChart_2Bond1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //2Bond2
+        var myChart_2Bond2 = echarts.init(document.getElementById('2Bond2'));
+		myChart_2Bond2.setOption({
+			title: { text: '2Bond(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_2Bond2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/3605", function(data) {
+			myChart_2Bond2.hideLoading();
+			myChart_2Bond2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+    </script>
+</body>
+</html>
