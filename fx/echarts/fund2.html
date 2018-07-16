@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh">    
+    <!-- 引入 ECharts 文件 -->
+	<!-- <script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script> -->
+    <script src="echarts.common.min.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script> -->
+    <script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+	<div style="display:flex;flex-direction:row;">
+	<select id="tp1" name="tp1">
+        <option value="1">ETF-场内</option>
+        <option value="2" selected>QDII</option>
+        <option value="3">QDII-ETF</option>
+        <option value="4">QDII-指数</option>
+        <option value="5">保本型</option>
+        <option value="6">债券型</option>
+        <option value="7">债券指数</option>
+        <option value="8">分级杠杆</option>
+        <option value="9">固定收益</option>
+        <option value="10">定开债券</option>
+        <option value="11">混合-FOF</option>
+        <option value="12">混合型</option>
+        <option value="13">理财型</option>
+        <option value="14">联接基金</option>
+        <option value="15">股票型</option>
+        <option value="16">股票指数</option>
+        <option value="17">货币型</option>
+        <option value="99">ALL</option>
+   	</select>
+    <select id="tp2" name="tp2">
+    	<option value="1" selected>股票</option>
+    	<option value="2">债券</option>
+    	<option value="3">混合</option>
+    	<option value="4">-(股票/债券/混合)</option>
+    	<option value="5">标普</option>
+    	<option value="6">纳斯达克</option>
+    	<option value="7">-(标普/纳斯达克)</option>
+        <option value="99">ALL</option>
+    </select></div>
+    <div id="fund4" style="width: 1200px;height:500px;"></div>
+	<script type="text/javascript">
+        //fund4
+        var myChart_fund4 = echarts.init(document.getElementById('fund4'));
+        option = {
+		    legend: {},
+			tooltip: { trigger: 'axis' },
+			dataset: { source: [ ['product'] ] },
+			xAxis: { type: 'category', boundaryGap: false },
+			yAxis: {}
+		};
+		function load_data() {
+			//alert($('#tp1').val());
+			var p1 = $('#tp1').val();
+			var p2 = $('#tp2').val();
+			var n = parseInt(p1)*10 + parseInt(p2);
+			var url = "http://localhost:8899/resources/fund2/" + n;
+			//alert(url);
+			myChart_fund4.showLoading();
+			$.getJSON(url, function(result) {
+				myChart_fund4.hideLoading();
+				ser = [];
+				for (var i = 0; i < (result.length - 1); i++) {
+					ser.push({type: 'line', seriesLayoutBy: 'row'});
+				}
+				opt = { dataset: { source: result }, 
+						series: ser 
+			    	  };
+				myChart_fund4.setOption(opt);
+			});
+		};
+		myChart_fund4.setOption(option);
+		load_data();
+		$('#tp1').change( function() {
+			load_data();
+		});
+		$('#tp2').change( function() {
+			load_data();
+		});
+    </script>
+</body>
+</html>

@@ -28,6 +28,7 @@ except Exception as exc:
 
 print("Read OK")
 soup = BeautifulSoup(f.text, 'html.parser')
+f.connection.close()
 
 r = re.compile(r'\d{6}')
 uls = soup.find_all('ul', class_='num_right')
@@ -49,6 +50,7 @@ con = sqlite3.connect('c:/rou/db/abc.db')
 for i in range(len(codes)):
     # test
     # print(codes[i])
+    # if codes[i] < '003324': continue
     print("Read fund (", codes[i], ") info from web, please wait...")
     url = "http://fund.eastmoney.com/f10/" + codes[i] + ".html"
     # print("url=", url)
@@ -61,6 +63,8 @@ for i in range(len(codes)):
 
     print("Read OK")
     soup = BeautifulSoup(f.text, 'lxml')
+    f.connection.close()
+
     tb = soup.find_all('table', class_='info w790')
     if len(tb) == 0:
         continue
@@ -83,14 +87,13 @@ for i in range(len(codes)):
             d[m[th]] = td
     # test
     d['key'] = d['code'] + ' ' + d['mgr']
-    pprint(d)
+    # pprint(d)
     keys = ','.join(d.keys())
     question_marks = ','.join(list('?' * len(d)))
     values = tuple(d.values())
     # print('INSERT OR REPLACE INTO fund_b (' + keys + ') VALUES (' + question_marks + ')', values)
     con.execute('INSERT OR REPLACE INTO fund_b (' + keys + ') VALUES (' + question_marks + ')', values)
-
-con.commit()
+    con.commit()
 
 '''
 con.execute("""

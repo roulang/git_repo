@@ -224,7 +224,7 @@ var pats2 = [
 'NonRept_Positions_Long_All c1,	NonRept_Positions_Short_All c2',
 ];
 
-var Cot = require('./cot2').cot, sqlite3 = require('sqlite3');
+var Cot2 = require('./cot2').cot2, sqlite3 = require('sqlite3');
 
 function cot2_dao(){
 	var db = new sqlite3.Database("C:/rou/db/abc.db");
