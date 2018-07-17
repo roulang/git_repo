@@ -35,51 +35,56 @@
     	<option value="1" selected>股票</option>
     	<option value="2">债券</option>
     	<option value="3">混合</option>
-    	<option value="4">-(股票/债券/混合)</option>
+    	<option value="4">not(股票/债券/混合)</option>
     	<option value="5">标普</option>
     	<option value="6">纳斯达克</option>
-    	<option value="7">-(标普/纳斯达克)</option>
+    	<option value="7">not(标普/纳斯达克)</option>
         <option value="99">ALL</option>
     </select></div>
-    <div id="fund4" style="width: 1200px;height:500px;"></div>
+    <div id="fund2" style="width: 1200px;height:500px;"></div>
 	<script type="text/javascript">
-        //fund4
-        var myChart_fund4 = echarts.init(document.getElementById('fund4'));
-        option = {
-		    legend: {},
-			tooltip: { trigger: 'axis' },
-			dataset: { source: [ ['product'] ] },
-			xAxis: { type: 'category', boundaryGap: false },
-			yAxis: {}
-		};
-		function load_data() {
-			//alert($('#tp1').val());
-			var p1 = $('#tp1').val();
-			var p2 = $('#tp2').val();
-			var n = parseInt(p1)*10 + parseInt(p2);
-			var url = "http://localhost:8899/resources/fund2/" + n;
-			//alert(url);
-			myChart_fund4.showLoading();
-			$.getJSON(url, function(result) {
-				myChart_fund4.hideLoading();
-				ser = [];
-				for (var i = 0; i < (result.length - 1); i++) {
-					ser.push({type: 'line', seriesLayoutBy: 'row'});
-				}
-				opt = { dataset: { source: result }, 
-						series: ser 
-			    	  };
-				myChart_fund4.setOption(opt);
-			});
-		};
-		myChart_fund4.setOption(option);
-		load_data();
+		$(document).ready(function() {
+		  $.ajaxSetup({ cache: false });
+		});		
 		$('#tp1').change( function() {
 			load_data();
 		});
 		$('#tp2').change( function() {
 			load_data();
 		});
+		function load_data() {
+	        //fund2
+	        var myChart_fund2 = echarts.init(document.getElementById('fund2'));
+        	myChart_fund2.clear();
+	        option = {
+			    legend: {},
+				tooltip: { trigger: 'axis' },
+				dataset: { source: [ ['product'] ] },
+				xAxis: { type: 'category', boundaryGap: false },
+				yAxis: {}
+			};
+			myChart_fund2.setOption(option);
+			//alert($('#tp1').val());
+			var p1 = $('#tp1').val();
+			var p2 = $('#tp2').val();
+			var n = parseInt(p1)*10 + parseInt(p2);
+			var url = "http://localhost:8899/resources/fund2/" + n;
+			//alert(url);
+			myChart_fund2.showLoading();
+			$.getJSON(url, function(result) {
+				myChart_fund2.hideLoading();
+				var ser = [];
+				for (var i = 0; i < (result.length - 1); i++) {
+					ser.push({type: 'line', seriesLayoutBy: 'row'});
+				}
+				opt = { dataset: { source: result }, 
+						series: ser 
+			    	  };
+				myChart_fund2.setOption(opt);
+				//myChart_fund2.setSeries(ser, false);
+			});
+		};
+		load_data();
     </script>
 </body>
 </html>

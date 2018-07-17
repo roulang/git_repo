@@ -1,15 +1,12 @@
 var urlParser = require('url').parse;
 
-//自定义内部事件
 var _events = ['list', 'retrieve'];
 
 function router(req, res, callback){
 	var method = req.method.toUpperCase();
-	//将HTTP命令映射到自定义事件
 	var event = emitEvent(method, req.resource);
 	console.log('event: ' + event);
 	if(supportEvent(event)){
-			//执行HTTP请求
 			return execute(req, event, callback);
 	}else{
 		return 'No supported event found!';
@@ -20,7 +17,6 @@ function execute(req, event, callback){
 	req.params = req.params || {};
 	if(req.method === 'POST' || req.method === 'PUT'){
 	}else{
-		//对于GET / DELETE请求，直接调用相应的Module处理请求
 		var urlParams = urlParser(req.url, true).query;
 		clone(req.params, urlParams);
 		return invoke(req, event, callback);
@@ -28,13 +24,12 @@ function execute(req, event, callback){
 }
 
 function invoke(req, event, callback){
-	//加载对应的资源处理Module
 	var module = require( './model/' + req.resource['resource'] + '_dao'),
 	model = new module.dao(),
 	fn = model[event];
 	fn(req.resource.id, req.params, function(result){
-		console.log('Execute result');
-		console.log(result);
+		//console.log('Execute result');
+		//console.log(result);
 		var stringfyResult = JSON.stringify(result);
 		callback(stringfyResult);
 	});

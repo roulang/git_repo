@@ -19,19 +19,19 @@ Date.prototype.yyyymmdd = function() {
          ].join('-');
 };
 
-function fund4_dao(){
+function fund2_dao(){
 	this.retrieve = function(id, params, callback){
 		/*
-		var fund4 = [
+		var fund2 = [
 			            ['funds', '2015', '2016', '2017'],
 			            ['工银深证红利ETF(159905)', 43.3, 85.8, 93.7],
 			            ['大成深证成长40ETF(159906)', 83.1, 73.4, 55.1],
 			            ['广发中小板300ETF(159907)', 86.4, 65.2, 82.5]
 		        	];
-		callback(fund4);
+		callback(fund2);
 		*/
 		var db = new sqlite3.Database("C:/rou/db/abc.db");
-		var fund4 = [['funds']];
+		var fund2 = [['funds']];
 		var dts = {};
 		var today = new Date();
 		var i = 1, j = 1;
@@ -42,7 +42,7 @@ function fund4_dao(){
 			if (wd > 0 && wd < 6) {
 				var dt = date.yyyymmdd();
 				dts[dt] = n - j + 1;
-				fund4[0][dts[dt]]=dt;
+				fund2[0][dts[dt]]=dt;
 				j += 1;
 			}
 			i += 1;
@@ -66,25 +66,25 @@ function fund4_dao(){
 			    for(var i=0; i<rows.length; i++){
 			    	if (cd != rows[i].code) {
 			    		n += 1;
-			    		fund4[n] = [];
-			    		fund4[n][0] = rows[i].name2 + '(' + rows[i].code + ')';
+			    		fund2[n] = [];
+			    		fund2[n][0] = rows[i].name2 + '(' + rows[i].code + ')';
 			    		cd = rows[i].code;
 			    	}
 			    	if (dts[rows[i].dt]) {
-			    		fund4[n][dts[rows[i].dt]] = parseFloat(rows[i].prc ? rows[i].prc : 0);
+			    		fund2[n][dts[rows[i].dt]] = parseFloat(rows[i].prc ? rows[i].prc : 0);
 			    	}
 				}
 				var k = Object.keys(dts);
 				for (var i = 0; i < k.length; i++) {
-					for (var j = 0; j < fund4.length; j++) {
-						if (!fund4[j][dts[k[i]]]) fund4[j][dts[k[i]]] = 0;
+					for (var j = 0; j < fund2.length; j++) {
+						if (!fund2[j][dts[k[i]]]) fund2[j][dts[k[i]]] = 0;
 					}
 				}
 				db.close();
-				callback(fund4);
+				callback(fund2);
 			}
 		);
 	};
 }
 
-exports.dao = fund4_dao;
+exports.dao = fund2_dao;
