@@ -124,7 +124,7 @@ void OnTick()
    }
    
    
-   if (sign>=0 || g_com==1) {
+   if (sign>=0 || g_com==1 || g_com==0) {
       //close sell order
       if(FindOrderA(NULL,-1,g_magic)) {  //found sell order
          if (OrderCloseA(NULL,-1,g_magic)>0) {  //close sell order
@@ -132,7 +132,7 @@ void OnTick()
          }
       }
    }
-   if (sign<=0 || g_com==2) {
+   if (sign<=0 || g_com==2 || g_com==0) {
       //close buy order
       if(FindOrderA(NULL,1,g_magic)) {  //found buy order
          if (OrderCloseA(NULL,1,g_magic)>0) {  //close buy order
