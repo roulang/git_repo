@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh">    
+    <!-- 引入 ECharts 文件 -->
+	<!-- <script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script> -->
+    <script src="echarts.common.min.js"></script>
+    <!-- <script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script> -->
+    <script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+	<div style="display:flex;flex-direction:row;">
+	<select id="tp1" name="tp1">
+        <option value="1" selected>set1</option>
+   	</select></div>
+    <div id="fund3" style="width: 1200px;height:500px;"></div>
+	<script type="text/javascript">
+		$(document).ready(function() {
+		  $.ajaxSetup({ cache: false });
+		});		
+		$('#tp1').change( function() {
+			load_data();
+		});
+		function load_data() {
+	        //fund3
+	        var myChart_fund3 = echarts.init(document.getElementById('fund3'));
+        	myChart_fund3.clear();
+	        option = {
+			    legend: {},
+				tooltip: { trigger: 'axis' },
+				dataset: { source: [ ['product'] ] },
+				xAxis: { type: 'category', boundaryGap: false },
+				yAxis: {}
+			};
+			myChart_fund3.setOption(option);
+			//alert($('#tp1').val());
+			var p1 = $('#tp1').val();
+			var n = parseInt(p1);
+			var url = "http://localhost:8899/resources/fund3/" + n;
+			//alert(url);
+			myChart_fund3.showLoading();
+			$.getJSON(url, function(result) {
+				myChart_fund3.hideLoading();
+				var ser = [];
+				for (var i = 0; i < (result.length - 1); i++) {
+					ser.push({type: 'line', seriesLayoutBy: 'row'});
+				}
+				opt = { dataset: { source: result }, 
+						series: ser 
+			    	  };
+				myChart_fund3.setOption(opt);
+				//myChart_fund3.setSeries(ser, false);
+			});
+		};
+		load_data();
+    </script>
+</body>
+</html>
