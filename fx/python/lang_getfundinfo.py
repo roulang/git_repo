@@ -34,7 +34,8 @@ r = re.compile(r'\d{6}')
 uls = soup.find_all('ul', class_='num_right')
 codes = []
 for i in range(len(uls)):
-    lis = uls[i].find_all('li', class_='b')
+    # lis = uls[i].find_all('li', class_='b')
+    lis = uls[i].find_all('li')
     for j in range(len(lis)):
         c = r.search(lis[j].getText())
         if c:
@@ -50,7 +51,7 @@ con = sqlite3.connect('c:/rou/db/abc.db')
 for i in range(len(codes)):
     # test
     # print(codes[i])
-    # if codes[i] < '003324': continue
+    if codes[i] < '690202': continue
     print("Read fund (", codes[i], ") info from web, please wait...")
     url = "http://fund.eastmoney.com/f10/" + codes[i] + ".html"
     # print("url=", url)

@@ -27,7 +27,7 @@ for i in range(len(codes)):
 # for i in range(2):
     # test
     # print(codes[i])
-    print("Read fund (", codes[i], ") info from web, please wait...")
+    print("Read fund (", codes[i], ")(" + str(i+1) + "/" + str(len(codes)) + ") info from web, please wait...")
     url = "http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code=" + codes[i] + "&page=1&per=" + n + "&sdate=&edate="
     # print("url=", url)
     f = requests.get(url)
