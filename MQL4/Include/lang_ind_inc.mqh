@@ -2364,6 +2364,119 @@ int getBarStatus(int arg_period,int arg_shift,int arg_thpt=0)
    
    return 0;
 }
+//+------------------------------------------------------------------+
+//| Get Band status
+//| date: 2018/07/28
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value:
+//| return value:
+//| <<line pos>>
+//|     (above) 2
+//|  |  (high)  1
+//| [ ] (open)  0
+//| [ ] (close) 0
+//|  |  (low)   -1
+//|     (below) -2
+//+------------------------------------------------------------------+
+void getBandStatus3 ( int arg_period,int arg_shift,
+                     double &arg_d2_low,double &arg_d2_high,double &arg_d4_low,double &arg_d4_high,
+                     double &arg_ma,double &arg_d2_gap,double &arg_d4_gap,int &arg_pos[], int &arg_bar_status,
+                     double arg_gap_ratio=0.1,int arg_pd=10 
+                   )
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   int cur_bar_shift=arg_shift;
+
+   int dev=2,dev2=4;
+   double cur_band_low=iBands(NULL,arg_period,arg_pd,dev2,0,PRICE_CLOSE,MODE_LOWER,cur_bar_shift);
+   double cur_band_high=iBands(NULL,arg_period,arg_pd,dev2,0,PRICE_CLOSE,MODE_UPPER,cur_bar_shift);
+   double cur_band_sub_low=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_LOWER,cur_bar_shift);
+   double cur_band_sub_high=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_UPPER,cur_bar_shift);
+   double cur_band_center=iBands(NULL,arg_period,arg_pd,dev,0,PRICE_CLOSE,MODE_MAIN,cur_bar_shift);
+   double cur_band_d4_gap=cur_band_high-cur_band_low;
+   double cur_band_d2_gap=cur_band_sub_high-cur_band_sub_low;
+
+   arg_d4_high=cur_band_high;
+   arg_d2_high=cur_band_sub_high;
+   arg_ma=cur_band_center;
+   arg_d2_low=cur_band_sub_low;
+   arg_d4_low=cur_band_low;
+   arg_d2_gap=cur_band_d2_gap;
+   arg_d4_gap=cur_band_d4_gap;
+   
+   double d4_offset=cur_band_d4_gap*arg_gap_ratio;
+   double d2_offset=cur_band_d2_gap*arg_gap_ratio;
+   double cur_band_value[5];
+   cur_band_value[0]=cur_band_high-d4_offset;
+   cur_band_value[1]=cur_band_sub_high-d2_offset;
+   cur_band_value[2]=cur_band_center;
+   cur_band_value[3]=cur_band_sub_low+d2_offset;
+   cur_band_value[4]=cur_band_low+d4_offset;
+   
+   int band_bar_pos[5];
+   getLinePosition(NULL,cur_bar_shift,cur_band_value,arg_pos,arg_bar_status);
+   
+}
+//+------------------------------------------------------------------+
+//| Get Line Position
+//| date: 2018/05/03
+//| arg_period: time period
+//| arg_shift: bar shift
+//| return value:
+//| <<line pos>>
+//|     (above) 2
+//|  |  (high)  1
+//| [ ] (open)  0
+//| [ ] (close) 0
+//|  |  (low)   -1
+//|     (below) -2
+//+------------------------------------------------------------------+
+void getLinePosition ( int arg_period,int arg_shift, double &arg_line[], int &arg_pos[], int &arg_bar_status )
+{
+   if (arg_period==PERIOD_CURRENT) arg_period=Period();
+   
+   int cur_bar_shift=arg_shift;
+   int bar_status=0;
+   
+   double cur_close_price=iClose(NULL,arg_period,cur_bar_shift);
+   double cur_open_price=iOpen(NULL,arg_period,cur_bar_shift);
+   double cur_high_price=iHigh(NULL,arg_period,cur_bar_shift);
+   double cur_low_price=iLow(NULL,arg_period,cur_bar_shift);
+   
+   double oc_gap=cur_open_price-cur_close_price;
+   double cur_high=cur_high_price,cur_low=cur_low_price;
+   double cur_sub_high,cur_sub_low;
+   if (oc_gap>0) {
+      bar_status=1;   //negative bar
+      cur_sub_high=cur_open_price;
+      cur_sub_low=cur_close_price;
+   } else {
+      cur_sub_high=cur_close_price;
+      cur_sub_low=cur_open_price;
+   }
+   arg_bar_status=bar_status;
+
+   int l1=ArraySize(arg_line);
+   int l2=ArraySize(arg_pos);
+   if (l1!=l2) return;
+   ArrayInitialize(arg_pos,0);
+   //| <<line pos>>
+   //|     (above) 2
+   //|  |  (high)  1
+   //| [ ] (open)  0
+   //| [ ] (close) 0
+   //|  |  (low)   -1
+   //|     (below) -2
+   for (int i=0;i<l1;i++) {
+      if (arg_line[i]>cur_high_price) arg_pos[i]=2;
+      else if (arg_line[i]>=cur_sub_high) arg_pos[i]=1;
+      else if (arg_line[i]>cur_sub_low) arg_pos[i]=0;
+      else if (arg_line[i]>=cur_low) arg_pos[i]=-1;
+      else arg_pos[i]=-2;
+   }
+   
+}
 bool getOHCLfromTime(datetime arg_st_dt, s_Price &arg_price, int arg_bar_cnt=60)
 {
    arg_price.ped=arg_bar_cnt;

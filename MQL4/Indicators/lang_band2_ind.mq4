@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                lang_macd_ind.mq4 |
+//|                                          lang_indicator_test.mq4 |
 //|                        Copyright 2017, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -8,36 +8,62 @@
 #property version   "1.00"
 #property strict
 
-#include <lang_ind_inc.mqh>
-//#include <lang_stg_inc.mqh>
+//#include <lang_ind_inc.mqh>
+#include <lang_stg_inc.mqh>
 
 //#property indicator_chart_window
 #property indicator_separate_window
-#property indicator_minimum -4
-#property indicator_maximum 4
-#property indicator_buffers 1
-#property indicator_plots   1
+#property indicator_minimum -2
+#property indicator_maximum 2
+#property indicator_buffers 4
+#property indicator_plots   4
 //--- plot signal
-#property indicator_label1  "signal"
+//#property indicator_label1  "signal"
 //#property indicator_type1   DRAW_ARROW
+#property indicator_label1  "high"
 #property indicator_type1   DRAW_HISTOGRAM
 #property indicator_color1  clrRed
 #property indicator_style1  STYLE_SOLID
 #property indicator_width1  1
 
+#property indicator_label2  "mid"
+#property indicator_type2   DRAW_HISTOGRAM
+#property indicator_color2  clrGreen
+#property indicator_style2  STYLE_SOLID
+#property indicator_width2  1
+
+#property indicator_label3  "low"
+#property indicator_type3   DRAW_HISTOGRAM
+#property indicator_color3  clrYellow
+#property indicator_style3  STYLE_SOLID
+#property indicator_width3  1
+
+#property indicator_label4  "st"
+#property indicator_type4   DRAW_HISTOGRAM
+#property indicator_color4  clrWhite
+#property indicator_style4  STYLE_SOLID
+#property indicator_width4  1
+
 //--- indicator buffers
-double         signalBuffer[];
+//double         signalBuffer[];
+double         highBuffer[];
+double         midBuffer[];
+double         lowBuffer[];
+double         stBuffer[];
 
 //input
-input int      i_mode=MODE_SIGNAL;     //0:Main,1:Signal
-input int      i_type=0;               //0:Open,1:Close
-input int      i_fast_pd=12;
-input int      i_slow_pd=26;
-input int      i_singal_pd=9;
-input double   i_deviation=2.0; // Bands Deviations
-input int      i_range_ratio=1;
+//input int      i_mode=MODE_SIGNAL;     //0:Main,1:Signal
+//input double   i_deviation=2;
+//input int      i_range_ratio=1;
+//input int      i_pd=10;
+input double    i_gap_ratio=0.1;
 
 //global
+//int   g_ma_cross=0;
+//int   g_fast_pd=12;
+//int   g_slow_pd=26;
+//int   g_singal_pd=9;
+//int g_last_band_st=0;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -49,16 +75,13 @@ int OnInit()
       //if (!timer_init(i_timer_sec)) return(INIT_FAILED);
    }
 
-   if (i_type==0) {
-      IndicatorSetDouble(INDICATOR_MINIMUM,-12);
-      IndicatorSetDouble(INDICATOR_MAXIMUM,12);
-   } else {
-      IndicatorSetDouble(INDICATOR_MINIMUM,-15);
-      IndicatorSetDouble(INDICATOR_MAXIMUM,15);
-   }
 //--- indicator buffers mapping
-   SetIndexBuffer(0,signalBuffer);
-   
+   //SetIndexBuffer(0,signalBuffer);
+   SetIndexBuffer(0,highBuffer);
+   SetIndexBuffer(1,midBuffer);
+   SetIndexBuffer(2,lowBuffer);
+   SetIndexBuffer(3,stBuffer);
+
    //SetIndexArrow(0,SYMBOL_ARROWUP);
 
    
@@ -92,44 +115,32 @@ int OnCalculate(const int rates_total,
    int limit=Bars-1;
 
    //1:skip last bar
-   int skip_first_bars=2;
-   int st=uncal_bars+skip_first_bars;
+   int st=uncal_bars+1;
    if (st>limit) st=limit;
    if(g_debug) {
       Print("1:st=",st);
    }
-   for(int i=st-skip_first_bars;i>0;i--) {
-      if (i_type==0) {
-         signalBuffer[i]=getMACDStatus(PERIOD_CURRENT,i,i_slow_pd,i_fast_pd,i_singal_pd,i_mode,i_deviation,i_range_ratio);
-         /*
-         //debug
-         if (signalBuffer[i]==2 || signalBuffer[i]==-2) {
-            datetime t=Time[i];
-            Print("time=",t);
-            Print("shift=",i);
-            Print("signalBuffer=",signalBuffer[i]);
-         }
-         */
-      } else {
-         double macd_slow,macd_fast,macd_range;
-         signalBuffer[i]=getMACDStatus2(PERIOD_CURRENT,i,macd_slow,macd_fast,macd_range,i_slow_pd,i_fast_pd,i_singal_pd,i_deviation,i_range_ratio);
-      }
+   int skip_first_bars=0;
+   for(int i=st-skip_first_bars;i>=0;i--) {
+      int band_bar_pos[5],bar_status;
+      double d2_low,d2_high,d4_low,d4_high,ma,d2_gap,d4_gap;
+      getBandStatus3(NULL,i,d2_low,d2_high,d4_low,d4_high,ma,d2_gap,d4_gap,band_bar_pos,bar_status,i_gap_ratio);
+      highBuffer[i]=band_bar_pos[1];
+      midBuffer[i]=band_bar_pos[2];
+      lowBuffer[i]=band_bar_pos[3];
+      stBuffer[i]=bar_status;
       
-      /*
       //debug
       datetime t=Time[i];
-      datetime t1=StringToTime("2017.10.18 19:00");
+      datetime t1=StringToTime("2018.04.9 08:00");
       if (t==t1) {
          Print("time=",t);
          Print("shift=",i);
-         Print("g_high_low=");
-         PrintTwoDimArray(g_high_low);
-         for (int j=0;j<ArraySize(g_touch_highlow);j++) {
-            Print("g_touch_highlow[",j,"]=",g_touch_highlow[j]);
-         }
+         Print("highBuffer[i]=",highBuffer[i]);
+         Print("midBuffer[i]=",midBuffer[i]);
+         Print("lowBuffer[i]=",lowBuffer[i]);
+         Print("stBuffer[i]=",stBuffer[i]);
       }
-      */
-      
    }
 
 //--- return value of prev_calculated for next call
@@ -140,7 +151,11 @@ int OnCalculate(const int rates_total,
 //+------------------------------------------------------------------+
 int InitializeAll()
 {
-   ArrayInitialize(signalBuffer,0.0);
+   //ArrayInitialize(signalBuffer,0.0);
+   ArrayInitialize(highBuffer,0.0);
+   ArrayInitialize(midBuffer,0.0);
+   ArrayInitialize(lowBuffer,0.0);
+   ArrayInitialize(stBuffer,0.0);
 
 //--- first counting position
    return(Bars-1);
