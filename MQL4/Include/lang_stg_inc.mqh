@@ -2094,7 +2094,104 @@ int isTrendStgOpen5( int arg_shift,double &arg_ls_price,
    }
    */
    
-   if (ma_st2==1 && macd_st>0) {    //large period's trend is up, macd fast>slow
+   if (ma_st2==1) {    //large period's trend is up, macd fast>slow
+      if (macd_st>0) {
+         if ((high_pos==1 || high_pos==0) && low_pos==-2) {    //bar hit band high
+            arg_ls_price=d2_low;
+            return 3;
+         }
+         if (high_pos==2 && (low_pos==-1 || low_pos==0) && bar_status==0) {  //bar hit band low, positive bar
+            arg_ls_price=d4_low;
+            return 2;
+         }
+         return 1;
+      }
+   }
+   if (ma_st2==-1) {   //large period's trend is down, macd fast<slow
+      if (macd_st<0) {
+         if ((low_pos==-1 || low_pos==0) && high_pos==2) {    //bar hit band low
+            arg_ls_price=d2_high;
+            return -3;
+         }
+         if (low_pos==-2 && (high_pos==1 || high_pos==0) && bar_status==1) {  //bar hit band high, negative bar
+            arg_ls_price=d4_high;
+            return -2;
+         }
+         return -1;
+      }
+   }
+   
+   arg_ls_price=0;
+   return 0;
+
+}
+//+------------------------------------------------------------------+
+//| Trend strategy Open
+//| date: 2018/9/18
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: +3,open buy(band up);-3,open sell (band dw);
+//|               +2,open buy(band dw);-2,open sell (band up);
+//|               1,stay open;-1,stay close;
+//|               0,N/A
+//+------------------------------------------------------------------+
+int isTrendStgOpen6( int arg_shift,double &arg_ls_price,
+                     double arg_gap_ratio=0,int arg_exp_pd=0,
+                     int arg_long_pd=20,int arg_mid_pd=10,int arg_short_pd=5
+                   )
+{
+   int bar_shift=arg_shift;
+   
+   double macd_slow,macd_fast,macd_range;
+   int macd_st=getMACDStatus2(PERIOD_CURRENT,bar_shift,macd_slow,macd_fast,macd_range);
+   //| return value: fast>slow,same direction,up,5;
+   //|               fast>slow,different direction(fast down,slow up),4;
+   //|               fast>slow,different direction(fast up,slow down),3;
+   //|               fast>slow,same direction(fast down,slow down),2;
+   //|               fast>slow,no direction,1;
+   //| return value: fast<slow,same direction,down,-5;
+   //|               fast<slow,different direction(fast up,slow down),-4;
+   //|               fast<slow,different direction(fast down,slow up),-3;
+   //|               fast<slow,same direction(fast up,slow up),-2;
+   //|               fast<slow,no direction,-1;
+   //|               n/a:0
+   //| return value: fast is above slow range upper:+10  
+   //|               fast is below slow range lower:-10  
+   //|               fast is above slow band upper:+20  
+   //|               fast is below slow band lower:-20  
+
+   int band_bar_pos[5],bar_status;
+   double d2_low,d2_high,d4_low,d4_high,ma,d2_gap,d4_gap;
+   getBandStatus3(NULL,bar_shift,d2_low,d2_high,d4_low,d4_high,ma,d2_gap,d4_gap,band_bar_pos,bar_status,arg_gap_ratio);
+   //| return value:
+   //| <<line pos>>
+   //|     (above) 2
+   //|  |  (high)  1
+   //| [ ] (open)  0
+   //| [ ] (close) 0
+   //|  |  (low)   -1
+   //|     (below) -2
+   double high_pos=band_bar_pos[1];
+   double low_pos=band_bar_pos[3];
+   
+   /*
+   //debug
+   string cur=Symbol();
+   datetime t=Time[arg_shift];
+   datetime t1=StringToTime("2018.06.29 04:00");
+   datetime t2=StringToTime("2018.06.29 08:00");
+   datetime t3=StringToTime("2018.06.29 12:00");
+   if (cur=="NZDUSD" && (t==t1 || t==t2 || t==t3)) {
+      Print("time=",t,",shift=",arg_shift);
+      Print("ma_st=",ma_st,",ma_st2=",ma_st2);
+      Print("high=",band_bar_pos[1]);
+      Print("mid=",band_bar_pos[2]);
+      Print("low=",band_bar_pos[3]);
+      Print("st=",bar_status);
+   }
+   */
+   
+   if (macd_st>0) {
       if ((high_pos==1 || high_pos==0) && low_pos==-2) {    //bar hit band high
          arg_ls_price=d2_low;
          return 3;
@@ -2105,7 +2202,7 @@ int isTrendStgOpen5( int arg_shift,double &arg_ls_price,
       }
       return 1;
    }
-   if (ma_st2==-1 && macd_st<0) {   //large period's trend is down, macd fast<slow
+   if (macd_st<0) {
       if ((low_pos==-1 || low_pos==0) && high_pos==2) {    //bar hit band low
          arg_ls_price=d2_high;
          return -3;

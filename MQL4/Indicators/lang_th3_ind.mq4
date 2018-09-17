@@ -84,7 +84,7 @@ int OnCalculate(const int rates_total,
    int skip_first_bars=0;
    for(int i=st-skip_first_bars;i>0;i--) {
       double ls_p;
-      int signal=isTrendStgOpen5(i,ls_p,i_band_ratio);
+      int signal=isTrendStgOpen6(i,ls_p,i_band_ratio);
       
       signalBuffer[i]=signal;
       
