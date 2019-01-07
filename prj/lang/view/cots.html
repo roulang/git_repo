@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="3600" >    
+    <!-- 引入 ECharts 文件 -->
+	<script src="http://cdn.bootcss.com/echarts/3.2.2/echarts.min.js"></script>
+    <!-- <script src="echarts.common.min.js"></script> -->
+    <script src="http://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <!-- <script src="jquery-3.3.1.min.js"></script> -->
+</head>
+<body>
+	<div id="row" style="display:flex;flex-direction:row;">
+		<div id="col1" style="display:flex;flex-direction:column;">
+		    <div id="eur1" style="width: 300px;height:150px;"></div>
+		    <div id="eur2" style="width: 300px;height:150px;"></div>
+		    <div id="jpy1" style="width: 300px;height:150px;"></div>
+		    <div id="jpy2" style="width: 300px;height:150px;"></div>
+	    </div>
+		<div id="col2" style="display:flex;flex-direction:column;">
+		    <div id="aud1" style="width: 300px;height:150px;"></div>
+		    <div id="aud2" style="width: 300px;height:150px;"></div>
+		    <div id="nzd1" style="width: 300px;height:150px;"></div>
+		    <div id="nzd2" style="width: 300px;height:150px;"></div>
+	    </div>
+		<div id="col3" style="display:flex;flex-direction:column;">
+		    <div id="cad1" style="width: 300px;height:150px;"></div>
+		    <div id="cad2" style="width: 300px;height:150px;"></div>
+		    <div id="gbp1" style="width: 300px;height:150px;"></div>
+		    <div id="gbp2" style="width: 300px;height:150px;"></div>
+	    </div>
+		<div id="col4" style="display:flex;flex-direction:column;">
+		    <div id="chf1" style="width: 300px;height:150px;"></div>
+		    <div id="chf2" style="width: 300px;height:150px;"></div>
+		    <div id="dxy1" style="width: 300px;height:150px;"></div>
+		    <div id="dxy2" style="width: 300px;height:150px;"></div>
+	    </div>
+	</div>
+	<script type="text/javascript">
+        //eur1
+        var myChart_eur1 = echarts.init(document.getElementById('eur1'));
+		myChart_eur1.setOption({
+			title: { text: 'EUR(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_eur1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/503", function(data) {
+			myChart_eur1.hideLoading();
+			myChart_eur1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //eur2
+        var myChart_eur2 = echarts.init(document.getElementById('eur2'));
+		myChart_eur2.setOption({
+			title: { text: 'EUR(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_eur2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/505", function(data) {
+			myChart_eur2.hideLoading();
+			myChart_eur2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//jpy1
+        var myChart_jpy1 = echarts.init(document.getElementById('jpy1'));
+		myChart_jpy1.setOption({
+			title: { text: 'JPY(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_jpy1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/403", function(data) {
+			myChart_jpy1.hideLoading();
+			myChart_jpy1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //jpy2
+        var myChart_jpy2 = echarts.init(document.getElementById('jpy2'));
+		myChart_jpy2.setOption({
+			title: { text: 'JPY(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_jpy2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/405", function(data) {
+			myChart_jpy2.hideLoading();
+			myChart_jpy2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//aud1
+        var myChart_aud1 = echarts.init(document.getElementById('aud1'));
+		myChart_aud1.setOption({
+			title: { text: 'AUD(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_aud1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/603", function(data) {
+			myChart_aud1.hideLoading();
+			myChart_aud1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //aud2
+        var myChart_aud2 = echarts.init(document.getElementById('aud2'));
+		myChart_aud2.setOption({
+			title: { text: 'AUD(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_aud2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/605", function(data) {
+			myChart_aud2.hideLoading();
+			myChart_aud2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//nzd1
+        var myChart_nzd1 = echarts.init(document.getElementById('nzd1'));
+		myChart_nzd1.setOption({
+			title: { text: 'NZD(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_nzd1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/1103", function(data) {
+			myChart_nzd1.hideLoading();
+			myChart_nzd1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //nzd2
+        var myChart_nzd2 = echarts.init(document.getElementById('nzd2'));
+		myChart_nzd2.setOption({
+			title: { text: 'NZD(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_nzd2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/1105", function(data) {
+			myChart_nzd2.hideLoading();
+			myChart_nzd2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//cad1
+        var myChart_cad1 = echarts.init(document.getElementById('cad1'));
+		myChart_cad1.setOption({
+			title: { text: 'CAD(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_cad1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/103", function(data) {
+			myChart_cad1.hideLoading();
+			myChart_cad1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //cad2
+        var myChart_cad2 = echarts.init(document.getElementById('cad2'));
+		myChart_cad2.setOption({
+			title: { text: 'CAD(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_cad2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/105", function(data) {
+			myChart_cad2.hideLoading();
+			myChart_cad2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//gbp1
+        var myChart_gbp1 = echarts.init(document.getElementById('gbp1'));
+		myChart_gbp1.setOption({
+			title: { text: 'GBP(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_gbp1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/303", function(data) {
+			myChart_gbp1.hideLoading();
+			myChart_gbp1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //gbp2
+        var myChart_gbp2 = echarts.init(document.getElementById('gbp2'));
+		myChart_gbp2.setOption({
+			title: { text: 'GBP(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_gbp2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/305", function(data) {
+			myChart_gbp2.hideLoading();
+			myChart_gbp2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//chf1
+        var myChart_chf1 = echarts.init(document.getElementById('chf1'));
+		myChart_chf1.setOption({
+			title: { text: 'CHF(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_chf1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/203", function(data) {
+			myChart_chf1.hideLoading();
+			myChart_chf1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //chf2
+        var myChart_chf2 = echarts.init(document.getElementById('chf2'));
+		myChart_chf2.setOption({
+			title: { text: 'CHF(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_chf2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/205", function(data) {
+			myChart_chf2.hideLoading();
+			myChart_chf2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+		//dxy1
+        var myChart_dxy1 = echarts.init(document.getElementById('dxy1'));
+		myChart_dxy1.setOption({
+			title: { text: 'DXY(lev)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_dxy1.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/4603", function(data) {
+			myChart_dxy1.hideLoading();
+			myChart_dxy1.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+        //dxy2
+        var myChart_dxy2 = echarts.init(document.getElementById('dxy2'));
+		myChart_dxy2.setOption({
+			title: { text: 'DXY(oth)', textStyle: {fontSize: 14} }, legend: { data:['LONG','SHORT'] }, grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+			tooltip: { trigger: 'axis' },
+			xAxis: { type: 'category', boundaryGap: false, data: [] },
+			yAxis: {},
+			series: [ { name: 'LONG', type: 'bar', stack: 'TOT', data: [] }, { name: 'SHORT', type: 'bar', stack: 'TOT', data: [] } ]
+		});
+		myChart_dxy2.showLoading();
+		$.getJSON("http://localhost:8899/resources/cot/4605", function(data) {
+			myChart_dxy2.hideLoading();
+			myChart_dxy2.setOption( { xAxis: { data: data.catg }, series: [ { name: 'LONG', data: data.data['1'] }, { name: 'SHORT', data: data.data['2'] } ] });
+		});
+    </script>
+</body>
+</html>
