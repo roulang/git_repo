@@ -2218,3 +2218,80 @@ int isTrendStgOpen6( int arg_shift,double &arg_ls_price,
    return 0;
 
 }
+
+//+------------------------------------------------------------------+
+//| Trend strategy Open
+//| date: 2018/11/25
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: +3,open buy(band up);-3,open sell (band dw);
+//|               +2,open buy(band dw);-2,open sell (band up);
+//|               1,stay open;-1,stay close;
+//|               0,N/A
+//+------------------------------------------------------------------+
+int isTrendStgOpen7( int arg_shift,double &arg_ls_price,
+                     double arg_gap_ratio=0, int arg_pd=720
+                   )
+{
+   int bar_shift=arg_shift;
+   
+   int band_bar_pos[5],bar_status;
+   double d2_low,d2_high,d4_low,d4_high,d2_gap,d4_gap,ma,ma2;
+   getBandStatus3(NULL,bar_shift+1,d2_low,d2_high,d4_low,d4_high,ma2,d2_gap,d4_gap,band_bar_pos,bar_status,arg_gap_ratio,arg_pd);
+   getBandStatus3(NULL,bar_shift,d2_low,d2_high,d4_low,d4_high,ma,d2_gap,d4_gap,band_bar_pos,bar_status,arg_gap_ratio,arg_pd);
+   //| return value:
+   //| <<line pos>>
+   //|     (above) 2
+   //|  |  (high)  1
+   //| [ ] (open)  0
+   //| [ ] (close) 0
+   //|  |  (low)   -1
+   //|     (below) -2
+   double high_pos=band_bar_pos[1];
+   double low_pos=band_bar_pos[3];
+   double ma_pos=band_bar_pos[2];
+   double ma_slop=ma-ma2;
+   if (MathAbs(ma_slop)<Point()*0.1) ma_slop=0;
+   /*
+   //debug
+   string cur=Symbol();
+   datetime t=Time[arg_shift];
+   datetime t1=StringToTime("2018.06.29 04:00");
+   datetime t2=StringToTime("2018.06.29 08:00");
+   datetime t3=StringToTime("2018.06.29 12:00");
+   if (cur=="NZDUSD" && (t==t1 || t==t2 || t==t3)) {
+      Print("time=",t,",shift=",arg_shift);
+      Print("ma_st=",ma_st,",ma_st2=",ma_st2);
+      Print("high=",band_bar_pos[1]);
+      Print("mid=",band_bar_pos[2]);
+      Print("low=",band_bar_pos[3]);
+      Print("st=",bar_status);
+   }
+   */
+   
+   if (ma_slop>0) {
+      if ((high_pos==1 || high_pos==0) && ma_pos==-2) {    //bar hit band high
+         arg_ls_price=d4_low;
+         return 3;
+      }
+      if (high_pos==2 && (ma_pos==1 || ma_pos==0 || ma_pos==-1)) {  //bar hit band ma
+         arg_ls_price=d4_low;
+         return 2;
+      }
+      return 1;
+   }
+   if (ma_slop<0) {
+      if ((low_pos==-1 || low_pos==0) && ma_pos==2) {    //bar hit band low
+         arg_ls_price=d4_high;
+         return -3;
+      }
+      if (low_pos==-2 && (ma_pos==1 || ma_pos==0 || ma_pos==-1)) {  //bar hit band ma
+         arg_ls_price=d4_high;
+         return -2;
+      }
+      return -1;
+   }
+   
+   arg_ls_price=0;
+   return 0;
+}

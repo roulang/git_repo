@@ -1100,7 +1100,7 @@ bool sendOrderMail(  string arg_title,int arg_cnt,string &arg_msg[],
                      double &arg_price[],int &arg_price_pt[],
                      double &arg_ls_price[],int &arg_ls_price_pt[],
                      double &arg_tp_price[],int &arg_tp_price_pt[],
-                     double &arg_lot[],string &arg_comment[],
+                     double &arg_lot[],string &arg_comment[]
                   )
 {
    string mail_title=arg_title;
