@@ -38,6 +38,7 @@ input bool     i_sendmail=False;
 
 //global
 int g_timer_sec;
+double g_last_signal;
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -57,6 +58,7 @@ int OnInit()
    //SetIndexArrow(0,SYMBOL_ARROWUP);
    
    g_sendmail=i_sendmail;
+   g_last_signal=0;
    
 //---
    return(INIT_SUCCEEDED);
@@ -152,8 +154,11 @@ void OnTimer()
    if(g_debug) Print("OnTimer() at ", g_timer_sec);
    signalBuffer[0]=getKDJStatus(PERIOD_CURRENT,0,i_k_pd,i_d_pd,i_slow,i_high,i_low);
    ChartRedraw();
-   if (MathAbs(signalBuffer[0])>=2) {
-      Print("send notice mail");
-      mailNotice_indicator("kdj",signalBuffer[0]);
+   if(g_last_signal!=signalBuffer[0]) {
+      g_last_signal=signalBuffer[0];
+      if (MathAbs(signalBuffer[0])>=2) {
+         Print("send notice mail");
+         mailNotice_indicator("kdj",signalBuffer[0]);
+      }
    }
 }
