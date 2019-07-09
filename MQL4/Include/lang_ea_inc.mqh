@@ -11,10 +11,10 @@
 
 //input
 input bool     i_sendmail=true;
-input int      i_equity_percent=1;
+input int      i_equity_percent=50;
 input double   i_max_lots=0.01;
 input int      i_slippage=5;
-input int      i_ls_pt=100;      //take lose point
+//input int      i_ls_pt=100;      //take lose point
 //input bool     i_skip_jpychf_usd_relate=true;
 
 //--- input
@@ -94,14 +94,15 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
    //<<<<debug
    if (g_debug) {
       Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
+      printf("cmd=%d;vol=%.5f;pt=%.5f;pc=%.5f;ls=%.5f;lspt=%.5f;ps=%.5f;ps_pt=%.5f", cmd, risk_vol, pt, price, ls_price, ls_pt, ps_price, ps_pt);
+      //printf("command=%d", cmd);
+      //printf("volume=%.5f", risk_vol);
+      //printf("point=%.5f", pt);
+      //printf("price=%.5f", price);
+      //printf("loss stop price=%.5f", ls_price);
+      //printf("loss stop point=%.5f", ls_pt);
+      //printf("profit stop price=%.5f", ps_price);
+      //printf("profit stop point=%.5f", ps_pt);
       //printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
@@ -113,8 +114,7 @@ bool OrderBuy2(double argPrice, double argLsPrice, double argPsPrice, int argMag
       ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Green);
    }
    
-   if (ret <0 )
-   {
+   if (ret <0 ) {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check));
    }
@@ -192,14 +192,15 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
    //<<<<debug
    if (g_debug) {
       Print("<<<<debug");
-      printf("command=%d", cmd);
-      printf("volume=%.5f", risk_vol);
-      printf("point=%.5f", pt);
-      printf("price=%.5f", price);
-      printf("loss stop price=%.5f", ls_price);
-      printf("loss stop point=%.5f", ls_pt);
-      printf("profit stop price=%.5f", ps_price);
-      printf("profit stop point=%.5f", ps_pt);
+      printf("cmd=%d;vol=%.5f;pt=%.5f;pc=%.5f;ls=%.5f;lspt=%.5f;ps=%.5f;ps_pt=%.5f", cmd, risk_vol, pt, price, ls_price, ls_pt, ps_price, ps_pt);
+      //printf("command=%d", cmd);
+      //printf("volume=%.5f", risk_vol);
+      //printf("point=%.5f", pt);
+      //printf("price=%.5f", price);
+      //printf("loss stop price=%.5f", ls_price);
+      //printf("loss stop point=%.5f", ls_pt);
+      //printf("profit stop price=%.5f", ps_price);
+      //printf("profit stop point=%.5f", ps_pt);
       //printf("gap=%.0f", gap);
       Print("debug>>>>");
    }
@@ -211,8 +212,7 @@ bool OrderSell2(double argPrice, double argLsPrice, double argPsPrice, int argMa
       ret = OrderSend(Symbol(), cmd, risk_vol, price, slippage, ls_price, ps_price, "", argMag, 0, Red);
    }
    
-   if (ret < 0)
-   {
+   if (ret < 0) {
       int check=GetLastError(); 
       if(check != ERR_NO_ERROR) Print("Message not sent. Error: ", ErrorDescription(check)); 
    }
@@ -689,13 +689,13 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
          //   (type==-2 && StringCompare(OrderSymbol(),cur)==0 && OrderType()==OP_SELLSTOP && OrderMagicNumber()==magic)) 
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,1)) {
             b_cnt+=1;
-            if (OrderProfit()<0) {
+            if (OrderProfit()>0) {
                b_pft=OrderProfit();
             }
          }
          if (isSameOrder(OrderSymbol(),OrderMagicNumber(),OrderComment(),OrderType(),cur,arg_magic,-1)) {
             s_cnt+=1;
-            if (OrderProfit()<0) {
+            if (OrderProfit()>0) {
                s_pft=OrderProfit();
             }
          }
@@ -708,8 +708,8 @@ bool FindOrderCnt(string arg_symbol, int arg_magic, int &arg_buy_cnt, int &arg_s
    arg_buy_cnt=b_cnt;
    arg_sell_cnt=s_cnt;
    arg_ord_pft=0;
-   if (b_pft<0) arg_ord_pft=b_pft;
-   if (s_pft<0) arg_ord_pft=s_pft;
+   if (b_pft>0) arg_ord_pft=b_pft;
+   if (s_pft>0) arg_ord_pft=s_pft;
       
    if ((b_cnt+s_cnt)>0) return true;
    

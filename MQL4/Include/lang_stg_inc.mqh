@@ -2295,3 +2295,96 @@ int isTrendStgOpen7( int arg_shift,double &arg_ls_price,
    arg_ls_price=0;
    return 0;
 }
+
+//+------------------------------------------------------------------+
+//| Trend strategy Open
+//| date: 2019/7/4
+//| arg_shift: bar shift
+//| &arg_ls_price: lose stop price(for return)
+//| return value: +3,open buy(up);-3,open sell (dw)
+//|               +2,keep buy(up);-2,keep sell (dw);
+//|               +1,turn up;-1,turn dw;
+//|               0,N/A
+//+------------------------------------------------------------------+
+int isTrendStgOpen8( int arg_shift,double &arg_ls_price,
+                     double arg_off_pt=270, int arg_ma=60
+                   )
+{
+   int bar_shift=arg_shift;
+   int sig=0;
+   int val_i;
+   double val_h=0,val_l=0;
+   
+   //| return value: 
+   //|   +1,up,2K;
+   //|   +2,up,3K;
+   //|   -1,down,2K;
+   //|   -2,down,3K;
+   //|   0,N/A;
+   int ret=getBarStatus_illya(PERIOD_CURRENT,bar_shift);
+   if (MathAbs(ret)==1) {     //2K
+      val_i=iHighest(NULL,0,MODE_HIGH,2,bar_shift);
+      if(val_i!=-1) val_h=High[val_i];
+      else PrintFormat("Error in call iHighest. Error code=%d",GetLastError());
+
+      val_i=iLowest(NULL,0,MODE_LOW,2,bar_shift);
+      if(val_i!=-1) val_l=Low[val_i];
+      else PrintFormat("Error in call iLowest. Error code=%d",GetLastError());
+   }
+   if (MathAbs(ret)==2) {     //3K
+      val_i=iHighest(NULL,0,MODE_HIGH,3,bar_shift);
+      if(val_i!=-1) val_h=High[val_i];
+      else PrintFormat("Error in call iHighest. Error code=%d",GetLastError());
+
+      val_i=iLowest(NULL,0,MODE_LOW,3,bar_shift);
+      if(val_i!=-1) val_l=Low[val_i];
+      else PrintFormat("Error in call iLowest. Error code=%d",GetLastError());
+   }
+   
+   if (ret!=0) {
+      double cur_price=Close[bar_shift];
+      double cur_high=High[bar_shift];
+      double cur_low=Low[bar_shift];
+      double cur_ma=iMA(NULL,0,arg_ma,0,MODE_SMA,PRICE_CLOSE,bar_shift);
+      if (ret>0) {
+         arg_ls_price=val_l-arg_off_pt*Point();
+         if (cur_price>cur_ma) {    //above sma up signal, open buy order
+            if ((MathAbs(cur_high-cur_ma)+MathAbs(cur_low-cur_ma))==(cur_high-cur_low)) {    // sma is in the bar
+               return 3;
+            } else 
+               return 2;
+         }
+         return 1;
+      }
+      if (ret<0) {
+         arg_ls_price=val_h+arg_off_pt*Point();
+         if (cur_price<cur_ma) {    //below sma dw signal, open sell order
+            if ((MathAbs(cur_high-cur_ma)+MathAbs(cur_low-cur_ma))==(cur_high-cur_low)) {    // sma is in the bar
+               return -3;
+            } else 
+               return -2;
+         }
+         return -1;
+      }
+   }
+
+   /*
+   //debug
+   string cur=Symbol();
+   datetime t=Time[arg_shift];
+   datetime t1=StringToTime("2018.06.29 04:00");
+   datetime t2=StringToTime("2018.06.29 08:00");
+   datetime t3=StringToTime("2018.06.29 12:00");
+   if (cur=="NZDUSD" && (t==t1 || t==t2 || t==t3)) {
+      Print("time=",t,",shift=",arg_shift);
+      Print("ma_st=",ma_st,",ma_st2=",ma_st2);
+      Print("high=",band_bar_pos[1]);
+      Print("mid=",band_bar_pos[2]);
+      Print("low=",band_bar_pos[3]);
+      Print("st=",bar_status);
+   }
+   */
+   
+   arg_ls_price=0;
+   return 0;
+}
